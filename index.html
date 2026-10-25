@@ -423,6 +423,8 @@
     position: relative;
     box-shadow: 0 30px 90px rgba(0,0,0,0.7);
     font-family: 'Inter', system-ui, sans-serif;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
   }
   .lp-modal-close {
     position: absolute;
@@ -789,6 +791,21 @@
   .perfil-foto-acoes { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
   .perfil-foto-acoes .linha { display: flex; gap: 8px; flex-wrap: wrap; }
   .perfil-dica { font-size: 0.74rem; color: var(--cinza); line-height: 1.5; }
+  .campo-arroba { position: relative; }
+  .campo-arroba::before {
+    content: '@';
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--ouro);
+    font-weight: 600;
+    pointer-events: none;
+  }
+  .campo-arroba input { padding-left: 31px !important; }
+  .dica-user { font-size: 0.76rem; margin-top: 7px; color: var(--cinza); line-height: 1.4; }
+  .dica-user:empty { display: none; }
+  .dica-user.ok   { color: var(--verde); }
+  .dica-user.erro { color: var(--vermelho); }
   .perfil-campo { margin-bottom: 14px; }
   .perfil-campo label {
     display: block;
@@ -1574,6 +1591,14 @@
         <input type="text" id="input-nome" placeholder="Seu nome" />
       </div>
       <div class="campo">
+        <label>Nome de usuário</label>
+        <div class="campo-arroba">
+          <input type="text" id="input-user-cad" maxlength="20" placeholder="seunome" autocapitalize="none"
+                 autocomplete="username" spellcheck="false" oninput="aoDigitarUsername(this, 'dica-user-cad')" />
+        </div>
+        <div class="dica-user" id="dica-user-cad"></div>
+      </div>
+      <div class="campo">
         <label>Telefone / WhatsApp</label>
         <input type="tel" id="input-tel-cad" placeholder="(85) 99999-9999" oninput="mascaraTelefone(this)" />
       </div>
@@ -1651,10 +1676,7 @@
   <h2 class="tela-titulo" id="perfil-titulo">Minha conta</h2>
   <p class="tela-subtitulo" id="perfil-subtitulo">Seus dados</p>
 
-  <div class="perfil-aviso" id="perfil-aviso" style="display:none;">
-    Para continuar, complete o seu cadastro com nome, telefone e uma foto.
-    Você poderá alterar essas informações quando quiser, em <b>Minha conta</b>.
-  </div>
+  <div class="perfil-aviso" id="perfil-aviso" style="display:none;"></div>
 
   <!-- dados pessoais -->
   <div class="perfil-card">
@@ -1673,6 +1695,15 @@
       </div>
     </div>
 
+    <div class="perfil-campo">
+      <label for="perfil-username">Nome de usuário</label>
+      <div class="campo-arroba">
+        <input type="text" id="perfil-username" maxlength="20" autocomplete="username" autocapitalize="none"
+               spellcheck="false" oninput="aoDigitarUsername(this, 'dica-user-perfil')">
+      </div>
+      <div class="dica-user" id="dica-user-perfil"></div>
+      <div class="perfil-dica">De 3 a 20 caracteres: letras minúsculas, números, ponto e sublinhado. É único na plataforma.</div>
+    </div>
     <div class="perfil-campo">
       <label for="perfil-nome">Nome completo</label>
       <input type="text" id="perfil-nome" maxlength="120" autocomplete="name">
@@ -1861,7 +1892,13 @@ async function verificarAcesso(user) {
       aprovado: false
     };
     if (meta.telefone) novo.telefone = meta.telefone;
-    const { data: criado } = await db.from('usuarios').insert(novo).select().single();
+    if (meta.username) novo.username = meta.username;
+    let { data: criado, error: erroCriar } = await db.from('usuarios').insert(novo).select().single();
+    if (!criado && erroCriar && erroCriar.code === '23505' && novo.username) {
+      // alguém pegou o nome de usuário nesse meio tempo: cria sem ele e pede outro no primeiro acesso
+      delete novo.username;
+      ({ data: criado } = await db.from('usuarios').insert(novo).select().single());
+    }
     if (!criado) { mostrarTelaAguardando(); return; }
     perfil = criado;
   }
@@ -1923,20 +1960,31 @@ async function submitLogin() {
 async function submitCadastro() {
   limparMensagens();
   const nome = document.getElementById('input-nome').value.trim();
+  const username = normalizarUsername(document.getElementById('input-user-cad').value);
   const telefone = document.getElementById('input-tel-cad').value.trim();
   const email = document.getElementById('input-email-cad').value.trim();
   const senha = document.getElementById('input-senha-cad').value;
 
-  if (!nome || !telefone || !email || !senha) { mostrarErro('Preencha todos os campos.'); return; }
+  if (!nome || !username || !telefone || !email || !senha) { mostrarErro('Preencha todos os campos.'); return; }
+  if (!usernameFormatoValido(username)) { mostrarErro('O nome de usuário deve ter de 3 a 20 caracteres (letras minúsculas, números, ponto ou sublinhado) e não pode ser um nome reservado.'); return; }
   if (!telefoneValido(telefone)) { mostrarErro('Informe um telefone válido, com DDD.'); return; }
   if (senha.length < 6) { mostrarErro('A senha deve ter no mínimo 6 caracteres.'); return; }
 
   const btn = document.getElementById('btn-cadastrar');
   btn.disabled = true; btn.textContent = 'Criando conta...';
 
+  const livre = await usernameDisponivel(username);
+  if (livre !== true) {
+    mostrarErro(livre === false
+      ? `O nome de usuário @${username} já está em uso. Escolha outro.`
+      : 'Não foi possível verificar o nome de usuário agora. Tente novamente em instantes.');
+    btn.disabled = false; btn.textContent = 'Criar conta';
+    return;
+  }
+
   const { data, error } = await db.auth.signUp({
     email, password: senha,
-    options: { data: { full_name: nome, telefone } }
+    options: { data: { full_name: nome, username, telefone } }
   });
 
   if (error) {
@@ -1951,6 +1999,7 @@ async function submitCadastro() {
       id: data.user.id,
       email: email,
       nome: nome,
+      username: username,
       telefone: telefone,
       aprovado: false
     });
@@ -1979,11 +2028,63 @@ function fotoDoGoogle(user) {
   return m.avatar_url || m.picture || null;
 }
 
-// quem veio por e-mail precisa informar nome, telefone e foto;
-// quem veio pelo Google já traz nome e foto da conta Google
+// todos precisam de nome de usuário; quem veio por e-mail também informa nome, telefone e foto
+// (quem veio pelo Google já traz nome e foto da conta Google)
 function cadastroIncompleto(user, perfil) {
+  if (!(perfil.username || '').trim()) return true;
   if (entrouPorGoogle(user)) return false;
   return !(perfil.nome || '').trim() || !(perfil.telefone || '').trim() || !perfil.foto_url;
+}
+
+// ── nome de usuário: único na plataforma ──
+const USERNAME_RESERVADOS = ['admin', 'administrador', 'administrator', 'suporte', 'support',
+  'medquest', 'moderador', 'root', 'sistema', 'hellen', 'helen', 'taussig'];
+
+function normalizarUsername(texto) {
+  return String(texto || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')   // tira acentos
+    .toLowerCase()
+    .replace(/[^a-z0-9_.]/g, '')
+    .slice(0, 20);
+}
+
+function usernameFormatoValido(u) {
+  return /^[a-z0-9][a-z0-9_.]{2,19}$/.test(u) && !USERNAME_RESERVADOS.includes(u);
+}
+
+// sugestão a partir do e-mail, para o usuário só confirmar ou trocar
+function sugestaoUsername(user) {
+  const base = normalizarUsername((user.email || '').split('@')[0]).replace(/^[_.]+/, '');
+  return base.length >= 3 ? base : (base + 'user').slice(0, 20);
+}
+
+// true = livre · false = já em uso ou não permitido · null = não foi possível verificar
+async function usernameDisponivel(u) {
+  const { data, error } = await db.rpc('username_disponivel', { p_username: u });
+  if (error) return null;
+  return data === true;
+}
+
+const _timersUsername = {};
+function aoDigitarUsername(el, idDica) {
+  el.value = normalizarUsername(el.value);
+  const dica = document.getElementById(idDica);
+  const definir = (classe, texto) => { dica.className = 'dica-user' + (classe ? ' ' + classe : ''); dica.textContent = texto; };
+  clearTimeout(_timersUsername[idDica]);
+
+  const v = el.value;
+  if (!v) { definir('', ''); return; }
+  if (v.length < 3) { definir('', 'Use pelo menos 3 caracteres.'); return; }
+  if (!usernameFormatoValido(v)) { definir('erro', 'Esse nome não pode ser usado. Escolha outro.'); return; }
+
+  definir('', 'Verificando...');
+  _timersUsername[idDica] = setTimeout(async () => {
+    const livre = await usernameDisponivel(v);
+    if (el.value !== v) return;   // a pessoa continuou digitando
+    if (livre === null) definir('erro', 'Não foi possível verificar agora. Tente de novo em instantes.');
+    else if (livre) definir('ok', `@${v} está disponível.`);
+    else definir('erro', `@${v} já está em uso. Escolha outro.`);
+  }, 400);
 }
 
 function telefoneValido(texto) {
@@ -2009,7 +2110,8 @@ function desenharAvatar(el, foto, nome) {
   const img = document.createElement('img');
   img.alt = '';
   img.referrerPolicy = 'no-referrer';
-  img.onerror = () => { el.textContent = inicial; };
+  // só vale se esta imagem ainda é a que está na tela (um erro atrasado de uma foto antiga não pode apagar a atual)
+  img.onerror = () => { if (el.contains(img)) el.textContent = inicial; };
   img.src = foto;
   el.appendChild(img);
 }
@@ -2059,6 +2161,10 @@ function preencherPerfil() {
   document.getElementById('perfil-arquivo').value = '';
   limparMsgPerfil();
 
+  const campoUser = document.getElementById('perfil-username');
+  campoUser.value = perfil.username || (perfilObrigatorio ? sugestaoUsername(user) : '');
+  if (campoUser.value) aoDigitarUsername(campoUser, 'dica-user-perfil');
+  else document.getElementById('dica-user-perfil').textContent = '';
   document.getElementById('perfil-nome').value = perfil.nome || '';
   document.getElementById('perfil-telefone').value = perfil.telefone || '';
   desenharAvatar(document.getElementById('perfil-avatar'),
@@ -2090,6 +2196,9 @@ function preencherPerfil() {
     .forEach(id => { document.getElementById(id).value = ''; });
 
   // primeiro acesso: só os dados pessoais
+  document.getElementById('perfil-aviso').innerHTML = google
+    ? 'Para continuar, escolha o seu <b>nome de usuário</b>. Ele é único na plataforma e você pode alterá-lo quando quiser, em <b>Minha conta</b>.'
+    : 'Para continuar, complete o seu cadastro com nome de usuário, nome, telefone e uma foto. Você poderá alterar essas informações quando quiser, em <b>Minha conta</b>.';
   document.getElementById('perfil-aviso').style.display = perfilObrigatorio ? '' : 'none';
   document.getElementById('perfil-card-email').style.display = perfilObrigatorio ? 'none' : '';
   document.getElementById('perfil-card-senha').style.display = perfilObrigatorio ? 'none' : '';
@@ -2163,9 +2272,12 @@ function removerFoto() {
 async function salvarPerfil() {
   msgPerfil('dados', '', '');
   const google = entrouPorGoogle(usuarioAtual);
+  const username = normalizarUsername(document.getElementById('perfil-username').value);
   const nome = document.getElementById('perfil-nome').value.trim();
   const telefone = document.getElementById('perfil-telefone').value.trim();
 
+  if (!username) { msgPerfil('dados', 'erro', 'Escolha o seu nome de usuário.'); return; }
+  if (!usernameFormatoValido(username)) { msgPerfil('dados', 'erro', 'O nome de usuário deve ter de 3 a 20 caracteres (letras minúsculas, números, ponto ou sublinhado) e não pode ser um nome reservado.'); return; }
   if (nome.length < 2) { msgPerfil('dados', 'erro', 'Informe o seu nome completo.'); return; }
   if (!google && !telefone) { msgPerfil('dados', 'erro', 'Informe o seu telefone, com DDD.'); return; }
   if (telefone && !telefoneValido(telefone)) { msgPerfil('dados', 'erro', 'Telefone inválido. Use DDD + número, por exemplo (85) 99999-9999.'); return; }
@@ -2179,6 +2291,10 @@ async function salvarPerfil() {
   botao.disabled = true; botao.textContent = 'Salvando...';
 
   try {
+    const livre = await usernameDisponivel(username);
+    if (livre === false) throw new Error(`O nome de usuário @${username} já está em uso. Escolha outro.`);
+    if (livre === null) throw new Error('Não foi possível verificar o nome de usuário agora. Tente novamente em instantes.');
+
     let fotoUrl = (perfilAtual && perfilAtual.foto_url) || null;
     const caminho = `${usuarioAtual.id}/avatar.jpg`;
 
@@ -2194,10 +2310,14 @@ async function salvarPerfil() {
     }
 
     const { data, error } = await db.from('usuarios')
-      .update({ nome, telefone: telefone || null, foto_url: fotoUrl })
+      .update({ username, nome, telefone: telefone || null, foto_url: fotoUrl })
       .eq('id', usuarioAtual.id)
       .select();
-    if (error) throw new Error(error.message);
+    if (error) {
+      // outra pessoa pode ter pego o nome entre a verificação e o salvamento
+      if (error.code === '23505') throw new Error(`O nome de usuário @${username} acabou de ser usado por outra pessoa. Escolha outro.`);
+      throw new Error(error.message);
+    }
     if (!data || !data.length) throw new Error('O servidor não aceitou a alteração. Tente sair e entrar de novo.');
 
     perfilAtual = data[0];
@@ -2355,7 +2475,7 @@ function estadoPagamento(u) {
 }
 
 function identidade(u) {
-  return esc(u.nome ? `${u.nome} · ${u.email}` : u.email);
+  return esc([u.nome, u.username ? '@' + u.username : null, u.email].filter(Boolean).join(' · '));
 }
 
 function telefoneAdmin(u) {

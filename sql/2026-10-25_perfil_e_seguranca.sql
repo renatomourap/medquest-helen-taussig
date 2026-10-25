@@ -1,13 +1,14 @@
 -- =====================================================================
 -- MedQuest · Perfil do usuário + proteção das colunas sensíveis
--- Rodar uma vez em: Supabase > SQL Editor > New query > Run
--- É seguro rodar mais de uma vez (usa "if not exists" / "drop ... if exists").
+-- Rodar em: Supabase > SQL Editor > New query > Run
+-- É seguro rodar mais de uma vez, inclusive se uma versão anterior deste arquivo já foi rodada.
 -- =====================================================================
 
 -- 1. Colunas novas do perfil ------------------------------------------
 alter table public.usuarios
   add column if not exists telefone text,
-  add column if not exists foto_url text;
+  add column if not exists foto_url text,
+  add column if not exists username text;
 
 alter table public.usuarios drop constraint if exists usuarios_perfil_formato;
 alter table public.usuarios
@@ -17,6 +18,45 @@ alter table public.usuarios
     -- a foto só pode apontar para o bucket "avatars" deste projeto
     and (foto_url is null or foto_url like 'https://gatkawdbksgkxhclyrhi.supabase.co/storage/v1/object/public/avatars/%')
   );
+
+
+-- 1b. Nome de usuário: único na plataforma, sem repetição ---------------
+--     3 a 20 caracteres: letras minúsculas, números, ponto e sublinhado.
+--     O índice único é quem garante a regra, mesmo que alguém tente burlar o site.
+alter table public.usuarios drop constraint if exists usuarios_username_formato;
+alter table public.usuarios
+  add constraint usuarios_username_formato check (
+    username is null or (
+      username ~ '^[a-z0-9][a-z0-9_.]{2,19}$'
+      and username not in ('admin', 'administrador', 'administrator', 'suporte', 'support',
+                           'medquest', 'moderador', 'root', 'sistema', 'hellen', 'helen', 'taussig')
+    )
+  );
+
+create unique index if not exists usuarios_username_unico
+  on public.usuarios (username);
+
+-- Consulta de disponibilidade (usada pelo aviso "Disponível / Já está em uso").
+-- O usuário comum só enxerga a própria linha, então a consulta roda com privilégio do banco
+-- e devolve apenas verdadeiro ou falso, sem expor nenhum dado.
+create or replace function public.username_disponivel(p_username text)
+returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select
+    p_username ~ '^[a-z0-9][a-z0-9_.]{2,19}$'
+    and p_username not in ('admin', 'administrador', 'administrator', 'suporte', 'support',
+                           'medquest', 'moderador', 'root', 'sistema', 'hellen', 'helen', 'taussig')
+    and not exists (
+      select 1 from public.usuarios
+      where username = p_username and id is distinct from auth.uid()
+    );
+$$;
+
+grant execute on function public.username_disponivel(text) to anon, authenticated;
 
 
 -- 2. INSERT: o usuário só consegue se criar como PENDENTE e sem privilégios
@@ -107,15 +147,19 @@ create policy avatars_apaga_propria on storage.objects
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 
 
--- 6. Conferência (deve devolver: 2 colunas, 4 policies, 1 bucket, 1 trigger)
+-- 6. Conferência (deve devolver: 3 colunas, 4 policies, 1 bucket, 1 trigger, 1 índice, 1 função)
 select
   (select count(*) from information_schema.columns
      where table_schema = 'public' and table_name = 'usuarios'
-       and column_name in ('telefone', 'foto_url'))                         as colunas,
+       and column_name in ('telefone', 'foto_url', 'username'))             as colunas,
   (select count(*) from pg_policies
      where schemaname = 'public' and tablename = 'usuarios'
        and policyname in ('usuario_insere_proprio', 'usuario_atualiza_proprio',
                           'usuario_le_proprio', 'admin_ve_todos'))          as policies_usuarios,
   (select count(*) from storage.buckets where id = 'avatars')               as bucket,
   (select count(*) from pg_trigger
-     where tgname = 'protege_campos_usuario' and not tgisinternal)          as trigger_protecao;
+     where tgname = 'protege_campos_usuario' and not tgisinternal)          as trigger_protecao,
+  (select count(*) from pg_indexes
+     where schemaname = 'public' and indexname = 'usuarios_username_unico') as indice_username,
+  (select count(*) from pg_proc
+     where proname = 'username_disponivel')                                 as funcao_username;
