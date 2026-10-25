@@ -786,20 +786,20 @@
     background: var(--superficie-2);
   }
   .disciplina-card .icon {
-    width: 46px; height: 46px;
-    border-radius: 12px;
-    background: var(--ouro-fraco);
-    border: 1px solid var(--ouro-borda);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 14px;
-    font-size: 1.5rem;
+    height: 56px;
+    display: flex; align-items: center;
+    margin-bottom: 16px;
+    font-size: 1.9rem;
     color: var(--ouro);
-    transition: all 0.18s;
+    transition: transform 0.18s, filter 0.18s;
   }
-  .disciplina-card .icon svg { width: 24px; height: 24px; }
+  .disciplina-card .icon img {
+    height: 56px; width: auto; max-width: 64px;
+    object-fit: contain;
+  }
   .disciplina-card:hover .icon {
-    background: rgba(245,207,114,0.18);
-    border-color: var(--ouro);
+    transform: translateY(-1px) scale(1.04);
+    filter: drop-shadow(0 0 10px rgba(245,207,114,0.35));
   }
   .disciplina-card h2 { font-size: 1.12rem; color: #fff; margin-bottom: 6px; font-weight: 600; }
   .disciplina-card p { font-size: 0.85rem; color: var(--cinza); line-height: 1.4; }
@@ -1892,19 +1892,14 @@ let estadoAtual = {
 };
 
 // ==================== PLATAFORMA ====================
-// Ícones em traço (mesma linguagem visual da capa)
-const ICONES = {
-  imunologia: '<path d="M12 21.2v-6.4"/><path d="M12 14.8 7.1 7.9"/><path d="M12 14.8l4.9-6.9"/><circle cx="6" cy="6.1" r="2"/><circle cx="18" cy="6.1" r="2"/>',
-  patologia: '<path d="M5 21h14"/><path d="M9.2 21a6.6 6.6 0 0 0 4.5-11.3"/><path d="M10.9 2.7 8.1 5.5a1.4 1.4 0 0 0 0 2l3.6 3.6a1.4 1.4 0 0 0 2 0l2.8-2.8a1.4 1.4 0 0 0 0-2l-3.6-3.6a1.4 1.4 0 0 0-2 0z"/><path d="M3.8 15.6h7.1"/><path d="M7.4 12.6v3"/>',
-  farmacologia: '<rect x="2.6" y="8.5" width="18.8" height="7" rx="3.5" transform="rotate(-45 12 12)"/><path d="M9.5 9.5 14.5 14.5"/>',
-  microbiologia: '<ellipse cx="12" cy="12" rx="6.4" ry="4.1" transform="rotate(-32 12 12)"/><path d="M17.4 7.2c1.4-1.3 2.6-1.1 3.4.2"/><path d="M6.6 16.8c-1.4 1.3-2.6 1.1-3.4-.2"/><circle cx="10.4" cy="13.2" r=".95"/><circle cx="13.6" cy="10.6" r=".95"/>',
-  parasitologia: '<path d="M12 3.3c3.1-.6 5.9 1.4 6.7 4.1.6 2.2-.6 3.4-.2 5.1.5 2.2 2 3.4.6 5.1-1.6 2-4.5 2.6-6.9 1.8-2.2-.7-2.7-2.4-4.5-3.1-1.2-.5-3.2-1.1-3.4-3.8-.2-2.5 2-3.5 2.9-5.3C8.2 4.6 9.3 3.8 12 3.3z"/><ellipse cx="13.1" cy="11.4" rx="2.5" ry="2.2"/><circle cx="8.1" cy="14.6" r="1"/>',
-};
-function icone(id) {
-  const d = ICONES[id];
-  if (!d) return '';
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-    stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+// Ilustrações douradas das disciplinas (mesmo estilo do coração da marca)
+const ILUSTRACOES = ['imunologia','patologia','farmacologia','microbiologia','parasitologia'];
+function icone(d) {
+  if (ILUSTRACOES.includes(d.id)) {
+    return `<img src="assets/disciplinas/${d.id}.png" alt=""
+      onerror="this.replaceWith(document.createTextNode('${d.icon}'))">`;
+  }
+  return d.icon;
 }
 
 function renderDisciplinas() {
@@ -1916,7 +1911,7 @@ function renderDisciplinas() {
     const card = document.createElement('div');
     card.className = 'disciplina-card';
     card.innerHTML = `
-      <div class="icon">${icone(d.id) || d.icon}</div>
+      <div class="icon">${icone(d)}</div>
       <h2>${d.nome}</h2>
       <p>${d.descricao}</p>
       <span class="badge">${temTemas ? totalQuestoes + (totalQuestoes !== 1 ? ' questões' : ' questão') : 'Em breve'}</span>
