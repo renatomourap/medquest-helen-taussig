@@ -606,86 +606,207 @@
   }
   .btn-sair-aguard:hover { background: var(--cinza-claro); color: var(--texto); }
 
-  /* ===== HEADER LOGADO ===== */
-  .app-header {
-    background: rgba(8,14,22,0.92);
+  /* ===== LAYOUT: SIDEBAR + TOPBAR + MAIN ===== */
+  .app-layout {
+    display: none;
+    min-height: 100vh;
+  }
+  .app-layout.visivel { display: flex; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 230px;
+    min-height: 100vh;
+    background: rgba(8,14,22,0.96);
+    border-right: 1px solid var(--borda);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 60;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ouro-borda) transparent;
+  }
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 11px;
+    padding: 20px 18px 14px;
+    background: none; border: none;
+    color: inherit; font: inherit; text-align: left;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .sidebar-logo:hover { opacity: 0.85; }
+  .sidebar-logo img { width: 28px; height: 40px; object-fit: contain; }
+  .sidebar-logo .logo-txt { line-height: 1.15; }
+  .sidebar-logo .logo-txt b {
+    display: block;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.1rem; font-weight: 500; color: #fff;
+  }
+  .sidebar-logo .logo-txt small {
+    display: block;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 0.55rem; letter-spacing: 0.18em; color: var(--ouro);
+  }
+
+  .sidebar-nav { padding: 6px 10px; flex: 1; }
+  .sidebar-nav a, .sidebar-nav button {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.88rem; font-weight: 500;
+    color: var(--cinza);
+    background: none; border: none;
+    cursor: pointer;
+    transition: all 0.14s;
+    text-decoration: none;
+    text-align: left;
+    font-family: inherit;
+  }
+  .sidebar-nav a:hover, .sidebar-nav button:hover { background: var(--ouro-fraco); color: var(--texto); }
+  .sidebar-nav a.active, .sidebar-nav button.active {
+    background: linear-gradient(135deg, rgba(245,207,114,0.22) 0%, rgba(245,207,114,0.10) 100%);
+    color: var(--ouro);
+    font-weight: 600;
+  }
+  .sidebar-nav svg { width: 18px; height: 18px; flex: none; opacity: 0.8; }
+  .sidebar-nav .active svg { opacity: 1; }
+  .sidebar-nav .em-breve {
+    font-size: 0.62rem;
+    background: var(--ouro-fraco);
+    color: var(--ouro);
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: auto;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .sidebar-divider {
+    margin: 10px 18px;
+    border: none;
+    border-top: 1px solid var(--borda);
+  }
+  .sidebar-section-title {
+    padding: 8px 18px 4px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--cinza);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .sidebar-disc {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.84rem; font-weight: 400;
+    color: var(--cinza);
+    background: none; border: none;
+    cursor: pointer;
+    transition: all 0.14s;
+    text-align: left;
+    font-family: inherit;
+  }
+  .sidebar-disc:hover { background: var(--ouro-fraco); color: var(--texto); }
+  .sidebar-disc img { width: 20px; height: 20px; object-fit: contain; }
+  .sidebar-disc.inativa { opacity: 0.45; cursor: not-allowed; }
+
+  .sidebar-sair {
+    padding: 12px 18px;
+    border-top: 1px solid var(--borda);
+  }
+  .sidebar-sair button {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 0.84rem; font-weight: 500;
+    color: var(--cinza);
+    background: none; border: none;
+    cursor: pointer;
+    transition: all 0.14s;
+    font-family: inherit;
+  }
+  .sidebar-sair button:hover { background: rgba(240,138,138,0.10); color: var(--vermelho); }
+  .sidebar-sair svg { width: 16px; height: 16px; }
+
+  /* ── Topbar ── */
+  .topbar {
+    height: 58px;
+    background: rgba(8,14,22,0.88);
     backdrop-filter: blur(10px);
-    color: var(--texto);
-    padding: 11px 22px;
+    border-bottom: 1px solid var(--borda);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--ouro-borda);
+    padding: 0 28px;
     position: sticky;
     top: 0;
     z-index: 50;
   }
-  .app-header .logo {
-    display: flex; align-items: center; gap: 11px;
-    background: none; border: none; padding: 4px 8px 4px 0;
-    color: inherit; font: inherit; text-align: left;
-    cursor: pointer; border-radius: 10px;
-    transition: opacity 0.15s;
-  }
-  .app-header .logo:hover { opacity: 0.85; }
-  .app-header .logo:hover img { filter: drop-shadow(0 0 7px rgba(245,207,114,0.45)); }
-  .app-header .logo:focus-visible { outline: 2px solid var(--ouro); outline-offset: 3px; }
-  .app-header .logo img { width: 26px; height: 37px; object-fit: contain; flex: none; }
-  .app-header .logo-txt { line-height: 1.15; }
-  .app-header .logo-txt b {
-    display: block;
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.05rem;
-    font-weight: 500;
-    color: #fff;
-  }
-  .app-header .logo-txt small {
-    display: block;
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    color: var(--ouro);
-  }
-  .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
-  .conta-btn {
+  .topbar-search {
     display: flex; align-items: center; gap: 10px;
-    background: none; border: none; color: inherit;
-    font: inherit; cursor: pointer; padding: 3px 8px 3px 3px;
-    border-radius: 30px; transition: background 0.15s;
+    background: var(--superficie-2);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 8px 14px;
+    width: 340px;
+    max-width: 40vw;
+    color: var(--cinza);
+    font-size: 0.84rem;
+    cursor: pointer;
+    transition: border-color 0.15s;
   }
-  .conta-btn:hover { background: var(--ouro-fraco); }
-  .conta-btn:hover #user-nome-header { color: var(--ouro); }
-  @media (max-width: 560px) {
-    .app-header { padding: 10px 14px; }
-    #user-nome-header { display: none; }
-    .conta-btn { padding: 0; }
-    .app-header .logo-txt small { letter-spacing: 0.12em; font-size: 0.55rem; white-space: nowrap; }
-    .app-header .logo-txt b { font-size: 0.98rem; }
-    .btn-admin { margin-right: 2px; }
-    .user-info { gap: 8px; }
+  .topbar-search:hover { border-color: var(--ouro-borda); }
+  .topbar-search svg { width: 16px; height: 16px; flex: none; opacity: 0.6; }
+  .topbar-search span { flex: 1; }
+  .topbar-search kbd {
+    font-family: inherit;
+    font-size: 0.72rem;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid var(--borda);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--cinza);
   }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+  .topbar-notif {
+    position: relative;
+    background: none; border: none;
+    color: var(--cinza);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .topbar-notif:hover { background: var(--ouro-fraco); color: var(--texto); }
+  .topbar-notif svg { width: 20px; height: 20px; }
+  .topbar-user {
+    display: flex; align-items: center; gap: 10px;
+    background: none; border: none;
+    color: inherit; font: inherit;
+    cursor: pointer;
+    padding: 4px 8px 4px 4px;
+    border-radius: 30px;
+    transition: background 0.15s;
+  }
+  .topbar-user:hover { background: var(--ouro-fraco); }
   .user-avatar {
-    width: 32px; height: 32px;
+    width: 34px; height: 34px;
     border-radius: 50%;
     background: var(--ouro-fraco);
-    border: 1px solid var(--ouro-borda);
+    border: 1.5px solid var(--ouro-borda);
     color: var(--ouro);
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 0.85rem;
+    font-weight: 700; font-size: 0.88rem;
     overflow: hidden;
   }
   .user-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .btn-logout {
-    padding: 5px 12px;
-    border: 1px solid var(--borda);
-    border-radius: 6px;
-    background: transparent;
-    color: var(--cinza);
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: all 0.15s;
-  }
-  .btn-logout:hover { background: var(--ouro-fraco); border-color: var(--ouro); color: var(--ouro); }
+  .topbar-user span { font-size: 0.88rem; font-weight: 500; color: var(--texto); }
+  .topbar-user .drop-arrow { font-size: 0.65rem; color: var(--cinza); margin-left: 2px; }
 
   .btn-admin {
     padding: 5px 12px;
@@ -696,13 +817,350 @@
     cursor: pointer;
     font-size: 0.8rem;
     transition: background 0.15s;
-    margin-right: 8px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
   }
   .btn-admin svg { width: 13px; height: 13px; }
   .btn-admin:hover { background: rgba(245,207,114,0.2); }
+
+  /* ── Main content area ── */
+  .main-area {
+    flex: 1;
+    margin-left: 230px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .main-content {
+    flex: 1;
+    padding: 0;
+    overflow-y: auto;
+  }
+
+  /* ── Dashboard ── */
+  .dash-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 0;
+    min-height: calc(100vh - 58px);
+  }
+  .dash-center { padding: 0 28px 40px; }
+  .dash-right {
+    padding: 22px 20px;
+    border-left: 1px solid var(--borda);
+    background: rgba(8,14,22,0.4);
+  }
+
+  /* Hero */
+  .dash-hero {
+    position: relative;
+    padding: 38px 34px 30px;
+    min-height: 180px;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 24px;
+  }
+  .dash-hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .dash-hero-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 18%;
+    filter: brightness(0.5);
+  }
+  .dash-hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0,7,15,0.88) 0%, rgba(0,7,15,0.45) 55%, transparent 100%);
+  }
+  .dash-hero-content { position: relative; z-index: 1; }
+  .dash-hero h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.85rem;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .dash-hero h1 em { font-style: italic; color: var(--ouro); }
+  .dash-hero .frase {
+    color: var(--cinza);
+    font-size: 0.92rem;
+    font-style: italic;
+    line-height: 1.5;
+  }
+  .dash-hero .card-frase {
+    position: absolute;
+    right: 28px; top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    background: linear-gradient(145deg, rgba(245,207,114,0.16) 0%, rgba(245,207,114,0.06) 100%);
+    border: 1px solid var(--ouro-borda);
+    border-radius: 14px;
+    padding: 18px 22px;
+    max-width: 200px;
+    color: var(--ouro);
+    font-size: 0.82rem;
+    font-style: italic;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  /* Quick actions */
+  .dash-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .action-card {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex; align-items: center; gap: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .action-card:hover { border-color: var(--ouro-borda); background: var(--superficie-2); }
+  .action-card .ac-icon {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    background: var(--ouro-fraco);
+    border: 1px solid var(--ouro-borda);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ouro);
+    font-size: 1.2rem;
+    flex: none;
+  }
+  .action-card .ac-icon svg { width: 22px; height: 22px; }
+  .action-card .ac-text h3 { font-size: 0.95rem; color: #fff; font-weight: 600; margin-bottom: 3px; }
+  .action-card .ac-text p { font-size: 0.78rem; color: var(--cinza); line-height: 1.35; }
+  .action-card .ac-arrow { margin-left: auto; color: var(--cinza); font-size: 1.1rem; }
+
+  /* Section heading */
+  .dash-section-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .dash-section-head svg { width: 20px; height: 20px; color: var(--ouro); }
+  .dash-section-head h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.25rem; font-weight: 500; color: #fff;
+  }
+  .dash-section-head p { font-size: 0.82rem; color: var(--cinza); margin-left: 4px; }
+
+  /* Discipline cards (dashboard) */
+  .dash-disc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .dash-disc-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--borda);
+    transition: all 0.18s;
+    background: var(--branco);
+    min-height: 190px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .dash-disc-card:hover { border-color: var(--ouro-borda); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.5); }
+  .dash-disc-card.inativa { opacity: 0.5; cursor: not-allowed; }
+  .dash-disc-card .disc-img {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .dash-disc-card .disc-img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(0.55) saturate(0.9);
+    transition: transform 0.3s;
+  }
+  .dash-disc-card:hover .disc-img img { transform: scale(1.05); }
+  .dash-disc-card .disc-info {
+    position: relative; z-index: 1;
+    padding: 14px 16px;
+    background: linear-gradient(transparent, rgba(0,7,15,0.92));
+  }
+  .dash-disc-card .disc-info h3 { font-size: 1rem; color: #fff; font-weight: 600; margin-bottom: 3px; }
+  .dash-disc-card .disc-info p { font-size: 0.76rem; color: var(--cinza); line-height: 1.3; margin-bottom: 8px; }
+  .dash-disc-card .disc-badge {
+    display: inline-block;
+    background: rgba(245,207,114,0.18);
+    color: var(--ouro);
+    border: 1px solid var(--ouro-borda);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .dash-disc-card .disc-arrow {
+    position: absolute;
+    right: 14px; bottom: 16px;
+    z-index: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--borda);
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--cinza);
+    font-size: 0.85rem;
+    transition: all 0.15s;
+  }
+  .dash-disc-card:hover .disc-arrow { background: var(--ouro); color: #11131a; border-color: var(--ouro); }
+
+  /* Progress section */
+  .dash-progress {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .dash-progress .progress-row {
+    display: flex; align-items: center; gap: 28px;
+  }
+  .donut-wrap {
+    width: 110px; height: 110px;
+    position: relative; flex: none;
+  }
+  .donut-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .donut-wrap .donut-label {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 800; color: var(--ouro);
+  }
+  .progress-detail { flex: 1; }
+  .progress-detail h3 { font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 2px; }
+  .progress-detail .p-sub { font-size: 0.8rem; color: var(--cinza); margin-bottom: 14px; }
+  .progress-legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 20px;
+  }
+  .progress-legend .leg-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.8rem; color: var(--cinza);
+  }
+  .leg-item .leg-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex: none;
+  }
+  .leg-item .leg-bar {
+    width: 50px; height: 5px;
+    background: var(--cinza-claro);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-left: auto;
+  }
+  .leg-item .leg-bar span { display: block; height: 100%; border-radius: 3px; }
+
+  /* Right sidebar panels */
+  .right-panel {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .right-panel .rp-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .right-panel .rp-head h3 {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.92rem; font-weight: 600; color: #fff;
+  }
+  .right-panel .rp-head h3 svg { width: 16px; height: 16px; color: var(--ouro); }
+  .right-panel .rp-head a {
+    font-size: 0.72rem; color: var(--ouro); text-decoration: none;
+    font-weight: 600;
+  }
+  .right-panel .rp-head a:hover { text-decoration: underline; }
+  .rp-placeholder {
+    text-align: center;
+    padding: 18px 8px;
+    color: var(--cinza);
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  .rp-placeholder svg { width: 32px; height: 32px; margin: 0 auto 8px; display: block; opacity: 0.4; }
+  .rp-placeholder .em-breve-tag {
+    display: inline-block;
+    margin-top: 8px;
+    background: var(--ouro-fraco);
+    color: var(--ouro);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  /* Stats panel */
+  .stats-row {
+    display: flex; gap: 14px; margin-top: 10px;
+  }
+  .stat-box {
+    flex: 1;
+    text-align: center;
+    padding: 10px 6px;
+    background: var(--superficie-2);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+  }
+  .stat-box .sb-icon { font-size: 1rem; margin-bottom: 4px; }
+  .stat-box .sb-num { font-size: 1.2rem; font-weight: 800; color: var(--ouro); }
+  .stat-box .sb-label { font-size: 0.65rem; color: var(--cinza); margin-top: 2px; }
+
+  /* Hamburger for mobile */
+  .hamburger {
+    display: none;
+    background: none; border: none;
+    color: var(--texto);
+    cursor: pointer;
+    padding: 6px;
+  }
+  .hamburger svg { width: 22px; height: 22px; }
+  .sidebar-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 55;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.open { display: block; }
+    .main-area { margin-left: 0; }
+    .hamburger { display: block; }
+    .dash-wrapper { grid-template-columns: 1fr; }
+    .dash-right { border-left: none; border-top: 1px solid var(--borda); }
+    .dash-disc-grid { grid-template-columns: repeat(2, 1fr); }
+    .dash-hero .card-frase { display: none; }
+    .topbar-search { max-width: 50vw; }
+  }
+  @media (max-width: 560px) {
+    .dash-disc-grid { grid-template-columns: 1fr; }
+    .dash-actions { grid-template-columns: 1fr; }
+    .topbar { padding: 0 14px; }
+    .topbar-search { display: none; }
+    .topbar-user span { display: none; }
+    .progress-row { flex-direction: column; text-align: center; }
+    .progress-legend { justify-items: center; }
+  }
 
   .admin-container {
     max-width: 920px;
@@ -1026,85 +1484,8 @@
     margin-left: 6px;
   }
 
-  /* ===== TELA DE SELEÇÃO ===== */
-  #tela-selecao {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 32px 20px;
-    display: none;
-  }
-
-  .logo-header {
-    text-align: center;
-    margin-bottom: 36px;
-  }
-  .logo-header h1 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 2.1rem;
-    color: #fff;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-  .logo-header h1 em { font-style: italic; color: var(--ouro); }
-  .logo-header p {
-    color: var(--ouro);
-    margin-top: 13px;
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-  }
-
-  .disciplinas-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 18px;
-  }
-
-  .disciplina-card {
-    background: var(--branco);
-    border-radius: 16px;
-    padding: 24px;
-    cursor: pointer;
-    transition: all 0.18s;
-    box-shadow: var(--sombra);
-    border: 1px solid var(--borda);
-  }
-  .disciplina-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.55);
-    border-color: var(--ouro-borda);
-    background: var(--superficie-2);
-  }
-  .disciplina-card .icon {
-    height: 56px;
-    display: flex; align-items: center;
-    margin-bottom: 16px;
-    font-size: 1.9rem;
-    color: var(--ouro);
-    transition: transform 0.18s, filter 0.18s;
-  }
-  .disciplina-card .icon img {
-    height: 56px; width: auto; max-width: 64px;
-    object-fit: contain;
-  }
-  .disciplina-card:hover .icon {
-    transform: translateY(-1px) scale(1.04);
-    filter: drop-shadow(0 0 10px rgba(245,207,114,0.35));
-  }
-  .disciplina-card h2 { font-size: 1.12rem; color: #fff; margin-bottom: 6px; font-weight: 600; }
-  .disciplina-card p { font-size: 0.85rem; color: var(--cinza); line-height: 1.4; }
-  .disciplina-card .badge {
-    display: inline-block;
-    margin-top: 12px;
-    background: var(--ouro-fraco);
-    color: var(--ouro);
-    border: 1px solid var(--ouro-borda);
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 0.78rem;
-    font-weight: 600;
-  }
+  /* ===== INNER SCREENS (temas, questao, resultado inside main-content) ===== */
+  #tela-selecao { display: none; } /* dashboard is now rendered inside dash-center */
 
   /* ===== TELA DE TEMAS ===== */
   #tela-temas {
@@ -1649,20 +2030,227 @@
 </div>
 
 <!-- HEADER (aparece quando logado) -->
-<div id="app-header" style="display:none;" class="app-header">
-  <button type="button" class="logo" onclick="irParaInicio()" title="Página inicial" aria-label="Ir para a página inicial">
-    <img src="assets/heart.png" alt="">
-    <div class="logo-txt"><b>MedQuest</b><small>HELLEN TAUSSIG</small></div>
-  </button>
-  <div class="user-info">
-    <button class="btn-admin" id="btn-admin" style="display:none;" onclick="mostrarAdmin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Admin</button>
-    <button class="conta-btn" onclick="mostrarPerfil()" title="Minha conta" aria-label="Minha conta">
-      <div class="user-avatar" id="user-avatar">?</div>
-      <span id="user-nome-header"></span>
+<!-- ===== APP LAYOUT: SIDEBAR + TOPBAR + MAIN ===== -->
+<div id="app-layout" class="app-layout">
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="fecharSidebar()"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <button type="button" class="sidebar-logo" onclick="irParaDashboard()" title="Início">
+      <img src="assets/heart.png" alt="">
+      <div class="logo-txt"><b>MedQuest</b><small>HELLEN TAUSSIG</small></div>
     </button>
-    <button class="btn-logout" onclick="fazerLogout()">Sair</button>
-  </div>
-</div>
+
+    <div class="sidebar-nav">
+      <button class="active" id="nav-inicio" onclick="irParaDashboard()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Início
+      </button>
+      <button id="nav-perfil" onclick="mostrarPerfil()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Perfil
+      </button>
+      <button id="nav-questoes" onclick="irParaDashboard()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+        Questões
+      </button>
+      <button onclick="avisoEmBreve('Resumo')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Resumo <span class="em-breve">Em breve</span>
+      </button>
+      <button onclick="avisoEmBreve('Plano da Semana')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Plano da Semana <span class="em-breve">Em breve</span>
+      </button>
+      <button onclick="avisoEmBreve('Anotações')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Anotações <span class="em-breve">Em breve</span>
+      </button>
+      <button onclick="avisoEmBreve('Progresso')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Progresso <span class="em-breve">Em breve</span>
+      </button>
+
+      <hr class="sidebar-divider">
+      <div class="sidebar-section-title">Áreas de Estudo</div>
+      <div id="sidebar-disciplinas"></div>
+    </div>
+
+    <div class="sidebar-sair" id="sidebar-admin-sair">
+      <button id="btn-admin-sidebar" style="display:none;" onclick="mostrarAdmin()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Admin
+      </button>
+      <button onclick="fazerLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main area (right of sidebar) -->
+  <div class="main-area">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger" id="hamburger" onclick="abrirSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-search" onclick="avisoEmBreve('Pesquisa')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Pesquisar assuntos, questões...</span>
+          <kbd>Ctrl K</kbd>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-admin" id="btn-admin" style="display:none;" onclick="mostrarAdmin()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Admin
+        </button>
+        <button class="topbar-user" onclick="mostrarPerfil()" title="Minha conta">
+          <div class="user-avatar" id="user-avatar">?</div>
+          <span id="user-nome-header"></span>
+          <span class="drop-arrow">▾</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <div class="main-content" id="main-content">
+
+      <!-- DASHBOARD (home screen) -->
+      <div id="tela-dashboard">
+        <div class="dash-wrapper">
+          <div class="dash-center">
+            <!-- Hero -->
+            <div class="dash-hero">
+              <div class="dash-hero-bg">
+                <img src="assets/taussig.webp" alt="">
+              </div>
+              <div class="dash-hero-content">
+                <h1>Bem-vindo de volta, <em id="dash-nome">Estudante</em>!</h1>
+                <p class="frase">"Nunca desista de tentar descobrir o que é certo para o paciente."</p>
+              </div>
+              <div class="card-frase">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px;margin:0 auto 6px;display:block;opacity:0.7;"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Cada questão é um passo a mais rumo à sua aprovação.
+              </div>
+            </div>
+
+            <!-- Quick actions -->
+            <div class="dash-actions">
+              <div class="action-card" onclick="continuarDeOndeParou()">
+                <div class="ac-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+                <div class="ac-text">
+                  <h3>Continue de onde parou</h3>
+                  <p>Retome o último tema estudado</p>
+                </div>
+                <span class="ac-arrow">→</span>
+              </div>
+              <div class="action-card" onclick="irParaDashboard()">
+                <div class="ac-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+                </div>
+                <div class="ac-text">
+                  <h3>Pratique Questões</h3>
+                  <p>Escolha uma área e comece a praticar</p>
+                </div>
+                <span class="ac-arrow">→</span>
+              </div>
+            </div>
+
+            <!-- Explorar por área -->
+            <div class="dash-section-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>
+              <h2>Explorar por área</h2>
+            </div>
+            <div class="dash-disc-grid" id="dash-disc-grid"></div>
+
+            <!-- Meu Progresso -->
+            <div class="dash-section-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <h2>Meu progresso</h2>
+            </div>
+            <div class="dash-progress" id="dash-progress">
+              <div class="progress-row">
+                <div class="donut-wrap">
+                  <svg viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--borda)" stroke-width="2.5"/>
+                    <circle id="donut-bar" cx="18" cy="18" r="15.9" fill="none" stroke="var(--ouro)" stroke-width="2.5" stroke-dasharray="0 100" stroke-linecap="round"/>
+                  </svg>
+                  <div class="donut-label" id="donut-label">0%</div>
+                </div>
+                <div class="progress-detail">
+                  <h3>Desempenho geral</h3>
+                  <p class="p-sub" id="progress-sub">Responda questões para ver seu progresso</p>
+                  <div class="progress-legend" id="progress-legend"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right sidebar -->
+          <div class="dash-right">
+            <!-- Plano da Semana -->
+            <div class="right-panel">
+              <div class="rp-head">
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  Plano da Semana
+                </h3>
+              </div>
+              <div class="rp-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Organize seus estudos semanais com metas e lembretes.
+                <span class="em-breve-tag">Em breve</span>
+              </div>
+            </div>
+
+            <!-- Últimas anotações -->
+            <div class="right-panel">
+              <div class="rp-head">
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  Últimas anotações
+                </h3>
+              </div>
+              <div class="rp-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Faça anotações durante o estudo e revise aqui.
+                <span class="em-breve-tag">Em breve</span>
+              </div>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="right-panel">
+              <div class="rp-head">
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  Estatísticas
+                </h3>
+              </div>
+              <div class="stats-row" id="stats-row">
+                <div class="stat-box">
+                  <div class="sb-num" id="dash-stat-total">0</div>
+                  <div class="sb-label">Questões<br>respondidas</div>
+                </div>
+                <div class="stat-box">
+                  <div class="sb-num" id="dash-stat-acertos">0</div>
+                  <div class="sb-label">Acertos</div>
+                </div>
+                <div class="stat-box">
+                  <div class="sb-num" id="dash-stat-temas">0</div>
+                  <div class="sb-label">Temas<br>estudados</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
 <!-- TELA ADMIN -->
 <div id="tela-admin" style="display:none;">
@@ -1775,14 +2363,7 @@
   </div>
 </div>
 
-<!-- TELA 1: SELEÇÃO DE DISCIPLINA -->
-<div id="tela-selecao">
-  <div class="logo-header">
-    <h1>Banco de <em>Questões</em></h1>
-    <p>Escolha o assunto</p>
-  </div>
-  <div class="disciplinas-grid" id="disciplinas-grid"></div>
-</div>
+<div id="tela-selecao" style="display:none;"></div>
 
 <!-- TELA 2: SELEÇÃO DE TEMA -->
 <div id="tela-temas" style="display:none;">
@@ -1856,6 +2437,13 @@
     </div>
   </div>
 </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /main-area -->
+</div><!-- /app-layout -->
+
+<!-- Toast for "em breve" -->
+<div id="toast-embreve" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ouro);color:#11131a;padding:10px 24px;border-radius:10px;font-size:0.88rem;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:opacity 0.3s;"></div>
 
 <script>
 // ==================== SUPABASE ====================
@@ -2161,7 +2749,12 @@ function mostrarPerfil(opcoes = {}) {
   document.getElementById('tela-login').classList.remove('visivel');
   document.getElementById('tela-aguardando').style.display = 'none';
   esconderApp();
-  document.getElementById('app-header').style.display = perfilObrigatorio ? 'none' : 'flex';
+  if (perfilObrigatorio) {
+    document.getElementById('app-layout').classList.remove('visivel');
+  } else {
+    document.getElementById('app-layout').classList.add('visivel');
+    setNavActive('nav-perfil');
+  }
   preencherPerfil();
   document.getElementById('tela-perfil').style.display = 'block';
   window.scrollTo(0, 0);
@@ -2172,7 +2765,7 @@ function irParaInicio() {
   if (!usuarioAtual || !perfilAtual) return;
   fecharCobranca();
   esconderApp();
-  document.getElementById('app-header').style.display = 'none';
+  document.getElementById('app-layout').classList.remove('visivel');
   const capa = document.getElementById('tela-login');
   capa.classList.add('logado', 'visivel');
   window.scrollTo(0, 0);
@@ -2181,7 +2774,6 @@ function irParaInicio() {
 // na capa: quem já está logado volta direto à plataforma; quem não está, abre o login/cadastro
 function entrarOuAcessar(modo) {
   if (usuarioAtual && perfilAtual) {
-    document.getElementById('app-header').style.display = 'flex';
     atualizarCabecalho();
     mostrarApp();
     window.scrollTo(0, 0);
@@ -2190,9 +2782,18 @@ function entrarOuAcessar(modo) {
   abrirModalLogin(modo);
 }
 
+// irParaDashboard: volta para o dashboard (tela principal dentro do app)
+function irParaDashboard() {
+  esconderApp();
+  document.getElementById('tela-dashboard').style.display = 'block';
+  setNavActive('nav-inicio');
+  renderDashboard();
+  fecharSidebar();
+}
+
 function voltarDoPerfil() {
   document.getElementById('tela-perfil').style.display = 'none';
-  mostrarTela('selecao');
+  irParaDashboard();
 }
 
 function preencherPerfil() {
@@ -2442,7 +3043,7 @@ async function alterarSenha() {
 
 async function fazerLogout() {
   await db.auth.signOut();
-  document.getElementById('app-header').style.display = 'none';
+  document.getElementById('app-layout').classList.remove('visivel');
   usuarioAtual = null;
   perfilAtual = null;
 }
@@ -2467,23 +3068,27 @@ function mostrarApp() {
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('tela-login').classList.remove('visivel', 'logado');
   document.getElementById('tela-aguardando').style.display = 'none';
+  document.getElementById('app-layout').classList.add('visivel');
   // Mostra botão admin se for administrador
   if (usuarioAtual && perfilAtual && perfilAtual.admin) {
     document.getElementById('btn-admin').style.display = 'inline-block';
+    document.getElementById('btn-admin-sidebar').style.display = 'flex';
   }
-  renderDisciplinas();
-  mostrarTela('selecao');
+  atualizarCabecalho();
+  renderSidebarDisciplinas();
+  irParaDashboard();
 }
 
 async function mostrarAdmin() {
   esconderApp();
   document.getElementById('tela-admin').style.display = 'block';
+  setNavActive(null);
   await carregarUsuarios();
 }
 
 function voltarDoAdmin() {
   document.getElementById('tela-admin').style.display = 'none';
-  mostrarTela('selecao');
+  irParaDashboard();
 }
 
 // ──────────── situação da mensalidade ────────────
@@ -2715,8 +3320,9 @@ async function renovarPagamento(id, dias) {
 }
 
 function esconderApp() {
-  ['tela-selecao','tela-temas','tela-questao','tela-resultado','tela-admin','tela-perfil'].forEach(id => {
-    document.getElementById(id).style.display = 'none';
+  ['tela-dashboard','tela-selecao','tela-temas','tela-questao','tela-resultado','tela-admin','tela-perfil'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
   });
 }
 
@@ -6359,15 +6965,149 @@ function encerrarSessao() {
 
 function reiniciarTema() { iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId); }
 function voltarTemas() { abrirDisciplina(estadoAtual.disciplinaId); window.scrollTo(0, 0); }
-function voltarSelecao() { mostrarTela('selecao'); renderDisciplinas(); }
+function voltarSelecao() { irParaDashboard(); }
 
 function mostrarTela(nome) {
+  document.getElementById('tela-dashboard').style.display = 'none';
   document.getElementById('tela-admin').style.display = 'none';
   document.getElementById('tela-perfil').style.display = 'none';
-  document.getElementById('tela-selecao').style.display = nome === 'selecao' ? 'block' : 'none';
+  document.getElementById('tela-selecao').style.display = 'none';
   document.getElementById('tela-temas').style.display = nome === 'temas' ? 'block' : 'none';
   document.getElementById('tela-questao').style.display = nome === 'questao' ? 'block' : 'none';
   document.getElementById('tela-resultado').style.display = nome === 'resultado' ? 'flex' : 'none';
+  if (nome === 'temas' || nome === 'questao') setNavActive('nav-questoes');
+}
+
+// ==================== DASHBOARD ====================
+function setNavActive(id) {
+  document.querySelectorAll('.sidebar-nav a, .sidebar-nav button').forEach(el => el.classList.remove('active'));
+  if (id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active');
+  }
+}
+
+function avisoEmBreve(feature) {
+  const t = document.getElementById('toast-embreve');
+  t.textContent = feature + ' — Em breve!';
+  t.style.display = 'block';
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.style.display = 'none', 350); }, 2200);
+}
+
+function abrirSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+}
+
+function fecharSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+function renderSidebarDisciplinas() {
+  const container = document.getElementById('sidebar-disciplinas');
+  container.innerHTML = '';
+  BANCO.disciplinas.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'sidebar-disc';
+    btn.title = d.nome;
+    btn.onclick = () => { if (d.temas.length > 0) abrirDisciplina(d.id); else avisoEmBreve(d.nome); };
+    if (ILUSTRACOES.includes(d.id)) {
+      btn.innerHTML = `<img src="assets/disciplinas/${d.id}.png" alt="${d.nome}" style="width:22px;height:22px;object-fit:contain;filter:brightness(0) invert(1);opacity:0.7;">`;
+    } else {
+      btn.textContent = d.icon;
+    }
+    container.appendChild(btn);
+  });
+}
+
+async function renderDashboard() {
+  // Nome
+  const nome = (perfilAtual && perfilAtual.nome) || (usuarioAtual ? usuarioAtual.email.split('@')[0] : 'Estudante');
+  const dashNome = document.getElementById('dash-nome');
+  if (dashNome) dashNome.textContent = nome;
+
+  // Disciplinas grid
+  const grid = document.getElementById('dash-disc-grid');
+  if (grid) {
+    grid.innerHTML = '';
+    BANCO.disciplinas.forEach(d => {
+      const totalQ = d.temas.reduce((s, t) => s + t.questoes.length, 0);
+      const temTemas = d.temas.length > 0;
+      const card = document.createElement('div');
+      card.className = 'dash-disc-card';
+      if (ILUSTRACOES.includes(d.id)) {
+        card.style.backgroundImage = `url(assets/disciplinas/${d.id}.png)`;
+      }
+      card.innerHTML = `
+        <div class="ddc-overlay">
+          <div class="ddc-nome">${d.nome}</div>
+          <div class="ddc-info">${temTemas ? totalQ + (totalQ !== 1 ? ' questões' : ' questão') : 'Em breve'}</div>
+        </div>
+      `;
+      if (temTemas) {
+        card.style.cursor = 'pointer';
+        card.onclick = () => abrirDisciplina(d.id);
+      } else {
+        card.style.opacity = '0.5';
+        card.style.cursor = 'not-allowed';
+      }
+      grid.appendChild(card);
+    });
+  }
+
+  // Estatísticas e progresso via Supabase
+  let totalResp = 0, totalAcertos = 0, temasSet = new Set();
+  if (usuarioAtual) {
+    try {
+      const { data } = await db.from('progresso').select('*').eq('usuario_id', usuarioAtual.id);
+      if (data) {
+        totalResp = data.length;
+        totalAcertos = data.filter(r => r.acertou).length;
+        data.forEach(r => { if (r.tema_id) temasSet.add(r.tema_id); });
+      }
+    } catch(e) { /* silencioso */ }
+  }
+
+  // Stats
+  const sTot = document.getElementById('dash-stat-total');
+  const sAce = document.getElementById('dash-stat-acertos');
+  const sTem = document.getElementById('dash-stat-temas');
+  if (sTot) sTot.textContent = totalResp;
+  if (sAce) sAce.textContent = totalResp > 0 ? Math.round((totalAcertos / totalResp) * 100) + '%' : '0%';
+  if (sTem) sTem.textContent = temasSet.size;
+
+  // Donut
+  const totalQuestoes = BANCO.disciplinas.reduce((s, d) => s + d.temas.reduce((ss, t) => ss + t.questoes.length, 0), 0);
+  const pct = totalQuestoes > 0 ? Math.round((totalResp / totalQuestoes) * 100) : 0;
+  const donutBar = document.getElementById('donut-bar');
+  const donutLabel = document.getElementById('donut-label');
+  if (donutBar) donutBar.setAttribute('stroke-dasharray', pct + ' ' + (100 - pct));
+  if (donutLabel) donutLabel.textContent = pct + '%';
+
+  // Legend
+  const legend = document.getElementById('progress-legend');
+  if (legend) {
+    legend.innerHTML = `
+      <div class="pl-item"><span class="pl-dot" style="background:var(--ouro);"></span> Respondidas: ${totalResp}</div>
+      <div class="pl-item"><span class="pl-dot" style="background:#4ade80;"></span> Acertos: ${totalAcertos}</div>
+      <div class="pl-item"><span class="pl-dot" style="background:#f87171;"></span> Erros: ${totalResp - totalAcertos}</div>
+    `;
+  }
+}
+
+function continuarDeOndeParou() {
+  // Tenta retomar o último tema estudado
+  if (estadoAtual.disciplinaId && estadoAtual.temaId) {
+    abrirDisciplina(estadoAtual.disciplinaId);
+    return;
+  }
+  // Se não há estado, abre a primeira disciplina com questões
+  const d = BANCO.disciplinas.find(d => d.temas.length > 0);
+  if (d) abrirDisciplina(d.id);
+  else avisoEmBreve('Questões');
 }
 
 // ==================== SALVAR PROGRESSO ====================
