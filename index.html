@@ -670,7 +670,7 @@
   .btn-admin:hover { background: rgba(245,207,114,0.2); }
 
   .admin-container {
-    max-width: 700px;
+    max-width: 920px;
     margin: 0 auto;
     padding: 24px 16px;
   }
@@ -727,6 +727,82 @@
     transition: background 0.15s;
   }
   .btn-revogar:hover { background: var(--vermelho-claro); }
+  /* resumo de pagamentos */
+  .admin-resumo {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .resumo-item {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    padding: 15px 16px;
+  }
+  .resumo-num { font-size: 1.7rem; font-weight: 700; line-height: 1; color: var(--texto); }
+  .resumo-label {
+    font-size: 0.64rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--cinza);
+    margin-top: 8px;
+    line-height: 1.35;
+  }
+  .resumo-item.alerta { border-color: rgba(240,138,138,0.42); }
+  .resumo-item.alerta .resumo-num { color: var(--vermelho); }
+  .resumo-item.aviso { border-color: var(--ouro-borda); }
+  .resumo-item.aviso .resumo-num { color: var(--ouro); }
+  .resumo-item.ok .resumo-num { color: var(--verde); }
+
+  /* selo de situação da mensalidade */
+  .badge-pag {
+    font-size: 0.67rem;
+    padding: 4px 11px;
+    border-radius: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid;
+    flex-shrink: 0;
+    margin: 0 16px;
+  }
+  .badge-pag.vencido { background: var(--vermelho-claro); color: var(--vermelho); border-color: rgba(240,138,138,0.42); }
+  .badge-pag.proximo { background: var(--ouro-fraco); color: var(--ouro); border-color: var(--ouro-borda); }
+  .badge-pag.emdia   { background: var(--verde-claro);  color: var(--verde);  border-color: rgba(95,211,154,0.42); }
+
+  .usuario-card.urgente { border-color: rgba(240,138,138,0.38); }
+  .usuario-card.atencao { border-color: var(--ouro-borda); }
+  .usuario-card .usuario-info { flex: 1; min-width: 0; }
+  .usuario-card .usuario-email { overflow-wrap: anywhere; }
+  .admin-acoes { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+  .btn-mini {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--ouro-borda);
+    background: var(--ouro-fraco);
+    color: var(--ouro);
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .btn-mini:hover { background: rgba(245,207,114,0.2); }
+  .btn-mini.forte { background: var(--ouro); color: #11131a; border-color: var(--ouro); }
+  .btn-mini.forte:hover { filter: brightness(1.08); }
+  .admin-vazio { color: var(--cinza); font-size: 0.88rem; }
+
+  @media (max-width: 620px) {
+    .admin-resumo { grid-template-columns: 1fr 1fr; }
+    .usuario-card .usuario-email { font-size: 0.86rem; }
+    .admin-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .admin-header h2 { font-size: 1.2rem; }
+    .usuario-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .admin-acoes { width: 100%; }
+    .badge-pag { margin: 0; }
+  }
+
   .badge-admin {
     font-size: 0.7rem;
     background: var(--ouro-fraco);
@@ -1339,13 +1415,21 @@
       <button class="voltar-btn" onclick="voltarDoAdmin()">← Voltar</button>
       <h2>Painel do Administrador</h2>
     </div>
+    <div class="admin-resumo" id="admin-resumo"></div>
+
     <div class="admin-section">
-      <h3>Usuários Pendentes</h3>
-      <div id="lista-pendentes"><p style="color:var(--cinza)">Carregando...</p></div>
+      <h3>Cadastros aguardando aprovação</h3>
+      <div id="lista-pendentes"><p class="admin-vazio">Carregando...</p></div>
     </div>
+
     <div class="admin-section">
-      <h3>Usuários Aprovados</h3>
-      <div id="lista-aprovados"><p style="color:var(--cinza)">Carregando...</p></div>
+      <h3>Mensalidades</h3>
+      <div id="lista-pagamentos"><p class="admin-vazio">Carregando...</p></div>
+    </div>
+
+    <div class="admin-section">
+      <h3>Administradores</h3>
+      <div id="lista-admins"><p class="admin-vazio">Carregando...</p></div>
     </div>
   </div>
 </div>
@@ -1603,61 +1687,122 @@ function voltarDoAdmin() {
   mostrarTela('selecao');
 }
 
+// ──────────── situação da mensalidade ────────────
+function diasAte(data) {
+  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  const d = new Date(data); d.setHours(0, 0, 0, 0);
+  return Math.round((d - hoje) / 86400000);
+}
+
+function plural(n, um, muitos) { return n === 1 ? `${n} ${um}` : `${n} ${muitos}`; }
+
+function estadoPagamento(u) {
+  if (!u.pagamento_validade) {
+    return { grupo: 'vencido', classe: 'vencido', cartao: 'urgente',
+             selo: 'Sem mensalidade', detalhe: 'Nenhum pagamento registrado até agora',
+             ordem: -99999 };
+  }
+  const dias = diasAte(u.pagamento_validade);
+  const data = new Date(u.pagamento_validade).toLocaleDateString('pt-BR');
+  if (dias < 0) {
+    return { grupo: 'vencido', classe: 'vencido', cartao: 'urgente',
+             selo: `Vencida há ${plural(-dias, 'dia', 'dias')}`,
+             detalhe: `Venceu em ${data}`, ordem: dias };
+  }
+  if (dias <= 7) {
+    return { grupo: 'proximo', classe: 'proximo', cartao: 'atencao',
+             selo: dias === 0 ? 'Vence hoje' : `Vence em ${plural(dias, 'dia', 'dias')}`,
+             detalhe: `Próxima mensalidade em ${data}`, ordem: dias };
+  }
+  return { grupo: 'emdia', classe: 'emdia', cartao: '',
+           selo: 'Em dia',
+           detalhe: `Próxima mensalidade em ${data} · faltam ${plural(dias, 'dia', 'dias')}`,
+           ordem: dias };
+}
+
+function identidade(u) {
+  return u.nome ? `${u.nome} · ${u.email}` : u.email;
+}
+
 async function carregarUsuarios() {
-  const { data: todos } = await db.from('usuarios').select('*').order('criado_em', { ascending: false });
-  if (!todos) return;
+  const { data: todos, error } = await db.from('usuarios').select('*').order('criado_em', { ascending: false });
+  if (error || !todos) {
+    document.getElementById('lista-pagamentos').innerHTML =
+      '<p class="admin-vazio">Não foi possível carregar os usuários.</p>';
+    return;
+  }
 
   const pendentes = todos.filter(u => !u.aprovado);
-  const aprovados = todos.filter(u => u.aprovado);
+  const admins    = todos.filter(u => u.aprovado && u.admin);
+  const pagantes  = todos.filter(u => u.aprovado && !u.admin)
+                         .map(u => ({ ...u, pag: estadoPagamento(u) }))
+                         .sort((a, b) => a.pag.ordem - b.pag.ordem);
 
-  // Pendentes
+  // ── resumo ──
+  const conta = g => pagantes.filter(u => u.pag.grupo === g).length;
+  document.getElementById('admin-resumo').innerHTML = `
+    <div class="resumo-item ${conta('vencido') ? 'alerta' : ''}">
+      <div class="resumo-num">${conta('vencido')}</div>
+      <div class="resumo-label">Mensalidades<br>vencidas</div>
+    </div>
+    <div class="resumo-item ${conta('proximo') ? 'aviso' : ''}">
+      <div class="resumo-num">${conta('proximo')}</div>
+      <div class="resumo-label">Vencem em<br>até 7 dias</div>
+    </div>
+    <div class="resumo-item ok">
+      <div class="resumo-num">${conta('emdia')}</div>
+      <div class="resumo-label">Em dia</div>
+    </div>
+    <div class="resumo-item ${pendentes.length ? 'aviso' : ''}">
+      <div class="resumo-num">${pendentes.length}</div>
+      <div class="resumo-label">Aguardando<br>aprovação</div>
+    </div>`;
+
+  // ── cadastros aguardando aprovação ──
   const listaPend = document.getElementById('lista-pendentes');
-  if (pendentes.length === 0) {
-    listaPend.innerHTML = '<p style="color:var(--cinza);font-size:0.9rem;">Nenhum usuário pendente.</p>';
-  } else {
-    listaPend.innerHTML = pendentes.map(u => `
+  listaPend.innerHTML = pendentes.length === 0
+    ? '<p class="admin-vazio">Nenhum cadastro aguardando.</p>'
+    : pendentes.map(u => `
       <div class="usuario-card">
         <div class="usuario-info">
-          <span class="usuario-email">${u.nome || '—'} &lt;${u.email}&gt;</span>
-          <span class="usuario-data">Cadastrado em ${u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—'}</span>
+          <span class="usuario-email">${identidade(u)}</span>
+          <span class="usuario-data">Cadastrou-se em ${u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—'}</span>
         </div>
-        <button class="btn-aprovar" onclick="aprovarUsuario('${u.id}')">✓ Aprovar</button>
-      </div>
-    `).join('');
-  }
+        <div class="admin-acoes">
+          <button class="btn-aprovar" onclick="aprovarUsuario('${u.id}')">Aprovar</button>
+        </div>
+      </div>`).join('');
 
-  // Aprovados
-  const listaAprov = document.getElementById('lista-aprovados');
-  if (aprovados.length === 0) {
-    listaAprov.innerHTML = '<p style="color:var(--cinza);font-size:0.9rem;">Nenhum usuário aprovado.</p>';
-  } else {
-    listaAprov.innerHTML = aprovados.map(u => {
-      const validade = u.pagamento_validade ? new Date(u.pagamento_validade) : null;
-      const hoje = new Date();
-      const emDia = validade && validade > hoje;
-      const statusPag = u.pagamento_status || 'pendente';
-      const badgePag = statusPag === 'ativo' && emDia
-        ? `<span style="font-size:0.7rem;background:#d1fae5;color:#065f46;padding:2px 7px;border-radius:10px;font-weight:600;margin-left:4px;">✓ Em dia até ${validade.toLocaleDateString('pt-BR')}</span>`
-        : `<span style="font-size:0.7rem;background:#fee2e2;color:#991b1b;padding:2px 7px;border-radius:10px;font-weight:600;margin-left:4px;">⚠ ${statusPag}</span>`;
-      return `
+  // ── mensalidades ──
+  const listaPag = document.getElementById('lista-pagamentos');
+  listaPag.innerHTML = pagantes.length === 0
+    ? '<p class="admin-vazio">Nenhum assinante aprovado ainda.</p>'
+    : pagantes.map(u => `
+      <div class="usuario-card ${u.pag.cartao}">
+        <div class="usuario-info">
+          <span class="usuario-email">${identidade(u)}</span>
+          <span class="usuario-data">${u.pag.detalhe}</span>
+        </div>
+        <span class="badge-pag ${u.pag.classe}">${u.pag.selo}</span>
+        <div class="admin-acoes">
+          <button class="btn-mini ${u.pag.grupo === 'emdia' ? '' : 'forte'}" onclick="renovarPagamento('${u.id}', 30)">+30 dias</button>
+          <button class="btn-mini" onclick="renovarPagamento('${u.id}', 90)">+90</button>
+          <button class="btn-revogar" onclick="revogarUsuario('${u.id}')">Revogar</button>
+        </div>
+      </div>`).join('');
+
+  // ── administradores ──
+  const listaAdm = document.getElementById('lista-admins');
+  listaAdm.innerHTML = admins.map(u => `
       <div class="usuario-card">
         <div class="usuario-info">
-          <span class="usuario-email">
-            ${u.nome || '—'} &lt;${u.email}&gt;
-            ${u.admin ? '<span class="badge-admin">Admin</span>' : ''}
-            ${!u.admin ? badgePag : ''}
-          </span>
-          <span class="usuario-data">Aprovado</span>
+          <span class="usuario-email">${identidade(u)}<span class="badge-admin">Admin</span></span>
+          <span class="usuario-data">Acesso total · sem cobrança</span>
         </div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          ${!u.admin && !emDia ? `<button class="btn-aprovar" onclick="renovarPagamento('${u.id}', 30)" style="font-size:0.75rem;padding:5px 10px;">+30 dias</button>` : ''}
-          ${!u.admin && emDia ? `<button class="btn-aprovar" onclick="renovarPagamento('${u.id}', 30)" style="font-size:0.75rem;padding:5px 10px;background:#059669;">+30 dias</button>` : ''}
-          ${u.id !== usuarioAtual.id && !u.admin ? `<button class="btn-revogar" onclick="revogarUsuario('${u.id}')" style="font-size:0.75rem;padding:5px 10px;">✗</button>` : ''}
-          ${u.id === usuarioAtual.id ? '<span style="font-size:0.8rem;color:var(--cinza)">Você</span>' : ''}
+        <div class="admin-acoes">
+          ${u.id === usuarioAtual.id ? '<span class="admin-vazio">Você</span>' : ''}
         </div>
-      </div>
-    `}).join('');
-  }
+      </div>`).join('');
 }
 
 async function aprovarUsuario(id) {
