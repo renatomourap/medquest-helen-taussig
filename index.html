@@ -610,7 +610,7 @@
 <!-- TELA LOGIN -->
 <div id="tela-login" style="display:none;">
   <main class="medquest-image-stage" aria-label="Apresentação MedQuest — Hellen Taussig">
-    <img src="assets/medquest-landing-final.png" alt="MedQuest — Hellen Taussig: Mais que questões. Uma forma mais profunda de aprender Medicina. Plataforma de questões médicas com gabarito comentado, foco em mecanismos e acompanhamento individual." onerror="this.parentElement.style.display='none';document.getElementById('medquest-image-fallback').style.display='block'">
+    <img width="1536" height="1024" fetchpriority="high" src="assets/medquest-landing-final.png" alt="MedQuest — Hellen Taussig: Mais que questões. Uma forma mais profunda de aprender Medicina. Plataforma de questões médicas com gabarito comentado, foco em mecanismos e acompanhamento individual." onerror="this.parentElement.style.display='none';document.getElementById('medquest-image-fallback').style.display='block'">
     <button class="medquest-hotspot medquest-hotspot--login" type="button" aria-label="Entrar" title="Entrar" onclick="abrirAuth('login')"></button>
     <button class="medquest-hotspot medquest-hotspot--signup" type="button" aria-label="Criar conta gratuita" title="Criar conta gratuita" onclick="abrirAuth('cadastro')"></button>
   </main>
@@ -908,14 +908,29 @@ async function fazerLogout() {
 }
 
 // ==================== NAVEGAÇÃO DE TELAS ====================
+let authTrigger = null;
 function abrirAuth(tipo) {
+  authTrigger = document.activeElement;
   if (tipo === 'cadastro') mostrarCadastro(); else mostrarLogin();
   document.getElementById('auth-overlay').classList.add('aberto');
+  document.getElementById(tipo === 'cadastro' ? 'input-nome' : 'input-email').focus();
 }
 function fecharAuth() {
   document.getElementById('auth-overlay').classList.remove('aberto');
   limparMensagens();
+  if (authTrigger) authTrigger.focus();
 }
+document.addEventListener('keydown', event => {
+  const overlay = document.getElementById('auth-overlay');
+  if (!overlay.classList.contains('aberto')) return;
+  if (event.key === 'Escape') fecharAuth();
+  if (event.key === 'Tab') {
+    const items = [...overlay.querySelectorAll('button, input, a[href], [tabindex="0"]')].filter(el => el.offsetParent !== null);
+    const first = items[0], last = items[items.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
+});
 
 function mostrarTelaLogin() {
   fecharAuth();
