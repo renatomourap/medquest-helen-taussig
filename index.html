@@ -1587,7 +1587,7 @@
     <!-- Formulário cadastro -->
     <div id="form-cadastro" style="display:none;">
       <div class="campo">
-        <label>Nome completo</label>
+        <label>Nome</label>
         <input type="text" id="input-nome" placeholder="Seu nome" />
       </div>
       <div class="campo">
@@ -1705,7 +1705,7 @@
       <div class="perfil-dica">De 3 a 20 caracteres: letras minúsculas, números, ponto e sublinhado. É único na plataforma.</div>
     </div>
     <div class="perfil-campo">
-      <label for="perfil-nome">Nome completo</label>
+      <label for="perfil-nome">Nome</label>
       <input type="text" id="perfil-nome" maxlength="120" autocomplete="name">
     </div>
     <div class="perfil-campo">
@@ -2278,7 +2278,7 @@ async function salvarPerfil() {
 
   if (!username) { msgPerfil('dados', 'erro', 'Escolha o seu nome de usuário.'); return; }
   if (!usernameFormatoValido(username)) { msgPerfil('dados', 'erro', 'O nome de usuário deve ter de 3 a 20 caracteres (letras minúsculas, números, ponto ou sublinhado) e não pode ser um nome reservado.'); return; }
-  if (nome.length < 2) { msgPerfil('dados', 'erro', 'Informe o seu nome completo.'); return; }
+  if (nome.length < 2) { msgPerfil('dados', 'erro', 'Informe o seu nome.'); return; }
   if (!google && !telefone) { msgPerfil('dados', 'erro', 'Informe o seu telefone, com DDD.'); return; }
   if (telefone && !telefoneValido(telefone)) { msgPerfil('dados', 'erro', 'Telefone inválido. Use DDD + número, por exemplo (85) 99999-9999.'); return; }
   if (!google && !perfilFotoNova && !(perfilAtual && perfilAtual.foto_url)) {
