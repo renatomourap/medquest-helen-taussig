@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plataforma de Questões — Medicina</title>
+<title>MedQuest — Helen Taussig</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --azul: #1a56a0;
@@ -30,11 +31,210 @@
     min-height: 100vh;
   }
 
+  /* ===== TELA DE LOGIN ===== */
+  #tela-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: linear-gradient(135deg, #1a3a6a 0%, #1a56a0 100%);
+  }
+
+  .login-card {
+    background: var(--branco);
+    border-radius: 20px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .login-logo .emoji { font-size: 3rem; display: block; margin-bottom: 10px; }
+  .login-logo h1 { font-size: 1.5rem; color: var(--azul); font-weight: 700; }
+  .login-logo p { color: var(--cinza); font-size: 0.9rem; margin-top: 4px; }
+
+  .btn-google {
+    width: 100%;
+    padding: 13px;
+    border: 2px solid var(--borda);
+    border-radius: 10px;
+    background: var(--branco);
+    color: var(--texto);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.15s;
+    margin-bottom: 20px;
+  }
+  .btn-google:hover { background: #f5f5f5; border-color: #aaa; }
+  .btn-google svg { width: 20px; height: 20px; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    color: var(--cinza);
+    font-size: 0.85rem;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--borda);
+  }
+
+  .campo {
+    margin-bottom: 14px;
+  }
+  .campo label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--texto);
+    margin-bottom: 6px;
+  }
+  .campo input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid var(--borda);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .campo input:focus { border-color: var(--azul-claro); }
+
+  .btn-submit {
+    width: 100%;
+    padding: 13px;
+    background: var(--azul);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 4px;
+  }
+  .btn-submit:hover { background: var(--azul-claro); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .login-toggle {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 0.88rem;
+    color: var(--cinza);
+  }
+  .login-toggle a {
+    color: var(--azul);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .login-toggle a:hover { text-decoration: underline; }
+
+  .msg-erro {
+    background: var(--vermelho-claro);
+    color: var(--vermelho);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .msg-sucesso {
+    background: var(--verde-claro);
+    color: var(--verde);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    margin-bottom: 14px;
+    display: none;
+  }
+
+  /* ===== AGUARDANDO APROVAÇÃO ===== */
+  #tela-aguardando {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: linear-gradient(135deg, #1a3a6a 0%, #1a56a0 100%);
+  }
+
+  .aguardando-card {
+    background: var(--branco);
+    border-radius: 20px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .aguardando-card .emoji-big { font-size: 4rem; margin-bottom: 16px; display: block; }
+  .aguardando-card h2 { color: var(--azul); font-size: 1.3rem; margin-bottom: 10px; }
+  .aguardando-card p { color: var(--cinza); font-size: 0.95rem; line-height: 1.5; }
+  .btn-sair-aguard {
+    margin-top: 24px;
+    padding: 10px 24px;
+    border: 2px solid var(--borda);
+    border-radius: 8px;
+    background: white;
+    color: var(--cinza);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .btn-sair-aguard:hover { background: var(--cinza-claro); }
+
+  /* ===== HEADER LOGADO ===== */
+  .app-header {
+    background: var(--azul);
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .app-header .logo { font-weight: 700; font-size: 1rem; }
+  .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+  .user-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem;
+  }
+  .btn-logout {
+    padding: 5px 12px;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 6px;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.15s;
+  }
+  .btn-logout:hover { background: rgba(255,255,255,0.15); }
+
   /* ===== TELA DE SELEÇÃO ===== */
   #tela-selecao {
     max-width: 900px;
     margin: 0 auto;
     padding: 32px 20px;
+    display: none;
   }
 
   .logo-header {
@@ -55,17 +255,17 @@
 
   .disciplinas-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 18px;
   }
 
   .disciplina-card {
     background: var(--branco);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 24px;
-    box-shadow: var(--sombra);
     cursor: pointer;
     transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: var(--sombra);
     border: 2px solid transparent;
   }
   .disciplina-card:hover {
@@ -73,28 +273,17 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     border-color: var(--azul-claro);
   }
-  .disciplina-card .icon {
-    font-size: 2rem;
-    margin-bottom: 12px;
-  }
-  .disciplina-card h2 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--azul);
-    margin-bottom: 6px;
-  }
-  .disciplina-card p {
-    font-size: 0.85rem;
-    color: var(--cinza);
-  }
+  .disciplina-card .icon { font-size: 2.2rem; margin-bottom: 10px; }
+  .disciplina-card h2 { font-size: 1.1rem; color: var(--azul); margin-bottom: 6px; }
+  .disciplina-card p { font-size: 0.85rem; color: var(--cinza); line-height: 1.4; }
   .disciplina-card .badge {
     display: inline-block;
     margin-top: 12px;
     background: var(--azul-fundo);
     color: var(--azul);
+    padding: 3px 10px;
     border-radius: 20px;
-    padding: 3px 12px;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 600;
   }
 
@@ -107,20 +296,16 @@
   }
 
   .voltar-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
     background: none;
     border: none;
     color: var(--azul);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    padding: 0;
-    margin-bottom: 20px;
-    transition: opacity 0.15s;
+    margin-bottom: 24px;
+    padding: 6px 0;
   }
-  .voltar-btn:hover { opacity: 0.7; }
+  .voltar-btn:hover { text-decoration: underline; }
 
   .tela-titulo {
     font-size: 1.5rem;
@@ -134,340 +319,204 @@
     margin-bottom: 24px;
   }
 
-  .temas-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
+  .temas-lista { display: flex; flex-direction: column; gap: 12px; }
   .tema-item {
     background: var(--branco);
     border-radius: 12px;
-    padding: 18px 22px;
+    padding: 18px 20px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    cursor: pointer;
     box-shadow: var(--sombra);
     border: 2px solid transparent;
     transition: all 0.15s;
   }
-  .tema-item:hover {
-    border-color: var(--azul-claro);
-    background: var(--azul-fundo);
-  }
-  .tema-item .tema-info h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 3px;
-  }
-  .tema-item .tema-info span {
-    font-size: 0.82rem;
-    color: var(--cinza);
-  }
-  .tema-item .seta {
-    color: var(--azul-claro);
-    font-size: 1.2rem;
-  }
+  .tema-item:hover { border-color: var(--azul-claro); background: var(--azul-fundo); }
+  .tema-info h3 { font-size: 1rem; color: var(--texto); margin-bottom: 3px; }
+  .tema-info span { font-size: 0.82rem; color: var(--cinza); }
+  .seta { font-size: 1.4rem; color: var(--azul-claro); }
 
-  /* ===== TELA DE QUESTÕES ===== */
+  /* ===== TELA DE QUESTÃO ===== */
   #tela-questao {
-    max-width: 800px;
+    max-width: 820px;
     margin: 0 auto;
-    padding: 24px 20px;
+    padding: 20px 20px 40px;
     display: none;
   }
 
   .questao-header {
-    background: var(--branco);
-    border-radius: 14px;
-    padding: 18px 22px;
-    margin-bottom: 18px;
-    box-shadow: var(--sombra);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: var(--branco);
+    border-radius: 12px;
+    padding: 12px 18px;
+    box-shadow: var(--sombra);
+    margin-bottom: 14px;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px;
   }
-  .questao-header .info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .questao-header .disciplina-nome {
-    font-size: 0.8rem;
-    color: var(--cinza);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .questao-header .tema-nome {
-    font-size: 1rem;
+  .info { display: flex; align-items: center; gap: 8px; }
+  .disciplina-nome {
+    background: var(--azul);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
     font-weight: 700;
-    color: var(--azul);
+    letter-spacing: 0.3px;
   }
+  .tema-nome { font-size: 0.88rem; color: var(--cinza); font-weight: 500; }
 
-  .progresso-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 5px;
-  }
-  .progresso-texto {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--cinza);
-  }
+  .progresso-container { display: flex; align-items: center; gap: 10px; }
+  .progresso-texto { font-size: 0.85rem; color: var(--cinza); font-weight: 600; white-space: nowrap; }
   .progresso-bar-wrap {
-    width: 160px;
+    width: 130px;
     height: 6px;
     background: var(--cinza-claro);
-    border-radius: 10px;
+    border-radius: 4px;
     overflow: hidden;
   }
   .progresso-bar {
     height: 100%;
     background: var(--azul-claro);
-    border-radius: 10px;
-    transition: width 0.4s;
+    border-radius: 4px;
+    transition: width 0.3s;
   }
-
-  .questao-box {
-    background: var(--branco);
-    border-radius: 14px;
-    padding: 28px;
-    box-shadow: var(--sombra);
-    margin-bottom: 18px;
-  }
-
-  .questao-numero {
-    display: inline-block;
-    background: var(--azul);
-    color: white;
-    border-radius: 8px;
-    padding: 4px 12px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .questao-enunciado {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: var(--texto);
-    margin-bottom: 24px;
-  }
-
-  .alternativas {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .alternativa {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 14px 18px;
-    border: 2px solid var(--borda);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.15s;
-    background: var(--branco);
-  }
-  .alternativa:hover:not(.bloqueada) {
-    border-color: var(--azul-claro);
-    background: var(--azul-fundo);
-  }
-  .alternativa.bloqueada { cursor: default; }
-
-  .alt-letra {
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    border-radius: 50%;
-    background: var(--cinza-claro);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: var(--cinza);
-    transition: all 0.15s;
-  }
-
-  .alt-texto {
-    font-size: 0.95rem;
-    line-height: 1.5;
-    padding-top: 3px;
-  }
-
-  .alternativa.correta {
-    border-color: var(--verde);
-    background: var(--verde-claro);
-  }
-  .alternativa.correta .alt-letra {
-    background: var(--verde);
-    color: white;
-  }
-
-  .alternativa.errada {
-    border-color: var(--vermelho);
-    background: var(--vermelho-claro);
-  }
-  .alternativa.errada .alt-letra {
-    background: var(--vermelho);
-    color: white;
-  }
-
-  .alternativa.neutra-revelada {
-    opacity: 0.6;
-  }
-
-  /* Gabarito comentado */
-  .gabarito-box {
-    background: #f8fffe;
-    border: 2px solid #b7e4cc;
-    border-radius: 14px;
-    padding: 22px 26px;
-    margin-top: 18px;
-    display: none;
-  }
-  .gabarito-box.visivel { display: block; }
-
-  .gabarito-titulo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--verde);
-    margin-bottom: 14px;
-  }
-
-  .gabarito-resposta {
-    font-size: 0.92rem;
-    line-height: 1.65;
-    color: var(--texto);
-  }
-  .gabarito-resposta strong {
-    color: var(--verde);
-  }
-
-  /* Navegação */
-  .nav-questao {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .nav-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.15s;
-  }
-
-  .btn-anterior {
-    background: var(--branco);
-    border-color: var(--borda);
-    color: var(--cinza);
-  }
-  .btn-anterior:hover:not(:disabled) {
-    border-color: var(--azul-claro);
-    color: var(--azul);
-  }
-  .btn-anterior:disabled { opacity: 0.35; cursor: default; }
-
-  .btn-proximo {
-    background: var(--azul);
-    color: white;
-  }
-  .btn-proximo:hover:not(:disabled) { background: var(--azul-claro); }
-  .btn-proximo:disabled { opacity: 0.35; cursor: default; }
-
-  .btn-encerrar {
-    background: var(--branco);
-    border-color: var(--borda);
-    color: var(--cinza);
-    font-size: 0.85rem;
-    padding: 10px 18px;
-  }
-  .btn-encerrar:hover { border-color: var(--vermelho); color: var(--vermelho); }
 
   .miniaturas {
     display: flex;
-    gap: 6px;
+    gap: 7px;
     flex-wrap: wrap;
-    justify-content: center;
+    background: var(--branco);
+    padding: 12px 14px;
+    border-radius: 10px;
+    box-shadow: var(--sombra);
+    margin-bottom: 14px;
   }
   .mini {
-    width: 32px;
-    height: 32px;
+    width: 32px; height: 32px;
     border-radius: 8px;
-    border: 2px solid var(--borda);
-    background: var(--branco);
-    font-size: 0.75rem;
-    font-weight: 700;
+    background: var(--cinza-claro);
     color: var(--cinza);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.82rem; font-weight: 700;
     cursor: pointer;
+    border: 2px solid transparent;
     transition: all 0.12s;
   }
   .mini:hover { border-color: var(--azul-claro); }
   .mini.atual { border-color: var(--azul); color: var(--azul); background: var(--azul-fundo); }
-  .mini.acertou { border-color: var(--verde); background: var(--verde-claro); color: var(--verde); }
-  .mini.errou { border-color: var(--vermelho); background: var(--vermelho-claro); color: var(--vermelho); }
+  .mini.acertou { background: var(--verde-claro); color: var(--verde); border-color: var(--verde); }
+  .mini.errou { background: var(--vermelho-claro); color: var(--vermelho); border-color: var(--vermelho); }
 
-  /* TELA RESULTADO */
-  #tela-resultado {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 32px 20px;
+  .questao-box {
+    background: var(--branco);
+    border-radius: 16px;
+    padding: 28px 28px 22px;
+    box-shadow: var(--sombra);
+  }
+  .questao-numero { font-size: 0.8rem; color: var(--cinza); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+  .questao-enunciado { font-size: 1rem; line-height: 1.65; color: var(--texto); margin-bottom: 22px; }
+
+  .alternativas { display: flex; flex-direction: column; gap: 10px; }
+  .alternativa {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 2px solid var(--borda);
+    cursor: pointer;
+    transition: all 0.13s;
+    background: var(--branco);
+  }
+  .alternativa:hover:not(.bloqueada) { border-color: var(--azul-claro); background: var(--azul-fundo); }
+  .alternativa.bloqueada { cursor: default; }
+  .alternativa.correta { border-color: var(--verde); background: var(--verde-claro); }
+  .alternativa.errada { border-color: var(--vermelho); background: var(--vermelho-claro); }
+  .alternativa.neutra-revelada { opacity: 0.5; }
+  .alt-letra {
+    width: 28px; height: 28px; min-width: 28px;
+    border-radius: 50%;
+    background: var(--cinza-claro);
+    color: var(--cinza);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem;
+  }
+  .alternativa.correta .alt-letra { background: var(--verde); color: white; }
+  .alternativa.errada .alt-letra { background: var(--vermelho); color: white; }
+  .alt-texto { font-size: 0.93rem; line-height: 1.45; padding-top: 3px; }
+
+  .gabarito-box {
+    background: #fffbeb;
+    border: 2px solid #f59e0b;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-top: 16px;
     display: none;
+  }
+  .gabarito-box.visivel { display: block; }
+  .gabarito-titulo { font-weight: 700; color: #92400e; margin-bottom: 10px; font-size: 0.92rem; }
+  .gabarito-resposta { font-size: 0.9rem; line-height: 1.6; color: var(--texto); }
+
+  .nav-questao {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .nav-btn {
+    padding: 11px 22px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .btn-anterior { background: var(--branco); color: var(--azul); border-color: var(--azul); }
+  .btn-anterior:hover:not(:disabled) { background: var(--azul-fundo); }
+  .btn-anterior:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-proximo { background: var(--azul); color: white; }
+  .btn-proximo:hover:not(:disabled) { background: var(--azul-claro); }
+  .btn-proximo:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-encerrar { background: #dc2626; color: white; }
+  .btn-encerrar:hover { background: #b91c1c; }
+
+  /* ===== RESULTADO ===== */
+  #tela-resultado {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 40px 20px;
   }
 
   .resultado-card {
     background: var(--branco);
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 36px;
+    max-width: 480px;
+    width: 100%;
     text-align: center;
-    box-shadow: var(--sombra);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
   }
-
-  .resultado-emoji { font-size: 3.5rem; margin-bottom: 12px; }
-  .resultado-titulo { font-size: 1.6rem; font-weight: 800; color: var(--azul); margin-bottom: 8px; }
-  .resultado-sub { color: var(--cinza); font-size: 0.95rem; margin-bottom: 28px; }
-
+  .resultado-emoji { font-size: 3.5rem; margin-bottom: 14px; }
+  .resultado-titulo { font-size: 1.4rem; font-weight: 700; color: var(--azul); margin-bottom: 8px; }
+  .resultado-sub { color: var(--cinza); font-size: 0.92rem; line-height: 1.5; margin-bottom: 24px; }
   .resultado-stats {
     display: flex;
     justify-content: center;
-    gap: 24px;
+    gap: 32px;
     margin-bottom: 28px;
-    flex-wrap: wrap;
+    padding: 18px;
+    background: var(--cinza-claro);
+    border-radius: 12px;
   }
-  .stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  .stat-num {
-    font-size: 2rem;
-    font-weight: 800;
-  }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 2rem; font-weight: 800; }
   .stat-num.acertos { color: var(--verde); }
   .stat-num.erros { color: var(--vermelho); }
   .stat-num.total { color: var(--azul); }
@@ -508,11 +557,116 @@
     .progresso-bar-wrap { width: 110px; }
     .nav-btn { padding: 10px 16px; font-size: 0.88rem; }
   }
+
+  /* Loading */
+  #loading-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a3a6a 0%, #1a56a0 100%);
+    color: white;
+    font-size: 1.1rem;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 4px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<!-- ============= TELA 1: SELEÇÃO DE DISCIPLINA ============= -->
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <span>Carregando...</span>
+</div>
+
+<!-- TELA LOGIN -->
+<div id="tela-login" style="display:none;">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="emoji">🩺</span>
+      <h1>MedQuest</h1>
+      <p>Helen Taussig · Plataforma de Questões</p>
+    </div>
+
+    <div id="msg-erro" class="msg-erro"></div>
+    <div id="msg-sucesso" class="msg-sucesso"></div>
+
+    <!-- Google -->
+    <button class="btn-google" onclick="loginGoogle()">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Entrar com Google
+    </button>
+
+    <div class="divider">ou</div>
+
+    <!-- Formulário email/senha -->
+    <div id="form-login">
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="input-email" placeholder="seu@email.com" />
+      </div>
+      <div class="campo">
+        <label>Senha</label>
+        <input type="password" id="input-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter') submitLogin()" />
+      </div>
+      <button class="btn-submit" id="btn-entrar" onclick="submitLogin()">Entrar</button>
+      <div class="login-toggle">
+        Não tem conta? <a onclick="mostrarCadastro()">Criar conta</a>
+      </div>
+    </div>
+
+    <!-- Formulário cadastro -->
+    <div id="form-cadastro" style="display:none;">
+      <div class="campo">
+        <label>Nome completo</label>
+        <input type="text" id="input-nome" placeholder="Seu nome" />
+      </div>
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="input-email-cad" placeholder="seu@email.com" />
+      </div>
+      <div class="campo">
+        <label>Senha</label>
+        <input type="password" id="input-senha-cad" placeholder="Mínimo 6 caracteres" />
+      </div>
+      <button class="btn-submit" id="btn-cadastrar" onclick="submitCadastro()">Criar conta</button>
+      <div class="login-toggle">
+        Já tem conta? <a onclick="mostrarLogin()">Fazer login</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TELA AGUARDANDO APROVAÇÃO -->
+<div id="tela-aguardando" style="display:none;">
+  <div class="aguardando-card">
+    <span class="emoji-big">⏳</span>
+    <h2>Cadastro em análise</h2>
+    <p>Seu cadastro foi recebido! Um administrador irá aprovar seu acesso em breve.<br><br>Você receberá uma confirmação por e-mail quando o acesso for liberado.</p>
+    <button class="btn-sair-aguard" onclick="fazerLogout()">Sair</button>
+  </div>
+</div>
+
+<!-- HEADER (aparece quando logado) -->
+<div id="app-header" style="display:none;" class="app-header">
+  <div class="logo">🩺 MedQuest · Helen Taussig</div>
+  <div class="user-info">
+    <div class="user-avatar" id="user-avatar">?</div>
+    <span id="user-nome-header"></span>
+    <button class="btn-logout" onclick="fazerLogout()">Sair</button>
+  </div>
+</div>
+
+<!-- TELA 1: SELEÇÃO DE DISCIPLINA -->
 <div id="tela-selecao">
   <div class="logo-header">
     <h1>🩺 Plataforma de Questões</h1>
@@ -521,15 +675,15 @@
   <div class="disciplinas-grid" id="disciplinas-grid"></div>
 </div>
 
-<!-- ============= TELA 2: SELEÇÃO DE TEMA ============= -->
-<div id="tela-temas">
+<!-- TELA 2: SELEÇÃO DE TEMA -->
+<div id="tela-temas" style="display:none;">
   <button class="voltar-btn" onclick="voltarSelecao()">← Voltar</button>
   <div class="tela-titulo" id="temas-titulo"></div>
   <div class="tela-subtitulo" id="temas-subtitulo"></div>
   <div class="temas-lista" id="temas-lista"></div>
 </div>
 
-<!-- ============= TELA 3: QUESTÃO ============= -->
+<!-- TELA 3: QUESTÃO -->
 <div id="tela-questao">
   <div class="questao-header">
     <div class="info">
@@ -566,7 +720,7 @@
   </div>
 </div>
 
-<!-- ============= TELA 4: RESULTADO ============= -->
+<!-- TELA 4: RESULTADO -->
 <div id="tela-resultado">
   <div class="resultado-card">
     <div class="resultado-emoji" id="resultado-emoji"></div>
@@ -594,6 +748,193 @@
 </div>
 
 <script>
+// ==================== SUPABASE ====================
+const SUPABASE_URL = 'https://gatkawdbksgkxhclyrhi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhdGthd2Ria3Nna3hoY2x5cmhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4OTAyNDMsImV4cCI6MjEwODQ2NjI0M30.34RL_IgUBUj-YUQSB3cfJpRwf_u1C5A9iPT6Z2QROQ0';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let usuarioAtual = null;
+
+// ==================== AUTH ====================
+async function iniciarAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    await verificarAcesso(session.user);
+  } else {
+    mostrarTelaLogin();
+  }
+
+  db.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      await verificarAcesso(session.user);
+    } else if (event === 'SIGNED_OUT') {
+      mostrarTelaLogin();
+    }
+  });
+}
+
+async function verificarAcesso(user) {
+  usuarioAtual = user;
+
+  // Busca/cria perfil do usuário
+  const { data: perfil, error } = await db
+    .from('usuarios')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (error && error.code === 'PGRST116') {
+    // Usuário não existe na tabela ainda — cria
+    const nome = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
+    await db.from('usuarios').insert({
+      id: user.id,
+      email: user.email,
+      nome: nome,
+      aprovado: false
+    });
+    mostrarTelaAguardando();
+    return;
+  }
+
+  if (!perfil || !perfil.aprovado) {
+    mostrarTelaAguardando();
+    return;
+  }
+
+  // Acesso liberado
+  const nome = perfil.nome || user.email.split('@')[0];
+  document.getElementById('user-nome-header').textContent = nome;
+  document.getElementById('user-avatar').textContent = nome.charAt(0).toUpperCase();
+  document.getElementById('app-header').style.display = 'flex';
+
+  mostrarApp();
+}
+
+async function loginGoogle() {
+  limparMensagens();
+  const { error } = await db.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
+  if (error) mostrarErro(error.message);
+}
+
+async function submitLogin() {
+  limparMensagens();
+  const email = document.getElementById('input-email').value.trim();
+  const senha = document.getElementById('input-senha').value;
+  if (!email || !senha) { mostrarErro('Preencha e-mail e senha.'); return; }
+
+  const btn = document.getElementById('btn-entrar');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+
+  const { error } = await db.auth.signInWithPassword({ email, password: senha });
+  if (error) {
+    mostrarErro('E-mail ou senha incorretos.');
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+async function submitCadastro() {
+  limparMensagens();
+  const nome = document.getElementById('input-nome').value.trim();
+  const email = document.getElementById('input-email-cad').value.trim();
+  const senha = document.getElementById('input-senha-cad').value;
+
+  if (!nome || !email || !senha) { mostrarErro('Preencha todos os campos.'); return; }
+  if (senha.length < 6) { mostrarErro('A senha deve ter no mínimo 6 caracteres.'); return; }
+
+  const btn = document.getElementById('btn-cadastrar');
+  btn.disabled = true; btn.textContent = 'Criando conta...';
+
+  const { data, error } = await db.auth.signUp({
+    email, password: senha,
+    options: { data: { full_name: nome } }
+  });
+
+  if (error) {
+    mostrarErro(error.message === 'User already registered' ? 'Este e-mail já está cadastrado.' : error.message);
+    btn.disabled = false; btn.textContent = 'Criar conta';
+    return;
+  }
+
+  // Insere na tabela aguardando aprovação
+  if (data.user) {
+    await db.from('usuarios').upsert({
+      id: data.user.id,
+      email: email,
+      nome: nome,
+      aprovado: false
+    });
+  }
+
+  mostrarSucesso('Conta criada! Aguarde a aprovação do administrador.');
+  btn.disabled = false; btn.textContent = 'Criar conta';
+}
+
+async function fazerLogout() {
+  await db.auth.signOut();
+  document.getElementById('app-header').style.display = 'none';
+  usuarioAtual = null;
+}
+
+// ==================== NAVEGAÇÃO DE TELAS ====================
+function mostrarTelaLogin() {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('tela-login').style.display = 'flex';
+  document.getElementById('tela-aguardando').style.display = 'none';
+  esconderApp();
+}
+
+function mostrarTelaAguardando() {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('tela-login').style.display = 'none';
+  document.getElementById('tela-aguardando').style.display = 'flex';
+  esconderApp();
+}
+
+function mostrarApp() {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('tela-login').style.display = 'none';
+  document.getElementById('tela-aguardando').style.display = 'none';
+  renderDisciplinas();
+  mostrarTela('selecao');
+}
+
+function esconderApp() {
+  ['tela-selecao','tela-temas','tela-questao','tela-resultado'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+}
+
+function mostrarCadastro() {
+  limparMensagens();
+  document.getElementById('form-login').style.display = 'none';
+  document.getElementById('form-cadastro').style.display = 'block';
+}
+
+function mostrarLogin() {
+  limparMensagens();
+  document.getElementById('form-cadastro').style.display = 'none';
+  document.getElementById('form-login').style.display = 'block';
+}
+
+function mostrarErro(msg) {
+  const el = document.getElementById('msg-erro');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function mostrarSucesso(msg) {
+  const el = document.getElementById('msg-sucesso');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function limparMensagens() {
+  document.getElementById('msg-erro').style.display = 'none';
+  document.getElementById('msg-sucesso').style.display = 'none';
+}
+
 // ==================== BANCO DE DADOS ====================
 const BANCO = {
   disciplinas: [
@@ -741,34 +1082,10 @@ const BANCO = {
         }
       ]
     },
-    {
-      id: "patologia",
-      nome: "Patologia",
-      icon: "🔬",
-      descricao: "Em breve: Inflamação, Reparo Tecidual, Neoplasias",
-      temas: []
-    },
-    {
-      id: "farmacologia",
-      nome: "Farmacologia",
-      icon: "💊",
-      descricao: "Em breve: Antibióticos, Sistema Nervoso, Cardiovascular",
-      temas: []
-    },
-    {
-      id: "microbiologia",
-      nome: "Microbiologia",
-      icon: "🦠",
-      descricao: "Em breve: Bacteriologia, Virologia, Micologia",
-      temas: []
-    },
-    {
-      id: "parasitologia",
-      nome: "Parasitologia",
-      icon: "🪱",
-      descricao: "Em breve: Protozoários, Helmintos, Artrópodes",
-      temas: []
-    }
+    { id: "patologia", nome: "Patologia", icon: "🔬", descricao: "Em breve: Inflamação, Reparo Tecidual, Neoplasias", temas: [] },
+    { id: "farmacologia", nome: "Farmacologia", icon: "💊", descricao: "Em breve: Antibióticos, Sistema Nervoso, Cardiovascular", temas: [] },
+    { id: "microbiologia", nome: "Microbiologia", icon: "🦠", descricao: "Em breve: Bacteriologia, Virologia, Micologia", temas: [] },
+    { id: "parasitologia", nome: "Parasitologia", icon: "🪱", descricao: "Em breve: Protozoários, Helmintos, Artrópodes", temas: [] }
   ]
 };
 
@@ -777,15 +1094,11 @@ let estadoAtual = {
   disciplinaId: null,
   temaId: null,
   questaoIndex: 0,
-  respostas: {},   // { index: { marcada, correta } }
+  respostas: {},
   questoes: []
 };
 
-// ==================== INICIALIZAÇÃO ====================
-function init() {
-  renderDisciplinas();
-}
-
+// ==================== PLATAFORMA ====================
 function renderDisciplinas() {
   const grid = document.getElementById('disciplinas-grid');
   grid.innerHTML = '';
@@ -813,10 +1126,8 @@ function renderDisciplinas() {
 function abrirDisciplina(disciplinaId) {
   const disc = BANCO.disciplinas.find(d => d.id === disciplinaId);
   estadoAtual.disciplinaId = disciplinaId;
-
   document.getElementById('temas-titulo').textContent = disc.nome;
   document.getElementById('temas-subtitulo').textContent = 'Selecione um tema para iniciar as questões';
-
   const lista = document.getElementById('temas-lista');
   lista.innerHTML = '';
   disc.temas.forEach(t => {
@@ -832,115 +1143,73 @@ function abrirDisciplina(disciplinaId) {
     item.onclick = () => iniciarTema(disciplinaId, t.id);
     lista.appendChild(item);
   });
-
   mostrarTela('temas');
 }
 
 function iniciarTema(disciplinaId, temaId) {
   const disc = BANCO.disciplinas.find(d => d.id === disciplinaId);
   const tema = disc.temas.find(t => t.id === temaId);
-
-  estadoAtual.disciplinaId = disciplinaId;
-  estadoAtual.temaId = temaId;
-  estadoAtual.questaoIndex = 0;
-  estadoAtual.respostas = {};
-  estadoAtual.questoes = tema.questoes;
-
+  estadoAtual = { disciplinaId, temaId, questaoIndex: 0, respostas: {}, questoes: tema.questoes };
   document.getElementById('q-disciplina').textContent = disc.nome.toUpperCase();
   document.getElementById('q-tema').textContent = tema.nome;
-
   renderMiniaturas();
   renderQuestao(0);
   mostrarTela('questao');
 }
 
-// ==================== RENDERIZAÇÃO DE QUESTÃO ====================
 function renderQuestao(index) {
   const q = estadoAtual.questoes[index];
   const total = estadoAtual.questoes.length;
   estadoAtual.questaoIndex = index;
-
-  // Progresso
   const pct = Math.round(((index + 1) / total) * 100);
   document.getElementById('progresso-txt').textContent = `${index + 1} / ${total}`;
   document.getElementById('progresso-bar').style.width = pct + '%';
-
-  // Número e enunciado
   document.getElementById('q-numero').textContent = `Questão ${index + 1} • ${q.hotpoint}`;
   document.getElementById('q-enunciado').textContent = q.enunciado;
-
-  // Alternativas
   const altContainer = document.getElementById('alternativas');
   altContainer.innerHTML = '';
   const resp = estadoAtual.respostas[index];
-
   q.alternativas.forEach(alt => {
     const div = document.createElement('div');
     div.className = 'alternativa';
-
     if (resp) {
       div.classList.add('bloqueada');
-      if (alt.letra === q.correta) {
-        div.classList.add('correta');
-      } else if (alt.letra === resp.marcada) {
-        div.classList.add('errada');
-      } else {
-        div.classList.add('neutra-revelada');
-      }
+      if (alt.letra === q.correta) div.classList.add('correta');
+      else if (alt.letra === resp.marcada) div.classList.add('errada');
+      else div.classList.add('neutra-revelada');
     } else {
       div.onclick = () => responder(index, alt.letra);
     }
-
-    div.innerHTML = `
-      <div class="alt-letra">${alt.letra}</div>
-      <div class="alt-texto">${alt.texto}</div>
-    `;
+    div.innerHTML = `<div class="alt-letra">${alt.letra}</div><div class="alt-texto">${alt.texto}</div>`;
     altContainer.appendChild(div);
   });
-
-  // Gabarito
   const gabBox = document.getElementById('gabarito-box');
   const gabTxt = document.getElementById('gabarito-texto');
-  if (resp) {
-    gabTxt.innerHTML = q.comentario;
-    gabBox.classList.add('visivel');
-  } else {
-    gabBox.classList.remove('visivel');
-    gabTxt.innerHTML = '';
-  }
-
-  // Botões nav
+  if (resp) { gabTxt.innerHTML = q.comentario; gabBox.classList.add('visivel'); }
+  else { gabBox.classList.remove('visivel'); gabTxt.innerHTML = ''; }
   document.getElementById('btn-anterior').disabled = (index === 0);
   document.getElementById('btn-proximo').disabled = (index === total - 1);
-
-  // Miniatura ativa
   atualizarMiniaturas();
 }
 
 function responder(index, letraMarcada) {
   const q = estadoAtual.questoes[index];
-  const acertou = letraMarcada === q.correta;
-  estadoAtual.respostas[index] = { marcada: letraMarcada, acertou };
+  estadoAtual.respostas[index] = { marcada: letraMarcada, acertou: letraMarcada === q.correta };
+  salvarProgresso(index, letraMarcada, letraMarcada === q.correta);
   renderQuestao(index);
 }
 
 function navegarQuestao(delta) {
   const novoIndex = estadoAtual.questaoIndex + delta;
-  const total = estadoAtual.questoes.length;
-  if (novoIndex >= 0 && novoIndex < total) {
-    renderQuestao(novoIndex);
-  }
+  if (novoIndex >= 0 && novoIndex < estadoAtual.questoes.length) renderQuestao(novoIndex);
 }
 
-// ==================== MINIATURAS ====================
 function renderMiniaturas() {
   const cont = document.getElementById('miniaturas');
   cont.innerHTML = '';
   estadoAtual.questoes.forEach((_, i) => {
     const m = document.createElement('div');
-    m.className = 'mini';
-    m.textContent = i + 1;
-    m.id = `mini-${i}`;
+    m.className = 'mini'; m.textContent = i + 1; m.id = `mini-${i}`;
     m.onclick = () => renderQuestao(i);
     cont.appendChild(m);
   });
@@ -953,55 +1222,53 @@ function atualizarMiniaturas() {
     m.className = 'mini';
     const resp = estadoAtual.respostas[i];
     if (i === estadoAtual.questaoIndex) m.classList.add('atual');
-    if (resp) {
-      m.classList.add(resp.acertou ? 'acertou' : 'errou');
-    }
+    if (resp) m.classList.add(resp.acertou ? 'acertou' : 'errou');
   });
 }
 
-// ==================== ENCERRAR ====================
 function encerrarSessao() {
   const total = estadoAtual.questoes.length;
   const respondidas = Object.keys(estadoAtual.respostas).length;
   const acertos = Object.values(estadoAtual.respostas).filter(r => r.acertou).length;
   const erros = respondidas - acertos;
-
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-acertos').textContent = acertos;
   document.getElementById('stat-erros').textContent = erros;
-
   const pct = respondidas > 0 ? Math.round((acertos / respondidas) * 100) : 0;
-  let emoji = '😊';
-  let msg = `Você respondeu ${respondidas} de ${total} questões. Aproveitamento: ${pct}%`;
-  if (pct >= 80) { emoji = '🏆'; }
-  else if (pct >= 60) { emoji = '👍'; }
-  else if (pct >= 40) { emoji = '📚'; }
-  else { emoji = '💪'; }
-
+  let emoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : pct >= 40 ? '📚' : '💪';
   document.getElementById('resultado-emoji').textContent = emoji;
-  document.getElementById('resultado-sub').textContent = msg;
-
+  document.getElementById('resultado-sub').textContent = `Você respondeu ${respondidas} de ${total} questões. Aproveitamento: ${pct}%`;
   mostrarTela('resultado');
 }
 
-function reiniciarTema() {
-  iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId);
-}
+function reiniciarTema() { iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId); }
+function voltarSelecao() { mostrarTela('selecao'); renderDisciplinas(); }
 
-function voltarSelecao() {
-  mostrarTela('selecao');
-  renderDisciplinas();
-}
-
-// ==================== CONTROLE DE TELAS ====================
 function mostrarTela(nome) {
   document.getElementById('tela-selecao').style.display = nome === 'selecao' ? 'block' : 'none';
   document.getElementById('tela-temas').style.display = nome === 'temas' ? 'block' : 'none';
   document.getElementById('tela-questao').style.display = nome === 'questao' ? 'block' : 'none';
-  document.getElementById('tela-resultado').style.display = nome === 'resultado' ? 'block' : 'none';
+  document.getElementById('tela-resultado').style.display = nome === 'resultado' ? 'flex' : 'none';
 }
 
-init();
+// ==================== SALVAR PROGRESSO ====================
+async function salvarProgresso(questaoIndex, letraMarcada, acertou) {
+  if (!usuarioAtual) return;
+  try {
+    await db.from('progresso').upsert({
+      usuario_id: usuarioAtual.id,
+      disciplina_id: estadoAtual.disciplinaId,
+      tema_id: estadoAtual.temaId,
+      questao_id: estadoAtual.questoes[questaoIndex].id,
+      resposta: letraMarcada,
+      acertou: acertou,
+      respondido_em: new Date().toISOString()
+    }, { onConflict: 'usuario_id,questao_id' });
+  } catch(e) { /* silencioso */ }
+}
+
+// ==================== INICIAR ====================
+iniciarAuth();
 </script>
 </body>
 </html>
