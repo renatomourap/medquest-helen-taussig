@@ -580,53 +580,23 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
 
-/* MEDQUEST | landing editorial escura */
-#tela-login{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:0;min-height:100vh;color:#f5f1e9;background:radial-gradient(ellipse at 78% 38%,#1d3550 0%,#0d1b2c 44%,#091421 85%)}
-.public-nav{display:flex;justify-content:space-between;align-items:center;max-width:1480px;width:100%;margin:auto;padding:30px clamp(24px,5.5vw,92px);border-bottom:1px solid #ffffff17}
-.public-brand{display:flex;align-items:center;gap:12px;font-size:1.25rem;letter-spacing:.3px;font-weight:700;color:#f4e9d2;font-family:Georgia,serif}
-.public-brand small{display:block;font:500 .58rem 'Segoe UI',sans-serif;letter-spacing:2.3px;color:#b9a888;margin-top:4px}
-.public-mark{width:42px;height:42px;display:grid;place-items:center;border:1px solid #bca16d;border-radius:50%;font:1.6rem Georgia,serif;color:#d6bd86}
-.public-enter{background:transparent;border:1px solid #bda678;color:#f1dfb6;padding:12px 32px;border-radius:5px;font-weight:700;letter-spacing:.5px;cursor:pointer}
-.public-enter:hover{background:#c1a6781a}
-.public-main{width:min(1320px,calc(100% - 60px));margin:auto;display:grid;grid-template-columns:1fr 1.06fr;align-items:center;gap:clamp(24px,4vw,70px);padding:clamp(60px,8vw,116px) 0 75px}
-.public-eyebrow{display:block;font-size:.72rem;letter-spacing:3.2px;text-transform:uppercase;font-weight:700;color:#d2b782;margin-bottom:27px}
-.public-copy h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(2.9rem,4.6vw,5.15rem);font-weight:400;line-height:1.13;letter-spacing:-1.5px;color:#fffaf0;margin-bottom:27px}
-.public-copy h1 em{font-style:italic;font-weight:400;color:#d4b77d}
-.public-copy p{font-size:1.02rem;line-height:1.85;color:#b7c2cd;max-width:540px;margin-bottom:33px}
-.public-create{background:linear-gradient(115deg,#e2c992,#c7a56c);color:#172334;border:0;padding:17px 35px;border-radius:5px;font-size:.93rem;font-weight:800;letter-spacing:.4px;cursor:pointer;box-shadow:0 12px 35px #0003}
-.public-create:hover{filter:brightness(1.09)}
-.public-small{color:#9caabd;font-size:.8rem;margin-top:18px}
-.public-visual{position:relative;min-height:490px;padding:28px 20px 25px 30px}
-.public-halo{position:absolute;right:10%;top:-8%;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#bb9b5d20 0%,transparent 67%);border:1px solid #b79b6633}
-.public-portrait{position:absolute;top:4px;right:8%;width:104px;height:104px;border-radius:50%;border:2px solid #bda77a;box-shadow:0 0 0 9px #0f2030;display:grid;place-items:center;background:linear-gradient(140deg,#283c50,#0b1725);color:#d5bd8b;font:italic 2.7rem Georgia,serif;z-index:2}
-.public-portrait-label{position:absolute;right:3%;top:125px;color:#bba77e;font:italic .83rem Georgia,serif}
-.public-preview{position:relative;z-index:1;margin:94px 30px 0 0;background:#e9edf1;border:8px solid #263849;border-radius:14px;box-shadow:0 28px 65px #0009;transform:perspective(1200px) rotateY(-5deg) rotateX(2deg);overflow:hidden;color:#24394d}
-.public-preview-top{display:flex;align-items:center;gap:7px;padding:11px 15px;background:#172d44;color:#d7e0e8;font-size:.7rem}
-.public-preview-dot{width:7px;height:7px;border-radius:50%;background:#b8a072}
-.public-preview-content{display:grid;grid-template-columns:115px 1fr;min-height:260px}
-.public-preview-side{background:#162b42;color:#afc1d1;padding:19px 10px;font-size:.68rem;line-height:3}
-.public-preview-side b{color:#e5c78f}
-.public-preview-body{padding:22px 20px;background:#f2f4f6}
-.public-preview-body h3{font-size:1.06rem;color:#18334f;margin-bottom:7px}
-.public-preview-body p{font-size:.7rem;color:#788595;margin-bottom:18px}
-.public-preview-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-.public-preview-card{min-height:92px;background:white;border:1px solid #dfe5e9;border-radius:7px;padding:11px 7px;text-align:center;font-size:.66rem;font-weight:700;color:#294d6b;box-shadow:0 3px 10px #19344b10}
-.public-preview-card span{display:block;font-size:1.5rem;margin-bottom:8px}
-.public-preview-progress{margin-top:18px;padding:12px;background:white;border-radius:6px;color:#466078;font-size:.7rem}
-.public-preview-bar{height:6px;background:#e6e9ee;border-radius:8px;margin-top:10px;overflow:hidden}
-.public-preview-bar:before{content:'';display:block;width:67%;height:100%;background:#c7a56c}
-.public-preview-note{text-align:center;color:#a4b3c1;font-size:.72rem;margin-top:16px}
-.public-benefits{border-top:1px solid #ffffff1c;background:#091421;padding:36px 30px 48px}
-.public-benefits-inner{max-width:1230px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:38px}
-.public-benefit{border-left:1px solid #bca16d8a;padding:3px 0 3px 21px}
-.public-benefit strong{color:#e7cf9d;font:1.1rem Georgia,serif;display:block;margin-bottom:9px}
-.public-benefit p{color:#9eafc0;font-size:.86rem;line-height:1.7}
+/* Landing: a imagem final aprovada é exibida integralmente, sem recriação em CSS */
+#tela-login{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;min-height:100vh;padding:0;background:#04111d;color:#fff}
+.medquest-image-stage{width:min(100%,1536px);margin:0 auto;position:relative}
+.medquest-image-stage img{display:block;width:100%;height:auto}
+.medquest-hotspot{position:absolute;display:block;border:0;background:transparent;cursor:pointer;border-radius:10px;z-index:2}
+.medquest-hotspot:focus-visible{outline:3px solid #f6bf65;outline-offset:3px}
+.medquest-hotspot--login{left:87.8%;top:2.1%;width:10%;height:6%}
+.medquest-hotspot--signup{left:4.1%;top:57.4%;width:23%;height:7.2%}
+.medquest-fallback{display:none;max-width:680px;margin:8vh auto;padding:35px;text-align:center;color:#fff}
+.medquest-fallback h1{font:normal clamp(2rem,5vw,4rem) Georgia,serif;color:#f2cb84}
+.medquest-fallback p{color:#b8c6d5;line-height:1.7}
+.medquest-fallback button{margin:12px;padding:14px 22px;background:#f2c77d;border:0;border-radius:6px;color:#061321;font-weight:700;cursor:pointer}
 #auth-overlay{display:none;position:fixed;inset:0;background:#020812df;z-index:100;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
 #auth-overlay.aberto{display:flex}
 #auth-overlay .login-card{position:relative;max-height:calc(100vh - 40px);overflow-y:auto;box-shadow:0 30px 80px #0009}
 .auth-close{position:absolute;right:18px;top:15px;background:#f2f5f9;border:0;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:1.2rem}
-@media(max-width:850px){.public-main{grid-template-columns:1fr;gap:15px;padding:65px 0}.public-visual{min-height:420px}.public-preview{margin-top:95px}.public-benefits-inner{grid-template-columns:1fr;gap:24px}}
-@media(max-width:520px){.public-main{width:calc(100% - 40px);padding:55px 0 45px}.public-nav{padding:20px}.public-brand{font-size:.96rem}.public-enter{padding:10px 17px}.public-copy h1{font-size:2.7rem}.public-visual{padding:5px;min-height:350px}.public-portrait{right:10px;width:77px;height:77px;font-size:2rem}.public-portrait-label{top:90px}.public-preview{margin:88px 0 0;transform:none}.public-preview-content{grid-template-columns:78px 1fr}.public-preview-side{font-size:.55rem;padding:12px 5px}.public-preview-body{padding:15px 10px}.public-preview-card{font-size:.57rem;min-height:78px}.public-preview-cards{gap:5px}}
+@media(max-width:650px){.medquest-image-stage{min-width:650px}#tela-login{overflow-x:auto}.medquest-fallback{min-width:0}}
 </style>
 </head>
 <body>
@@ -639,40 +609,12 @@
 
 <!-- TELA LOGIN -->
 <div id="tela-login" style="display:none;">
-  <header class="public-nav">
-    <div class="public-brand"><span class="public-mark" aria-hidden="true">✦</span><span>MedQuest<small>HELLEN TAUSSIG · BANCO DE QUESTÕES</small></span></div>
-    <button class="public-enter" type="button" onclick="abrirAuth('login')">Entrar</button>
-  </header>
-  <main class="public-main">
-    <section class="public-copy">
-      <span class="public-eyebrow">O futuro da sua preparação médica</span>
-      <h1>Mais que questões.<br>Uma forma mais <em>profunda</em> de aprender Medicina.</h1>
-      <p>Estude com propósito. Aprenda os mecanismos por trás de cada resposta, acompanhe sua evolução e transforme conhecimento em raciocínio clínico.</p>
-      <button class="public-create" type="button" onclick="abrirAuth('cadastro')">Criar conta gratuita</button>
-      <div class="public-small">Uma plataforma exclusiva para estudantes de Medicina.</div>
-    </section>
-    <section class="public-visual" aria-label="Prévia ilustrativa da plataforma">
-      <div class="public-halo" aria-hidden="true"></div>
-      <div class="public-portrait" aria-hidden="true">HT</div>
-      <div class="public-portrait-label">Hellen Taussig</div>
-      <div class="public-preview">
-        <div class="public-preview-top"><span class="public-preview-dot"></span><span class="public-preview-dot"></span><span class="public-preview-dot"></span><span style="margin-left:10px">MedQuest · Painel do estudante</span></div>
-        <div class="public-preview-content">
-          <div class="public-preview-side"><b>✦ MedQuest</b><div>▦ Início</div><div>✎ Questões</div><div>◷ Revisões</div><div>▥ Desempenho</div></div>
-          <div class="public-preview-body"><h3>Bem-vindo aos seus estudos</h3><p>Organize seu aprendizado, tema por tema.</p>
-            <div class="public-preview-cards"><div class="public-preview-card"><span>◈</span>Imunologia</div><div class="public-preview-card"><span>✣</span>Microbiologia</div><div class="public-preview-card"><span>✚</span>Patologia</div></div>
-            <div class="public-preview-progress">Exemplo de acompanhamento individual<div class="public-preview-bar"></div></div>
-          </div>
-        </div>
-      </div>
-      <div class="public-preview-note">Demonstração visual · Disciplinas e questões acessíveis somente após login</div>
-    </section>
+  <main class="medquest-image-stage" aria-label="Apresentação MedQuest — Hellen Taussig">
+    <img src="assets/medquest-landing-final.png" alt="MedQuest — Hellen Taussig: Mais que questões. Uma forma mais profunda de aprender Medicina. Plataforma de questões médicas com gabarito comentado, foco em mecanismos e acompanhamento individual." onerror="this.parentElement.style.display='none';document.getElementById('medquest-image-fallback').style.display='block'">
+    <button class="medquest-hotspot medquest-hotspot--login" type="button" aria-label="Entrar" title="Entrar" onclick="abrirAuth('login')"></button>
+    <button class="medquest-hotspot medquest-hotspot--signup" type="button" aria-label="Criar conta gratuita" title="Criar conta gratuita" onclick="abrirAuth('cadastro')"></button>
   </main>
-  <section class="public-benefits" aria-label="Recursos da plataforma"><div class="public-benefits-inner">
-    <div class="public-benefit"><strong>Questões comentadas</strong><p>Entenda os fundamentos e mecanismos por trás de cada alternativa.</p></div>
-    <div class="public-benefit"><strong>Revisão inteligente</strong><p>Retorne aos erros e fortaleça os conteúdos que precisam de atenção.</p></div>
-    <div class="public-benefit"><strong>Evolução individual</strong><p>Acompanhe seu progresso com privacidade e sem rankings.</p></div>
-  </div></section>
+  <div class="medquest-fallback" id="medquest-image-fallback"><h1>MedQuest · Hellen Taussig</h1><p>Mais que questões. Uma forma mais profunda de aprender Medicina.</p><button type="button" onclick="abrirAuth('login')">Entrar</button><button type="button" onclick="abrirAuth('cadastro')">Criar conta gratuita</button></div>
   <div id="auth-overlay" role="dialog" aria-modal="true" aria-label="Acessar MedQuest" onclick="if(event.target===this)fecharAuth()">
   <div class="login-card">
     <button type="button" class="auth-close" aria-label="Fechar" onclick="fecharAuth()">×</button>
