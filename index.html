@@ -793,6 +793,70 @@
   .btn-mini.forte:hover { filter: brightness(1.08); }
   .admin-vazio { color: var(--cinza); font-size: 0.88rem; }
 
+  /* modal de cobrança */
+  .cobranca-modal { max-width: 560px; }
+  .cobranca-para {
+    font-size: 0.8rem;
+    color: var(--cinza);
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--borda);
+  }
+  .cobranca-para b { color: var(--texto); font-weight: 600; }
+  .cobranca-campo { margin-bottom: 14px; }
+  .cobranca-campo label {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: var(--cinza);
+    margin-bottom: 7px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+  .cobranca-campo input, .cobranca-campo textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+    background: rgba(255,255,255,0.04);
+    color: var(--texto);
+    transition: border-color 0.2s;
+  }
+  .cobranca-campo textarea { min-height: 252px; resize: vertical; line-height: 1.6; }
+  .cobranca-campo input:focus, .cobranca-campo textarea:focus { border-color: var(--ouro); }
+  .cobranca-botoes { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .cobranca-botoes button {
+    flex: 1;
+    min-width: 140px;
+    padding: 12px;
+    border-radius: 9px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--ouro-borda);
+    background: transparent;
+    color: var(--ouro);
+    transition: all 0.15s;
+  }
+  .cobranca-botoes button:hover { background: var(--ouro-fraco); border-color: var(--ouro); }
+  .cobranca-botoes button.principal {
+    background: var(--ouro);
+    color: #11131a;
+    border-color: var(--ouro);
+    font-weight: 700;
+  }
+  .cobranca-botoes button.principal:hover { filter: brightness(1.08); }
+  .cobranca-aviso {
+    margin-top: 14px;
+    font-size: 0.76rem;
+    color: var(--cinza);
+    line-height: 1.55;
+  }
+
   @media (max-width: 620px) {
     .admin-resumo { grid-template-columns: 1fr 1fr; }
     .usuario-card .usuario-email { font-size: 0.86rem; }
@@ -1325,6 +1389,30 @@
 
 </div>
 </div>
+<!-- MODAL DE COBRANÇA -->
+<div class="lp-modal-overlay" id="modal-cobranca" onclick="if(event.target===this) fecharCobranca()">
+  <div class="lp-modal cobranca-modal">
+    <button class="lp-modal-close" onclick="fecharCobranca()">&times;</button>
+    <div class="lp-modal-logo" style="margin-bottom:20px;">
+      <h2 style="font-size:1.25rem;">Cobrança</h2>
+    </div>
+    <div class="cobranca-para">Para <b id="cobranca-destinatario"></b></div>
+    <div class="cobranca-campo">
+      <label for="cobranca-assunto">Assunto</label>
+      <input type="text" id="cobranca-assunto">
+    </div>
+    <div class="cobranca-campo">
+      <label for="cobranca-mensagem">Mensagem</label>
+      <textarea id="cobranca-mensagem"></textarea>
+    </div>
+    <div class="cobranca-botoes">
+      <button class="principal" onclick="abrirNoEmail()">Abrir no e-mail</button>
+      <button onclick="copiarCobranca()" id="btn-copiar-cobranca">Copiar mensagem</button>
+    </div>
+    <p class="cobranca-aviso">Edite à vontade antes de enviar. "Abrir no e-mail" monta a mensagem no seu aplicativo de e-mail, já endereçada — o envio sai do seu endereço.</p>
+  </div>
+</div>
+
 <!-- MODAL DE LOGIN / CADASTRO -->
 <div class="lp-modal-overlay" id="modal-auth" onclick="if(event.target===this) fecharModalLogin()">
   <div class="lp-modal">
@@ -1737,6 +1825,7 @@ async function carregarUsuarios() {
   const pagantes  = todos.filter(u => u.aprovado && !u.admin)
                          .map(u => ({ ...u, pag: estadoPagamento(u) }))
                          .sort((a, b) => a.pag.ordem - b.pag.ordem);
+  window.__pagantes = pagantes;
 
   // ── resumo ──
   const conta = g => pagantes.filter(u => u.pag.grupo === g).length;
@@ -1785,6 +1874,7 @@ async function carregarUsuarios() {
         </div>
         <span class="badge-pag ${u.pag.classe}">${u.pag.selo}</span>
         <div class="admin-acoes">
+          <button class="btn-mini" onclick="abrirCobranca('${u.id}')" title="Escrever e-mail de cobrança">Cobrar</button>
           <button class="btn-mini ${u.pag.grupo === 'emdia' ? '' : 'forte'}" onclick="renovarPagamento('${u.id}', 30)">+30 dias</button>
           <button class="btn-mini" onclick="renovarPagamento('${u.id}', 90)">+90</button>
           <button class="btn-revogar" onclick="revogarUsuario('${u.id}')">Revogar</button>
@@ -1803,6 +1893,87 @@ async function carregarUsuarios() {
           ${u.id === usuarioAtual.id ? '<span class="admin-vazio">Você</span>' : ''}
         </div>
       </div>`).join('');
+}
+
+// ──────────── cobrança por e-mail ────────────
+let cobrancaEmail = null;
+
+function textoCobranca(u) {
+  const nome = (u.nome || '').trim().split(/\s+/)[0];
+  const ola = nome ? `Olá, ${nome}!` : 'Olá!';
+  const assino = (perfilAtual && perfilAtual.nome ? perfilAtual.nome : '').trim();
+  const rodape = `${assino ? assino + '\n' : ''}MedQuest — Hellen Taussig`;
+  const data = u.pagamento_validade
+    ? new Date(u.pagamento_validade).toLocaleDateString('pt-BR') : null;
+  const monta = (assunto, miolo) => ({ assunto, corpo: `${ola}\n\n${miolo}\n\nQualquer dúvida, estou à disposição.\n\n${rodape}` });
+
+  // nunca pagou
+  if (!data) {
+    return monta('MedQuest — liberação do seu acesso',
+      'Seu cadastro no MedQuest já está aprovado, mas ainda não consta nenhuma mensalidade paga.\n\n'
+      + 'Para liberar o acesso completo, é só concluir o pagamento e me avisar por aqui que eu libero na hora.');
+  }
+
+  // vencida
+  if (u.pag.grupo === 'vencido') {
+    const dias = -diasAte(u.pagamento_validade);
+    return monta('MedQuest — mensalidade vencida',
+      `Sua mensalidade do MedQuest venceu em ${data}, há ${plural(dias, 'dia', 'dias')}, e o acesso está suspenso.\n\n`
+      + 'Para reativar, é só concluir o pagamento e me avisar por aqui que eu libero na hora.');
+  }
+
+  // vence em breve
+  if (u.pag.grupo === 'proximo') {
+    const dias = diasAte(u.pagamento_validade);
+    const quando = dias === 0 ? `vence hoje, ${data}` : `vence em ${data}, daqui a ${plural(dias, 'dia', 'dias')}`;
+    return monta('MedQuest — sua mensalidade vence em breve',
+      `Sua mensalidade do MedQuest ${quando}.\n\n`
+      + 'Para manter o acesso sem interrupção, é só concluir o pagamento até lá e me avisar.');
+  }
+
+  // em dia
+  return monta('MedQuest — sua mensalidade',
+    `Passando só para confirmar que está tudo certo por aqui: sua mensalidade do MedQuest está em dia, válida até ${data}.\n\n`
+    + 'Perto do vencimento eu aviso novamente.');
+}
+
+function abrirCobranca(id) {
+  const u = (window.__pagantes || []).find(x => x.id === id);
+  if (!u) return;
+  const t = textoCobranca(u);
+  cobrancaEmail = u.email;
+  document.getElementById('cobranca-destinatario').textContent = `${u.nome ? u.nome + ' · ' : ''}${u.email}`;
+  document.getElementById('cobranca-assunto').value = t.assunto;
+  document.getElementById('cobranca-mensagem').value = t.corpo;
+  document.getElementById('btn-copiar-cobranca').textContent = 'Copiar mensagem';
+  document.getElementById('modal-cobranca').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharCobranca() {
+  document.getElementById('modal-cobranca').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function abrirNoEmail() {
+  const assunto = document.getElementById('cobranca-assunto').value;
+  const corpo = document.getElementById('cobranca-mensagem').value;
+  window.location.href = `mailto:${cobrancaEmail}`
+    + `?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+}
+
+async function copiarCobranca() {
+  const botao = document.getElementById('btn-copiar-cobranca');
+  const texto = document.getElementById('cobranca-mensagem').value;
+  try {
+    await navigator.clipboard.writeText(texto);
+    botao.textContent = 'Copiado';
+  } catch (e) {
+    const ta = document.getElementById('cobranca-mensagem');
+    ta.select(); document.execCommand('copy');
+    botao.textContent = 'Copiado';
+  }
+  setTimeout(() => { botao.textContent = 'Copiar mensagem'; }, 1800);
 }
 
 async function aprovarUsuario(id) {
@@ -1862,7 +2033,7 @@ function fecharModalLogin() {
 }
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') fecharModalLogin();
+  if (e.key === 'Escape') { fecharModalLogin(); fecharCobranca(); }
 });
 
 function mostrarErro(msg) {
