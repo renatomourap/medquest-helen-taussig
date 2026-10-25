@@ -798,6 +798,8 @@ async function verificarAcesso(user) {
   }
 
   if (!perfil || !perfil.aprovado) {
+    // Debug temporário
+    console.log('DEBUG perfil:', JSON.stringify(perfil), 'error:', JSON.stringify(error));
     mostrarTelaAguardando();
     return;
   }
