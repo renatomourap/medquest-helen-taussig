@@ -752,16 +752,19 @@
   }
   .logo-header h1 {
     font-family: 'Playfair Display', Georgia, serif;
-    font-size: 2rem;
+    font-size: 2.1rem;
     color: #fff;
     font-weight: 500;
     letter-spacing: -0.01em;
   }
   .logo-header h1 em { font-style: italic; color: var(--ouro); }
   .logo-header p {
-    color: var(--cinza);
-    margin-top: 6px;
-    font-size: 0.95rem;
+    color: var(--ouro);
+    margin-top: 13px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
   }
 
   .disciplinas-grid {
@@ -843,9 +846,13 @@
     margin-bottom: 6px;
   }
   .tela-subtitulo {
-    color: var(--cinza);
-    font-size: 0.9rem;
-    margin-bottom: 24px;
+    color: var(--ouro);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-top: 11px;
+    margin-bottom: 26px;
   }
 
   .temas-lista { display: flex; flex-direction: column; gap: 12px; }
@@ -1930,7 +1937,7 @@ function abrirDisciplina(disciplinaId) {
   const disc = BANCO.disciplinas.find(d => d.id === disciplinaId);
   estadoAtual.disciplinaId = disciplinaId;
   document.getElementById('temas-titulo').textContent = disc.nome;
-  document.getElementById('temas-subtitulo').textContent = 'Selecione um tema para iniciar as questões';
+  document.getElementById('temas-subtitulo').textContent = 'Escolha o tema';
   const lista = document.getElementById('temas-lista');
   lista.innerHTML = '';
   disc.temas.forEach(t => {
