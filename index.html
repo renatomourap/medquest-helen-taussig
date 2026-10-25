@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plataforma de Questões — Medicina</title>
+<style>
+  :root {
+    --azul: #1a56a0;
+    --azul-claro: #2d7dd2;
+    --azul-fundo: #e8f0fb;
+    --verde: #1a7a4a;
+    --verde-claro: #e6f5ed;
+    --vermelho: #b91c1c;
+    --vermelho-claro: #fde8e8;
+    --cinza: #6b7280;
+    --cinza-claro: #f3f4f6;
+    --branco: #ffffff;
+    --texto: #111827;
+    --borda: #d1d5db;
+    --sombra: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f0f4f8;
+    color: var(--texto);
+    min-height: 100vh;
+  }
+
+  /* ===== TELA DE SELEÇÃO ===== */
+  #tela-selecao {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px;
+  }
+
+  .logo-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .logo-header h1 {
+    font-size: 1.8rem;
+    color: var(--azul);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .logo-header p {
+    color: var(--cinza);
+    margin-top: 6px;
+    font-size: 0.95rem;
+  }
+
+  .disciplinas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .disciplina-card {
+    background: var(--branco);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: var(--sombra);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 2px solid transparent;
+  }
+  .disciplina-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: var(--azul-claro);
+  }
+  .disciplina-card .icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+  }
+  .disciplina-card h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--azul);
+    margin-bottom: 6px;
+  }
+  .disciplina-card p {
+    font-size: 0.85rem;
+    color: var(--cinza);
+  }
+  .disciplina-card .badge {
+    display: inline-block;
+    margin-top: 12px;
+    background: var(--azul-fundo);
+    color: var(--azul);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  /* ===== TELA DE TEMAS ===== */
+  #tela-temas {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    display: none;
+  }
+
+  .voltar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--azul);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 20px;
+    transition: opacity 0.15s;
+  }
+  .voltar-btn:hover { opacity: 0.7; }
+
+  .tela-titulo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--azul);
+    margin-bottom: 6px;
+  }
+  .tela-subtitulo {
+    color: var(--cinza);
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+
+  .temas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tema-item {
+    background: var(--branco);
+    border-radius: 12px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    box-shadow: var(--sombra);
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .tema-item:hover {
+    border-color: var(--azul-claro);
+    background: var(--azul-fundo);
+  }
+  .tema-item .tema-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .tema-item .tema-info span {
+    font-size: 0.82rem;
+    color: var(--cinza);
+  }
+  .tema-item .seta {
+    color: var(--azul-claro);
+    font-size: 1.2rem;
+  }
+
+  /* ===== TELA DE QUESTÕES ===== */
+  #tela-questao {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    display: none;
+  }
+
+  .questao-header {
+    background: var(--branco);
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    box-shadow: var(--sombra);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .questao-header .info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .questao-header .disciplina-nome {
+    font-size: 0.8rem;
+    color: var(--cinza);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .questao-header .tema-nome {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--azul);
+  }
+
+  .progresso-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+  }
+  .progresso-texto {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cinza);
+  }
+  .progresso-bar-wrap {
+    width: 160px;
+    height: 6px;
+    background: var(--cinza-claro);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progresso-bar {
+    height: 100%;
+    background: var(--azul-claro);
+    border-radius: 10px;
+    transition: width 0.4s;
+  }
+
+  .questao-box {
+    background: var(--branco);
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: var(--sombra);
+    margin-bottom: 18px;
+  }
+
+  .questao-numero {
+    display: inline-block;
+    background: var(--azul);
+    color: white;
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .questao-enunciado {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--texto);
+    margin-bottom: 24px;
+  }
+
+  .alternativas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .alternativa {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 2px solid var(--borda);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--branco);
+  }
+  .alternativa:hover:not(.bloqueada) {
+    border-color: var(--azul-claro);
+    background: var(--azul-fundo);
+  }
+  .alternativa.bloqueada { cursor: default; }
+
+  .alt-letra {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 50%;
+    background: var(--cinza-claro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--cinza);
+    transition: all 0.15s;
+  }
+
+  .alt-texto {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    padding-top: 3px;
+  }
+
+  .alternativa.correta {
+    border-color: var(--verde);
+    background: var(--verde-claro);
+  }
+  .alternativa.correta .alt-letra {
+    background: var(--verde);
+    color: white;
+  }
+
+  .alternativa.errada {
+    border-color: var(--vermelho);
+    background: var(--vermelho-claro);
+  }
+  .alternativa.errada .alt-letra {
+    background: var(--vermelho);
+    color: white;
+  }
+
+  .alternativa.neutra-revelada {
+    opacity: 0.6;
+  }
+
+  /* Gabarito comentado */
+  .gabarito-box {
+    background: #f8fffe;
+    border: 2px solid #b7e4cc;
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin-top: 18px;
+    display: none;
+  }
+  .gabarito-box.visivel { display: block; }
+
+  .gabarito-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--verde);
+    margin-bottom: 14px;
+  }
+
+  .gabarito-resposta {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--texto);
+  }
+  .gabarito-resposta strong {
+    color: var(--verde);
+  }
+
+  /* Navegação */
+  .nav-questao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .btn-anterior {
+    background: var(--branco);
+    border-color: var(--borda);
+    color: var(--cinza);
+  }
+  .btn-anterior:hover:not(:disabled) {
+    border-color: var(--azul-claro);
+    color: var(--azul);
+  }
+  .btn-anterior:disabled { opacity: 0.35; cursor: default; }
+
+  .btn-proximo {
+    background: var(--azul);
+    color: white;
+  }
+  .btn-proximo:hover:not(:disabled) { background: var(--azul-claro); }
+  .btn-proximo:disabled { opacity: 0.35; cursor: default; }
+
+  .btn-encerrar {
+    background: var(--branco);
+    border-color: var(--borda);
+    color: var(--cinza);
+    font-size: 0.85rem;
+    padding: 10px 18px;
+  }
+  .btn-encerrar:hover { border-color: var(--vermelho); color: var(--vermelho); }
+
+  .miniaturas {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .mini {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 2px solid var(--borda);
+    background: var(--branco);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--cinza);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .mini:hover { border-color: var(--azul-claro); }
+  .mini.atual { border-color: var(--azul); color: var(--azul); background: var(--azul-fundo); }
+  .mini.acertou { border-color: var(--verde); background: var(--verde-claro); color: var(--verde); }
+  .mini.errou { border-color: var(--vermelho); background: var(--vermelho-claro); color: var(--vermelho); }
+
+  /* TELA RESULTADO */
+  #tela-resultado {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    display: none;
+  }
+
+  .resultado-card {
+    background: var(--branco);
+    border-radius: 16px;
+    padding: 36px;
+    text-align: center;
+    box-shadow: var(--sombra);
+  }
+
+  .resultado-emoji { font-size: 3.5rem; margin-bottom: 12px; }
+  .resultado-titulo { font-size: 1.6rem; font-weight: 800; color: var(--azul); margin-bottom: 8px; }
+  .resultado-sub { color: var(--cinza); font-size: 0.95rem; margin-bottom: 28px; }
+
+  .resultado-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .stat-num {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+  .stat-num.acertos { color: var(--verde); }
+  .stat-num.erros { color: var(--vermelho); }
+  .stat-num.total { color: var(--azul); }
+  .stat-label { font-size: 0.8rem; color: var(--cinza); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .resultado-btns {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-resultado {
+    padding: 12px 26px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .btn-reiniciar {
+    background: var(--azul);
+    color: white;
+    border-color: var(--azul);
+  }
+  .btn-reiniciar:hover { background: var(--azul-claro); }
+  .btn-menu {
+    background: var(--branco);
+    color: var(--azul);
+    border-color: var(--azul);
+  }
+  .btn-menu:hover { background: var(--azul-fundo); }
+
+  @media (max-width: 540px) {
+    .questao-box { padding: 20px 16px; }
+    .logo-header h1 { font-size: 1.4rem; }
+    .progresso-bar-wrap { width: 110px; }
+    .nav-btn { padding: 10px 16px; font-size: 0.88rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============= TELA 1: SELEÇÃO DE DISCIPLINA ============= -->
+<div id="tela-selecao">
+  <div class="logo-header">
+    <h1>🩺 Plataforma de Questões</h1>
+    <p>Residência Médica — Selecione uma disciplina para começar</p>
+  </div>
+  <div class="disciplinas-grid" id="disciplinas-grid"></div>
+</div>
+
+<!-- ============= TELA 2: SELEÇÃO DE TEMA ============= -->
+<div id="tela-temas">
+  <button class="voltar-btn" onclick="voltarSelecao()">← Voltar</button>
+  <div class="tela-titulo" id="temas-titulo"></div>
+  <div class="tela-subtitulo" id="temas-subtitulo"></div>
+  <div class="temas-lista" id="temas-lista"></div>
+</div>
+
+<!-- ============= TELA 3: QUESTÃO ============= -->
+<div id="tela-questao">
+  <div class="questao-header">
+    <div class="info">
+      <span class="disciplina-nome" id="q-disciplina"></span>
+      <span class="tema-nome" id="q-tema"></span>
+    </div>
+    <div class="progresso-container">
+      <span class="progresso-texto" id="progresso-txt"></span>
+      <div class="progresso-bar-wrap">
+        <div class="progresso-bar" id="progresso-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="miniaturas" id="miniaturas"></div>
+
+  <div style="margin-top:18px;">
+    <div class="questao-box">
+      <div class="questao-numero" id="q-numero"></div>
+      <div class="questao-enunciado" id="q-enunciado"></div>
+      <div class="alternativas" id="alternativas"></div>
+    </div>
+
+    <div class="gabarito-box" id="gabarito-box">
+      <div class="gabarito-titulo">📋 Gabarito Comentado</div>
+      <div class="gabarito-resposta" id="gabarito-texto"></div>
+    </div>
+  </div>
+
+  <div class="nav-questao" style="margin-top:18px;">
+    <button class="nav-btn btn-anterior" id="btn-anterior" onclick="navegarQuestao(-1)">← Anterior</button>
+    <button class="nav-btn btn-encerrar" onclick="encerrarSessao()">Encerrar</button>
+    <button class="nav-btn btn-proximo" id="btn-proximo" onclick="navegarQuestao(1)">Próxima →</button>
+  </div>
+</div>
+
+<!-- ============= TELA 4: RESULTADO ============= -->
+<div id="tela-resultado">
+  <div class="resultado-card">
+    <div class="resultado-emoji" id="resultado-emoji"></div>
+    <div class="resultado-titulo">Sessão Encerrada!</div>
+    <div class="resultado-sub" id="resultado-sub"></div>
+    <div class="resultado-stats">
+      <div class="stat-item">
+        <div class="stat-num total" id="stat-total"></div>
+        <div class="stat-label">Questões</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num acertos" id="stat-acertos"></div>
+        <div class="stat-label">Acertos</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num erros" id="stat-erros"></div>
+        <div class="stat-label">Erros</div>
+      </div>
+    </div>
+    <div class="resultado-btns">
+      <button class="btn-resultado btn-reiniciar" onclick="reiniciarTema()">Refazer</button>
+      <button class="btn-resultado btn-menu" onclick="voltarSelecao()">Menu Principal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== BANCO DE DADOS ====================
+const BANCO = {
+  disciplinas: [
+    {
+      id: "imunologia",
+      nome: "Imunologia",
+      icon: "🧬",
+      descricao: "Imunidade, imunodeficiências e resposta imune",
+      temas: [
+        {
+          id: "imunodeficiencias-primarias",
+          nome: "Imunodeficiências Primárias",
+          questoes: [
+            {
+              id: 1,
+              hotpoint: "Hot Point 1",
+              enunciado: "Uma criança com pneumonias bacterianas recorrentes apresenta níveis muito reduzidos de IgG, IgM e IgA. A citometria evidencia poucas células B periféricas, mas contagens preservadas de linfócitos T. Seus linfonodos têm centros germinativos pouco desenvolvidos, enquanto a resposta celular a mitógenos permanece conservada. Considerando maturação linfoide e mecanismos efetores, identifique o defeito primário mais provável.",
+              alternativas: [
+                { letra: "A", texto: "Falha de BTK no sinal do pré-BCR e maturação de células B." },
+                { letra: "B", texto: "Mutação em CIITA que bloqueia MHC II e seleção tímica de CD4+." },
+                { letra: "C", texto: "Defeito em CD40L que impede troca de classe e ativação macrofágica." },
+                { letra: "D", texto: "Perda de TAP1 que reduz a apresentação em MHC I para células CD8+." }
+              ],
+              correta: "A",
+              comentario: "<strong>Resposta: A</strong><br><br>A ausência de células B maduras com T preservadas e queda global das imunoglobulinas sugere bloqueio de pré-BCR por BTK — padrão clássico da <strong>Agamaglobulinemia de Bruton</strong>.<br><br>• <strong>B incorreta:</strong> CIITA/MHC II compromete CD4+, não o bloqueio pré-B.<br>• <strong>C incorreta:</strong> CD40L reduz troca de classe, mas não costuma abolir células B maduras.<br>• <strong>D incorreta:</strong> TAP1 afeta MHC I/CD8+, não o bloqueio pré-B."
+            },
+            {
+              id: 2,
+              hotpoint: "Hot Point 1",
+              enunciado: "Um recém-nascido tem valores muito baixos de círculos de excisão do receptor de células T (TRECs) no rastreio. Esse achado sugere escassa produção de linfócitos T recém-formados, mas não especifica o gene nem a gravidade funcional. Sua investigação deverá diferenciar falhas de desenvolvimento tímico, citocinas e recombinação V(D)J. Qual conduta interpretativa é biologicamente mais apropriada?",
+              alternativas: [
+                { letra: "A", texto: "Inferir deficiência exclusiva de IgA e solicitar apenas dosagem sérica de IgA." },
+                { letra: "B", texto: "Confirmar linfócitos T e B por citometria e investigar a função T." },
+                { letra: "C", texto: "Considerar CD40L mutado como causa necessária de TRECs indetectáveis." },
+                { letra: "D", texto: "Excluir SCID se houver células B, pois TRECs medem rearranjo do BCR." }
+              ],
+              correta: "B",
+              comentario: "<strong>Resposta: B</strong><br><br>TRECs refletem o rearranjo do TCR e o desenvolvimento tímico. A confirmação por imunofenotipagem e avaliação da função T é essencial para direcionar o diagnóstico.<br><br>• <strong>A incorreta:</strong> IgA não explica TRECs baixos — são marcadores de linhagens distintas.<br>• <strong>C incorreta:</strong> CD40L afeta a ajuda T à célula B, mas não define TRECs baixos.<br>• <strong>D incorreta:</strong> A presença de células B não exclui SCID com deficiência de células T — TRECs medem rearranjo do TCR, não do BCR."
+            },
+            {
+              id: 3,
+              hotpoint: "Hot Point 2",
+              enunciado: "Uma criança desenvolve abscessos profundos e infecções recorrentes por Staphylococcus e Aspergillus. Neutrófilos fagocitam as partículas, mas apresentam falha na geração de espécies reativas de oxigênio. A persistência de microrganismos leva ao recrutamento crônico de macrófagos e formação de granulomas. Qual alteração conecta o defeito bioquímico ao quadro observado?",
+              alternativas: [
+                { letra: "A", texto: "Deficiência de MyD88 com menor ativação de NF-κB por TLR." },
+                { letra: "B", texto: "Perda de sialil Lewis X que interrompe o rolamento neutrofílico." },
+                { letra: "C", texto: "Mutação de PHOX com redução da produção de superóxido." },
+                { letra: "D", texto: "Deficiência de IL-12Rβ1 que restringe a resposta ao IFN-γ." }
+              ],
+              correta: "C",
+              comentario: "<strong>Resposta: C</strong><br><br>O quadro descreve a <strong>Doença Granulomatosa Crônica (DGC)</strong>. O complexo NADPH oxidase (PHOX) produz superóxido indispensável à atividade microbicida oxidativa. Sem ele, o neutrófilo fagocita mas não elimina o microrganismo, gerando inflamação crônica e granulomas.<br><br>• <strong>A incorreta:</strong> MyD88 altera o sinal inflamatório por TLR, mas não explica falha na morte oxidativa.<br>• <strong>B incorreta:</strong> O defeito de sialil Lewis X (LAD-2) limita a migração do neutrófilo ao tecido, não a produção de superóxido.<br>• <strong>D incorreta:</strong> IL-12Rβ1 prejudica a ativação antimicobacteriana via IFN-γ — um mecanismo diferente."
+            },
+            {
+              id: 4,
+              hotpoint: "Hot Point 2",
+              enunciado: "Um lactente apresenta leucocitose persistente, atraso da queda do cordão umbilical e infecções cutâneas com pouco pus. Seus neutrófilos circulam em grande quantidade, mas alcançam mal os focos infecciosos. A citometria mostra ausência de CD18, componente compartilhado das integrinas β2. Qual fase do recrutamento celular está diretamente comprometida?",
+              alternativas: [
+                { letra: "A", texto: "Reconhecimento de RNA viral de dupla fita por TLR3 endossomal." },
+                { letra: "B", texto: "Produção de espécies reativas de oxigênio no fagolisossomo." },
+                { letra: "C", texto: "Rolamento inicial pela ligação de sialil Lewis X às selectinas." },
+                { letra: "D", texto: "Adesão firme ao endotélio dependente de integrinas β2." }
+              ],
+              correta: "D",
+              comentario: "<strong>Resposta: D</strong><br><br>O quadro descreve a <strong>LAD-1 (Deficiência de Adesão Leucocitária tipo 1)</strong>. CD18 integra LFA-1 e outras integrinas β2, necessárias à adesão firme do neutrófilo ao endotélio e à migração transendotelial. Sem CD18, o neutrófilo fica preso na circulação (leucocitose) e não chega ao tecido infectado.<br><br>• <strong>A incorreta:</strong> TLR3 é antiviral e endossomal — não relacionado à adesão celular.<br>• <strong>B incorreta:</strong> A produção de ERO no fagolisossomo é comprometida na DGC (PHOX), não na LAD.<br>• <strong>C incorreta:</strong> O rolamento por selectinas é tipicamente afetado na LAD-2 (defeito de fucosilação/sialil Lewis X), não na LAD-1."
+            },
+            {
+              id: 5,
+              hotpoint: "Hot Point 3",
+              enunciado: "Um menino tem infecções respiratórias recorrentes com IgM relativamente preservada, mas IgG e IgA baixas. Apresenta também infecção por Pneumocystis, indicando disfunção além da síntese de anticorpos. O defeito molecular impede a colaboração entre linfócitos T auxiliares e células B e também altera a ativação de fagócitos. Qual interação está mais diretamente envolvida?",
+              alternativas: [
+                { letra: "A", texto: "CD40L–CD40 na ajuda T à B e ativação de fagócitos." },
+                { letra: "B", texto: "AID–UNG na reparação do DNA e na atividade citotóxica de NK." },
+                { letra: "C", texto: "BTK–pré-BCR no rearranjo V(D)J e sinalização de IL-15." },
+                { letra: "D", texto: "IL-7–IL-7R na ativação direta de macrófagos e troca de classe." }
+              ],
+              correta: "A",
+              comentario: "<strong>Resposta: A</strong><br><br>O quadro descreve a <strong>Síndrome de Hiper-IgM por defeito de CD40L</strong>. CD40L expresso nas células T auxiliares liga-se ao CD40 de células B e fagócitos. A falha impede a troca de classe (por isso IgM preservada e IgG/IgA baixas) e compromete a imunidade celular, favorecendo infecções por oportunistas como Pneumocystis.<br><br>• <strong>B incorreta:</strong> AID/UNG afetam anticorpos por defeito intrínseco da célula B, sem causar defeito macrofágico primário nem infecção oportunista grave.<br>• <strong>C incorreta:</strong> BTK atua na maturação de células B (pré-BCR), não na interação T-B nem na ativação macrofágica.<br>• <strong>D incorreta:</strong> IL-7 é linfopoética — promove desenvolvimento T, não ativa macrófagos diretamente."
+            },
+            {
+              id: 6,
+              hotpoint: "Hot Point 3",
+              enunciado: "Uma adolescente tem infecções por pneumococos, imunoglobulinas séricas reduzidas e resposta pobre a vacinas. A citometria identifica células B maduras, mas a diferenciação em B de memória e plasmócitos é deficiente. A investigação considera defeitos intrínsecos das células B e falhas de auxílio por células T foliculares. Qual entidade é compatível com esse conjunto de mecanismos?",
+              alternativas: [
+                { letra: "A", texto: "Agamaglobulinemia de Bruton com bloqueio pré-B completo." },
+                { letra: "B", texto: "Imunodeficiência comum variável com diferenciação B ineficaz." },
+                { letra: "C", texto: "Deficiência isolada de perforina com citotoxicidade NK alterada." },
+                { letra: "D", texto: "SCID por IL2RG com ausência obrigatória de células B maduras." }
+              ],
+              correta: "B",
+              comentario: "<strong>Resposta: B</strong><br><br>O quadro é clássico de <strong>CVID (Imunodeficiência Comum Variável)</strong>. As células B maduras estão presentes, mas não conseguem se diferenciar em plasmócitos ou células de memória eficientes — resultando em hipogamaglobulinemia e má resposta a vacinas. É a imunodeficiência primária sintomática mais prevalente em adultos jovens.<br><br>• <strong>A incorreta:</strong> Bruton cursa com poucas ou nenhuma célula B periférica madura (bloqueio no estágio pré-B).<br>• <strong>C incorreta:</strong> Deficiência de perforina afeta citotoxicidade (CTL/NK), sem relação com hipogamaglobulinemia.<br>• <strong>D incorreta:</strong> SCID por IL2RG pode ter células B presentes, mas o fenótipo dominante é T−/NK−, com defeito T profundo — diferente do quadro descrito."
+            },
+            {
+              id: 7,
+              hotpoint: "Hot Point 4",
+              enunciado: "Um lactente com infecções oportunistas apresenta células T e NK muito reduzidas, porém linfócitos B numericamente presentes. A avaliação funcional mostra resposta deficiente a citocinas que compartilham uma subunidade receptora. A perda de sinais de IL-7 afeta timócitos, enquanto a falha de IL-15 prejudica a linhagem NK. Qual mutação explica a combinação e o defeito humoral secundário?",
+              alternativas: [
+                { letra: "A", texto: "IL7RA, que interrompe igualmente IL-7 e IL-15 em T e NK." },
+                { letra: "B", texto: "ADA, que altera seletivamente a troca de classe de células B." },
+                { letra: "C", texto: "IL2RG, que bloqueia sinais γc e reduz a ajuda de células T." },
+                { letra: "D", texto: "RAG2, que mantém o desenvolvimento T, mas suprime apenas NK." }
+              ],
+              correta: "C",
+              comentario: "<strong>Resposta: C</strong><br><br>O fenótipo T− B+ NK− descreve a <strong>SCID ligada ao X por mutação em IL2RG</strong>. IL2RG codifica a cadeia γ comum (γc) compartilhada pelos receptores de IL-2, IL-4, IL-7, IL-9, IL-15 e IL-21. A falta de sinal de IL-7 impede maturação T; a falta de IL-15 impede desenvolvimento NK. As células B ficam numericamente presentes, mas sem ajuda T, a resposta humoral é ineficaz.<br><br>• <strong>A incorreta:</strong> IL7RA afeta só a via de IL-7, preservando o sinal de IL-15 — as NK se desenvolvem normalmente (T− B+ NK+).<br>• <strong>B incorreta:</strong> ADA causa toxicidade purínica ampla que afeta T, B e NK — perfil diferente.<br>• <strong>D incorreta:</strong> RAG2 compromete a recombinação V(D)J de T e B (T− B−), tipicamente com NK preservadas."
+            },
+            {
+              id: 8,
+              hotpoint: "Hot Point 4",
+              enunciado: "Um lactente apresenta linfopenia progressiva envolvendo linfócitos T, B e NK e infecções graves. A análise metabólica demonstra acúmulo de desoxiadenosina e dATP, compostos tóxicos para precursores linfoides. A inibição da síntese de DNA impede expansão e maturação de várias linhagens. Qual deficiência enzimática explica diretamente o mecanismo?",
+              alternativas: [
+                { letra: "A", texto: "PNP com acúmulo predominante de desoxiguanosina em linfócitos." },
+                { letra: "B", texto: "PHOX com ausência do superóxido necessário à morte microbiana." },
+                { letra: "C", texto: "ARTEMIS com falha de abertura dos grampos na recombinação V(D)J." },
+                { letra: "D", texto: "ADA com acúmulo de metabólitos purínicos tóxicos." }
+              ],
+              correta: "D",
+              comentario: "<strong>Resposta: D</strong><br><br>A <strong>deficiência de ADA (adenosina desaminase)</strong> causa acúmulo de desoxiadenosina e dATP — metabólitos diretamente tóxicos para linfócitos em desenvolvimento. A inibição da ribonucleotídeo redutase impede a síntese de DNA e o desenvolvimento de T, B e NK. É a forma mais comum de SCID autossômica recessiva.<br><br>• <strong>A incorreta:</strong> Deficiência de PNP também causa SCID por acúmulo de metabólitos purínicos, mas o substrato predominante é desoxiguanosina, com efeito predominantemente na linhagem T.<br>• <strong>B incorreta:</strong> PHOX atua em fagócitos (DGC) — não em linfócitos em desenvolvimento.<br>• <strong>C incorreta:</strong> ARTEMIS atua no reparo do DNA durante a recombinação V(D)J — causa T− B−, mas o mecanismo é de quebra no DNA, não acúmulo de metabólitos purínicos."
+            },
+            {
+              id: 9,
+              hotpoint: "Hot Point 5",
+              enunciado: "Duas pessoas com variantes no gene RAG1 exibem fenótipos diferentes: uma apresenta SCID com poucos linfócitos T e B; outra apresenta inflamação, eczema e células T oligoclonais. Ambas dependem da recombinação V(D)J para formar receptores antigênicos funcionais. A intensidade do defeito permite ou impede a formação de repertórios parcialmente funcionais. Que conceito genético integra os dois quadros?",
+              alternativas: [
+                { letra: "A", texto: "A atividade residual de RAG1 modifica o fenótipo." },
+                { letra: "B", texto: "Variantes de RAG1 afetam apenas a troca de isótipos em plasmócitos." },
+                { letra: "C", texto: "RAG1 atua apenas nos timócitos, sem repercussão sobre células B." },
+                { letra: "D", texto: "Perda parcial de RAG1 sempre impede qualquer autorreatividade." }
+              ],
+              correta: "A",
+              comentario: "<strong>Resposta: A</strong><br><br>O conceito é o de <strong>variantes hipomórficas</strong>. Mutações que abolem completamente RAG1 bloqueiam todo o rearranjo V(D)J → SCID clássica (T− B−). Variantes hipomórficas mantêm atividade enzimática residual → repertório T/B restrito, que pode escaper dos mecanismos de seleção e gerar autorreatividade e inflamação, como na <strong>Síndrome de Omenn</strong>.<br><br>• <strong>B incorreta:</strong> RAG1 atua na recombinação V(D)J dos TCR e BCR — não na troca de isótipos, que é mediada por AID.<br>• <strong>C incorreta:</strong> RAG1 atua tanto em precursores T (timócitos) quanto em precursores B na medula óssea.<br>• <strong>D incorreta:</strong> Repertório restrito por variante hipomórfica pode gerar células autorreativas — autoimunidade é uma manifestação possível."
+            },
+            {
+              id: 10,
+              hotpoint: "Hot Point 5",
+              enunciado: "Uma criança apresenta eczema, infecções bacterianas recorrentes, trombocitopenia e plaquetas pequenas. Ao longo dos anos, ocorre piora da função dos linfócitos e redução das respostas aos antígenos polissacarídicos. A organização da sinapse imunológica e a migração leucocitária dependem da reorganização dinâmica de actina. Qual mecanismo genético é mais compatível com esse quadro multissistêmico?",
+              alternativas: [
+                { letra: "A", texto: "Deficiência de AID prejudicando apenas hipermutação e troca de classe." },
+                { letra: "B", texto: "Mutação em WASP alterando a dinâmica de actina hematopoética." },
+                { letra: "C", texto: "Perda de IFNGR1 com incapacidade específica de responder ao IFN-γ." },
+                { letra: "D", texto: "Mutação em IL7RA com ausência de NK e trombocitopenia primária." }
+              ],
+              correta: "B",
+              comentario: "<strong>Resposta: B</strong><br><br>O quadro clínico — <strong>eczema + infecções + trombocitopenia com plaquetas pequenas</strong> — é a tríade clássica da <strong>Síndrome de Wiskott-Aldrich</strong>. WASP conecta estímulos de receptores imunes ao rearranjo do citoesqueleto de actina, fundamental para a sinapse imunológica e a migração de leucócitos. Plaquetas pequenas ocorrem porque WASP também atua em megacariócitos.<br><br>• <strong>A incorreta:</strong> Deficiência de AID afeta apenas os anticorpos (hipermutação e troca de classe) — não causa plaquetas pequenas nem eczema.<br>• <strong>C incorreta:</strong> Perda de IFNGR1 gera suscetibilidade a micobactérias (MSMD) — fenótipo muito diferente.<br>• <strong>D incorreta:</strong> IL7RA reduz o número de células T e pode preservar NK, sem explicar plaquetas pequenas."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: "patologia",
+      nome: "Patologia",
+      icon: "🔬",
+      descricao: "Em breve: Inflamação, Reparo Tecidual, Neoplasias",
+      temas: []
+    },
+    {
+      id: "farmacologia",
+      nome: "Farmacologia",
+      icon: "💊",
+      descricao: "Em breve: Antibióticos, Sistema Nervoso, Cardiovascular",
+      temas: []
+    },
+    {
+      id: "microbiologia",
+      nome: "Microbiologia",
+      icon: "🦠",
+      descricao: "Em breve: Bacteriologia, Virologia, Micologia",
+      temas: []
+    },
+    {
+      id: "parasitologia",
+      nome: "Parasitologia",
+      icon: "🪱",
+      descricao: "Em breve: Protozoários, Helmintos, Artrópodes",
+      temas: []
+    }
+  ]
+};
+
+// ==================== ESTADO ====================
+let estadoAtual = {
+  disciplinaId: null,
+  temaId: null,
+  questaoIndex: 0,
+  respostas: {},   // { index: { marcada, correta } }
+  questoes: []
+};
+
+// ==================== INICIALIZAÇÃO ====================
+function init() {
+  renderDisciplinas();
+}
+
+function renderDisciplinas() {
+  const grid = document.getElementById('disciplinas-grid');
+  grid.innerHTML = '';
+  BANCO.disciplinas.forEach(d => {
+    const totalQuestoes = d.temas.reduce((s, t) => s + t.questoes.length, 0);
+    const temTemas = d.temas.length > 0;
+    const card = document.createElement('div');
+    card.className = 'disciplina-card';
+    card.innerHTML = `
+      <div class="icon">${d.icon}</div>
+      <h2>${d.nome}</h2>
+      <p>${d.descricao}</p>
+      <span class="badge">${temTemas ? totalQuestoes + ' questão' + (totalQuestoes !== 1 ? 'ões' : '') : 'Em breve'}</span>
+    `;
+    if (temTemas) {
+      card.onclick = () => abrirDisciplina(d.id);
+    } else {
+      card.style.opacity = '0.6';
+      card.style.cursor = 'not-allowed';
+    }
+    grid.appendChild(card);
+  });
+}
+
+function abrirDisciplina(disciplinaId) {
+  const disc = BANCO.disciplinas.find(d => d.id === disciplinaId);
+  estadoAtual.disciplinaId = disciplinaId;
+
+  document.getElementById('temas-titulo').textContent = disc.nome;
+  document.getElementById('temas-subtitulo').textContent = 'Selecione um tema para iniciar as questões';
+
+  const lista = document.getElementById('temas-lista');
+  lista.innerHTML = '';
+  disc.temas.forEach(t => {
+    const item = document.createElement('div');
+    item.className = 'tema-item';
+    item.innerHTML = `
+      <div class="tema-info">
+        <h3>${t.nome}</h3>
+        <span>${t.questoes.length} questão${t.questoes.length !== 1 ? 'ões' : ''} disponível${t.questoes.length !== 1 ? 'veis' : ''}</span>
+      </div>
+      <span class="seta">›</span>
+    `;
+    item.onclick = () => iniciarTema(disciplinaId, t.id);
+    lista.appendChild(item);
+  });
+
+  mostrarTela('temas');
+}
+
+function iniciarTema(disciplinaId, temaId) {
+  const disc = BANCO.disciplinas.find(d => d.id === disciplinaId);
+  const tema = disc.temas.find(t => t.id === temaId);
+
+  estadoAtual.disciplinaId = disciplinaId;
+  estadoAtual.temaId = temaId;
+  estadoAtual.questaoIndex = 0;
+  estadoAtual.respostas = {};
+  estadoAtual.questoes = tema.questoes;
+
+  document.getElementById('q-disciplina').textContent = disc.nome.toUpperCase();
+  document.getElementById('q-tema').textContent = tema.nome;
+
+  renderMiniaturas();
+  renderQuestao(0);
+  mostrarTela('questao');
+}
+
+// ==================== RENDERIZAÇÃO DE QUESTÃO ====================
+function renderQuestao(index) {
+  const q = estadoAtual.questoes[index];
+  const total = estadoAtual.questoes.length;
+  estadoAtual.questaoIndex = index;
+
+  // Progresso
+  const pct = Math.round(((index + 1) / total) * 100);
+  document.getElementById('progresso-txt').textContent = `${index + 1} / ${total}`;
+  document.getElementById('progresso-bar').style.width = pct + '%';
+
+  // Número e enunciado
+  document.getElementById('q-numero').textContent = `Questão ${index + 1} • ${q.hotpoint}`;
+  document.getElementById('q-enunciado').textContent = q.enunciado;
+
+  // Alternativas
+  const altContainer = document.getElementById('alternativas');
+  altContainer.innerHTML = '';
+  const resp = estadoAtual.respostas[index];
+
+  q.alternativas.forEach(alt => {
+    const div = document.createElement('div');
+    div.className = 'alternativa';
+
+    if (resp) {
+      div.classList.add('bloqueada');
+      if (alt.letra === q.correta) {
+        div.classList.add('correta');
+      } else if (alt.letra === resp.marcada) {
+        div.classList.add('errada');
+      } else {
+        div.classList.add('neutra-revelada');
+      }
+    } else {
+      div.onclick = () => responder(index, alt.letra);
+    }
+
+    div.innerHTML = `
+      <div class="alt-letra">${alt.letra}</div>
+      <div class="alt-texto">${alt.texto}</div>
+    `;
+    altContainer.appendChild(div);
+  });
+
+  // Gabarito
+  const gabBox = document.getElementById('gabarito-box');
+  const gabTxt = document.getElementById('gabarito-texto');
+  if (resp) {
+    gabTxt.innerHTML = q.comentario;
+    gabBox.classList.add('visivel');
+  } else {
+    gabBox.classList.remove('visivel');
+    gabTxt.innerHTML = '';
+  }
+
+  // Botões nav
+  document.getElementById('btn-anterior').disabled = (index === 0);
+  document.getElementById('btn-proximo').disabled = (index === total - 1);
+
+  // Miniatura ativa
+  atualizarMiniaturas();
+}
+
+function responder(index, letraMarcada) {
+  const q = estadoAtual.questoes[index];
+  const acertou = letraMarcada === q.correta;
+  estadoAtual.respostas[index] = { marcada: letraMarcada, acertou };
+  renderQuestao(index);
+}
+
+function navegarQuestao(delta) {
+  const novoIndex = estadoAtual.questaoIndex + delta;
+  const total = estadoAtual.questoes.length;
+  if (novoIndex >= 0 && novoIndex < total) {
+    renderQuestao(novoIndex);
+  }
+}
+
+// ==================== MINIATURAS ====================
+function renderMiniaturas() {
+  const cont = document.getElementById('miniaturas');
+  cont.innerHTML = '';
+  estadoAtual.questoes.forEach((_, i) => {
+    const m = document.createElement('div');
+    m.className = 'mini';
+    m.textContent = i + 1;
+    m.id = `mini-${i}`;
+    m.onclick = () => renderQuestao(i);
+    cont.appendChild(m);
+  });
+}
+
+function atualizarMiniaturas() {
+  estadoAtual.questoes.forEach((_, i) => {
+    const m = document.getElementById(`mini-${i}`);
+    if (!m) return;
+    m.className = 'mini';
+    const resp = estadoAtual.respostas[i];
+    if (i === estadoAtual.questaoIndex) m.classList.add('atual');
+    if (resp) {
+      m.classList.add(resp.acertou ? 'acertou' : 'errou');
+    }
+  });
+}
+
+// ==================== ENCERRAR ====================
+function encerrarSessao() {
+  const total = estadoAtual.questoes.length;
+  const respondidas = Object.keys(estadoAtual.respostas).length;
+  const acertos = Object.values(estadoAtual.respostas).filter(r => r.acertou).length;
+  const erros = respondidas - acertos;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-acertos').textContent = acertos;
+  document.getElementById('stat-erros').textContent = erros;
+
+  const pct = respondidas > 0 ? Math.round((acertos / respondidas) * 100) : 0;
+  let emoji = '😊';
+  let msg = `Você respondeu ${respondidas} de ${total} questões. Aproveitamento: ${pct}%`;
+  if (pct >= 80) { emoji = '🏆'; }
+  else if (pct >= 60) { emoji = '👍'; }
+  else if (pct >= 40) { emoji = '📚'; }
+  else { emoji = '💪'; }
+
+  document.getElementById('resultado-emoji').textContent = emoji;
+  document.getElementById('resultado-sub').textContent = msg;
+
+  mostrarTela('resultado');
+}
+
+function reiniciarTema() {
+  iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId);
+}
+
+function voltarSelecao() {
+  mostrarTela('selecao');
+  renderDisciplinas();
+}
+
+// ==================== CONTROLE DE TELAS ====================
+function mostrarTela(nome) {
+  document.getElementById('tela-selecao').style.display = nome === 'selecao' ? 'block' : 'none';
+  document.getElementById('tela-temas').style.display = nome === 'temas' ? 'block' : 'none';
+  document.getElementById('tela-questao').style.display = nome === 'questao' ? 'block' : 'none';
+  document.getElementById('tela-resultado').style.display = nome === 'resultado' ? 'block' : 'none';
+}
+
+init();
+</script>
+</body>
+</html>
