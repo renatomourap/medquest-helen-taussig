@@ -84,6 +84,11 @@
     overflow: visible;
   }
 
+  /* a capa serve a quem está deslogado (Entrar / Criar conta) e a quem já está logado (Acessar plataforma) */
+  #tela-login .so-logado { display: none; }
+  #tela-login.logado .so-logado { display: inline; }
+  #tela-login.logado .so-deslogado { display: none; }
+
   /* ───────── FOTO ───────── */
   .lp-photo {
     position: absolute;
@@ -1432,11 +1437,11 @@
   </div>
 
   <!-- Entrar -->
-  <button class="lp-entrar" onclick="abrirModalLogin('login')">
+  <button class="lp-entrar" onclick="entrarOuAcessar('login')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
     </svg>
-    Entrar
+    <span class="so-deslogado">Entrar</span><span class="so-logado">Acessar plataforma</span>
   </button>
 
   <!-- Tagline -->
@@ -1453,11 +1458,14 @@
   <p class="lp-desc">Um banco de questões médicas de alto nível, com gabarito <br>comentado, explicações detalhadas e foco nos mecanismos <br>que realmente importam.</p>
 
   <!-- CTA -->
-  <button class="lp-cta" onclick="abrirModalLogin('cadastro')">
-    <svg class="lp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <button class="lp-cta" onclick="entrarOuAcessar('cadastro')">
+    <svg class="lp-ico so-deslogado" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
     </svg>
-    Criar conta gratuita
+    <svg class="lp-ico so-logado" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </svg>
+    <span class="so-deslogado">Criar conta gratuita</span><span class="so-logado">Acessar a plataforma</span>
     <svg class="lp-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
     </svg>
@@ -1498,13 +1506,16 @@
   <!-- Banner inferior -->
   <div class="lp-banner">
     <div class="lp-lock">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="so-deslogado" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      <svg class="so-logado" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>
       </svg>
     </div>
     <div class="lp-banner-body">
       <div class="lp-banner-head">
-        <span>Após o seu login, você terá acesso a:</span>
+        <span><span class="so-deslogado">Após o seu login, você terá acesso a:</span><span class="so-logado">Você tem acesso a:</span></span>
         <i></i>
       </div>
       <div class="lp-banner-items">
@@ -2155,13 +2166,27 @@ function mostrarPerfil(opcoes = {}) {
   window.scrollTo(0, 0);
 }
 
-// clique no logo: volta à página inicial do app (seleção de disciplinas), sem sair da conta
+// clique no logo: abre a capa (página inicial do site) sem sair da conta
 function irParaInicio() {
   if (!usuarioAtual || !perfilAtual) return;
   fecharCobranca();
   esconderApp();
-  mostrarTela('selecao');
+  document.getElementById('app-header').style.display = 'none';
+  const capa = document.getElementById('tela-login');
+  capa.classList.add('logado', 'visivel');
   window.scrollTo(0, 0);
+}
+
+// na capa: quem já está logado volta direto à plataforma; quem não está, abre o login/cadastro
+function entrarOuAcessar(modo) {
+  if (usuarioAtual && perfilAtual) {
+    document.getElementById('app-header').style.display = 'flex';
+    atualizarCabecalho();
+    mostrarApp();
+    window.scrollTo(0, 0);
+    return;
+  }
+  abrirModalLogin(modo);
 }
 
 function voltarDoPerfil() {
@@ -2424,6 +2449,7 @@ async function fazerLogout() {
 // ==================== NAVEGAÇÃO DE TELAS ====================
 function mostrarTelaLogin() {
   document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('tela-login').classList.remove('logado');
   document.getElementById('tela-login').classList.add('visivel');
   document.getElementById('tela-aguardando').style.display = 'none';
   esconderApp();
@@ -2438,7 +2464,7 @@ function mostrarTelaAguardando() {
 
 function mostrarApp() {
   document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('tela-login').classList.remove('visivel');
+  document.getElementById('tela-login').classList.remove('visivel', 'logado');
   document.getElementById('tela-aguardando').style.display = 'none';
   // Mostra botão admin se for administrador
   if (usuarioAtual && perfilAtual && perfilAtual.admin) {
