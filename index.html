@@ -615,7 +615,16 @@
     top: 0;
     z-index: 50;
   }
-  .app-header .logo { display: flex; align-items: center; gap: 11px; }
+  .app-header .logo {
+    display: flex; align-items: center; gap: 11px;
+    background: none; border: none; padding: 4px 8px 4px 0;
+    color: inherit; font: inherit; text-align: left;
+    cursor: pointer; border-radius: 10px;
+    transition: opacity 0.15s;
+  }
+  .app-header .logo:hover { opacity: 0.85; }
+  .app-header .logo:hover img { filter: drop-shadow(0 0 7px rgba(245,207,114,0.45)); }
+  .app-header .logo:focus-visible { outline: 2px solid var(--ouro); outline-offset: 3px; }
   .app-header .logo img { width: 26px; height: 37px; object-fit: contain; flex: none; }
   .app-header .logo-txt { line-height: 1.15; }
   .app-header .logo-txt b {
@@ -1630,10 +1639,10 @@
 
 <!-- HEADER (aparece quando logado) -->
 <div id="app-header" style="display:none;" class="app-header">
-  <div class="logo">
+  <button type="button" class="logo" onclick="irParaInicio()" title="Página inicial" aria-label="Ir para a página inicial">
     <img src="assets/heart.png" alt="">
     <div class="logo-txt"><b>MedQuest</b><small>HELLEN TAUSSIG</small></div>
-  </div>
+  </button>
   <div class="user-info">
     <button class="btn-admin" id="btn-admin" style="display:none;" onclick="mostrarAdmin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Admin</button>
     <button class="conta-btn" onclick="mostrarPerfil()" title="Minha conta" aria-label="Minha conta">
@@ -2143,6 +2152,15 @@ function mostrarPerfil(opcoes = {}) {
   document.getElementById('app-header').style.display = perfilObrigatorio ? 'none' : 'flex';
   preencherPerfil();
   document.getElementById('tela-perfil').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+// clique no logo: volta à página inicial do app (seleção de disciplinas), sem sair da conta
+function irParaInicio() {
+  if (!usuarioAtual || !perfilAtual) return;
+  fecharCobranca();
+  esconderApp();
+  mostrarTela('selecao');
   window.scrollTo(0, 0);
 }
 
