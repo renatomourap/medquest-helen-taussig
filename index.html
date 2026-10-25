@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,700&family=Parisienne&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --azul: #1a56a0;
@@ -34,326 +34,449 @@
     min-height: 100vh;
   }
 
-  /* ===== LANDING PAGE DARK ===== */
+  /* ===================================================================
+     LANDING PAGE — canvas proporcional 1536 x 1024 (3:2)
+     Todas as medidas em % do palco ou em em (1em = 1,0417% da largura)
+     =================================================================== */
   #tela-login {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background: #0d0d0d;
-    color: #f0e6d3;
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  /* ── NAV ── */
-  .lp-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 60px;
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    z-index: 10;
-  }
-  .lp-nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .lp-nav-brand .heart-icon {
-    width: 36px; height: 36px;
-    filter: drop-shadow(0 0 8px rgba(201,168,76,0.6));
-  }
-  .lp-nav-brand .brand-text { line-height: 1.1; }
-  .lp-nav-brand .brand-name {
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    color: #c9a84c;
-    text-transform: uppercase;
-  }
-  .lp-nav-brand .brand-sub {
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    color: #8a7a5a;
-    text-transform: uppercase;
-  }
-  .lp-nav-actions { display: flex; gap: 12px; align-items: center; }
-  .lp-btn-outline {
-    padding: 9px 22px;
-    border: 1.5px solid #c9a84c;
-    border-radius: 6px;
-    color: #e8cf7e;
-    font-size: 0.85rem;
-    font-weight: 600;
-    background: rgba(13,13,13,0.7);
-    backdrop-filter: blur(6px);
-    cursor: pointer;
-    letter-spacing: 0.05em;
-    transition: all 0.2s;
-  }
-  .lp-btn-outline:hover { background: rgba(201,168,76,0.18); color: #f0e6d3; }
-  .lp-btn-gold {
-    padding: 9px 22px;
-    border: none;
-    border-radius: 6px;
-    background: #c9a84c;
-    color: #0d0d0d;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 0.05em;
-    transition: all 0.2s;
-  }
-  .lp-btn-gold:hover { background: #dfc05e; }
-
-  /* ── HERO ── */
-  .lp-hero {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 100vh;
-    position: relative;
-  }
-  .lp-hero-left {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 140px 60px 80px;
-    position: relative;
-    z-index: 2;
-  }
-  .lp-hero-right {
-    position: relative;
-    overflow: hidden;
-  }
-  .lp-hero-right::before {
-    content: '';
-    position: absolute;
+    display: none;
+    position: fixed;
     inset: 0;
     background:
-      linear-gradient(to right, #0d0d0d 0%, rgba(13,13,13,0.75) 18%, transparent 55%),
-      linear-gradient(to bottom, rgba(13,13,13,0.55) 0%, transparent 25%, transparent 70%, #0d0d0d 100%);
-    z-index: 1;
+      radial-gradient(52% 50% at 85% 44%, rgba(176, 98, 54, 0.34) 0%, transparent 64%),
+      radial-gradient(40% 38% at 70% 88%, rgba(150, 95, 45, 0.13) 0%, transparent 70%),
+      radial-gradient(68% 58% at 12% 18%, rgba(18, 34, 56, 0.52) 0%, transparent 65%),
+      linear-gradient(160deg, #00070f 0%, #000b16 48%, #000810 100%);
+    color: #fff;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
   }
-  .lp-hero-img {
-    width: 100%;
-    height: 100%;
+  #tela-login.visivel { display: flex; }
+
+  /* Palco: mantém SEMPRE a proporção 3:2 da arte, centralizado */
+  .lp-stage {
+    position: relative;
+    width: min(100vw, 150vh);
+    height: min(66.6667vw, 100vh);
+    font-size: min(1.0417vw, 1.5625vh);
+    overflow: visible;
+  }
+
+  /* ───────── FOTO ───────── */
+  .lp-photo {
+    position: absolute;
+    left: 45.57%;
+    top: 0;
+    width: 31.64%;
+    height: 57.81%;
     object-fit: cover;
-    object-position: top center;
-    filter: sepia(55%) saturate(65%) contrast(1.05) brightness(0.72);
+    object-position: center top;
+    -webkit-mask-image:
+      linear-gradient(to right, transparent 0%, #000 14%, #000 89%, transparent 100%),
+      linear-gradient(to bottom, #000 0%, #000 68%, transparent 99%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to right, transparent 0%, #000 14%, #000 89%, transparent 100%),
+      linear-gradient(to bottom, #000 0%, #000 68%, transparent 99%);
+    mask-composite: intersect;
+    pointer-events: none;
   }
 
-  .lp-tagline {
-    font-size: 0.72rem;
-    letter-spacing: 0.35em;
-    color: #c9a84c;
-    text-transform: uppercase;
-    margin-bottom: 28px;
-    font-weight: 500;
+  /* ───────── LOGO ───────── */
+  .lp-logo {
+    position: absolute;
+    left: 3.58%;
+    top: 1.95%;
+    display: flex;
+    align-items: center;
+    gap: 1.95em;
   }
-  .lp-tagline span { margin: 0 10px; opacity: 0.5; }
-
-  .lp-hero-title {
+  .lp-logo-heart {
+    width: 5.75em;
+    height: 8.19em;
+    flex: none;
+    object-fit: contain;
+    filter: drop-shadow(0 0 1.1em rgba(245,207,114,0.28));
+  }
+  .lp-logo-name {
     font-family: 'Playfair Display', Georgia, serif;
-    font-size: clamp(2rem, 3.5vw, 3rem);
-    line-height: 1.2;
-    margin-bottom: 24px;
-    color: #f0e6d3;
+    font-size: 3.45em;
+    font-weight: 500;
+    line-height: 1;
+    color: #fff;
+    letter-spacing: -0.005em;
   }
-  .lp-hero-title em {
-    font-style: italic;
-    color: #c9a84c;
+  .lp-logo-sub {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.62em;
+    font-weight: 500;
+    color: #f5cf72;
+    letter-spacing: 0.205em;
+    margin-top: 0.42em;
+    line-height: 1;
+  }
+  .lp-logo-sub2 {
+    font-size: 0.9em;
+    font-weight: 400;
+    color: #c6cad0;
+    letter-spacing: 0.175em;
+    margin-top: 1.25em;
+    line-height: 1;
   }
 
-  .lp-hero-desc {
-    font-size: 0.95rem;
-    line-height: 1.75;
-    color: #9a8a72;
-    max-width: 460px;
-    margin-bottom: 36px;
-  }
-
-  .lp-cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
-  .lp-btn-cta {
+  /* ───────── BOTÃO ENTRAR ───────── */
+  .lp-entrar {
+    position: absolute;
+    right: 2.47%;
+    top: 2.64%;
+    height: 4.98%;
+    padding: 0 1.45em;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 14px 28px;
-    background: #c9a84c;
-    color: #0d0d0d;
+    gap: 0.6em;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(226,232,240,0.55);
+    border-radius: 0.55em;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.06em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .lp-entrar svg { width: 1.2em; height: 1.2em; }
+  .lp-entrar:hover { background: rgba(245,207,114,0.12); border-color: #f5cf72; color: #f5cf72; }
+
+  /* ───────── TAGLINE ───────── */
+  .lp-tagline {
+    position: absolute;
+    left: 4.1%;
+    top: 20.6%;
+    font-size: 0.9em;
+    font-weight: 400;
+    letter-spacing: 0.295em;
+    color: #a8abb0;
+    white-space: nowrap;
+  }
+  .lp-tagline i { font-style: normal; color: #f5cf72; margin: 0 0.5em; }
+
+  /* ───────── TÍTULO ───────── */
+  .lp-title {
+    position: absolute;
+    left: 3.85%;
+    top: 24.6%;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 3.3em;
+    font-weight: 500;
+    line-height: 1.33;
+    color: #fff;
+    letter-spacing: -0.012em;
+  }
+  .lp-title b { font-weight: 500; color: #f5cf72; }
+  .lp-title em { font-style: italic; font-weight: 500; color: #f5cf72; }
+
+  /* ───────── DESCRIÇÃO ───────── */
+  .lp-desc {
+    position: absolute;
+    left: 4.1%;
+    top: 45.8%;
+    width: 40%;
+    font-size: 1.1em;
+    line-height: 1.76;
+    color: #c9ccd1;
+    font-weight: 300;
+  }
+
+  /* ───────── CTA ───────── */
+  .lp-cta {
+    position: absolute;
+    left: 4.1%;
+    top: 57.6%;
+    width: 23.2%;
+    height: 6.1%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85em;
+    background: linear-gradient(135deg, #fbd484 0%, #f0bd5c 100%);
     border: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
+    border-radius: 0.62em;
+    color: #11131a;
+    font-family: inherit;
+    font-size: 1.18em;
     font-weight: 700;
     cursor: pointer;
-    letter-spacing: 0.05em;
+    box-shadow: 0 0.5em 1.6em rgba(240,189,92,0.18);
     transition: all 0.2s;
   }
-  .lp-btn-cta:hover { background: #dfc05e; transform: translateY(-1px); }
-  .lp-btn-cta-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 28px;
-    background: transparent;
-    color: #c9a84c;
-    border: 1.5px solid rgba(201,168,76,0.4);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .lp-btn-cta-secondary:hover { border-color: #c9a84c; background: rgba(201,168,76,0.05); }
+  .lp-cta:hover { filter: brightness(1.07); transform: translateY(-1px); }
+  .lp-cta .lp-ico { width: 1.25em; height: 1.25em; flex: none; stroke: #11131a; }
+  .lp-cta .lp-seta { width: 1.15em; height: 1.15em; flex: none; stroke: #11131a; }
 
-  /* ── SIGNATURE ── */
-  .lp-signature {
-    margin-top: 48px;
-    padding-top: 32px;
-    border-top: 1px solid rgba(201,168,76,0.2);
+  /* ───────── ASSINATURA ───────── */
+  .lp-sig {
+    position: absolute;
+    left: 76.8%;
+    top: 14.6%;
+    width: 20.9%;
+    text-align: center;
   }
-  .lp-signature-name {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-style: italic;
-    font-size: 1.4rem;
-    color: #c9a84c;
-    margin-bottom: 6px;
+  .lp-sig-name {
+    font-family: 'Parisienne', 'Playfair Display', cursive;
+    font-size: 2.55em;
+    font-weight: 400;
+    color: #fdfdfd;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
   }
-  .lp-signature-quote {
-    font-size: 0.72rem;
-    letter-spacing: 0.2em;
-    color: #6a5a42;
-    text-transform: uppercase;
+  .lp-sig-quote {
+    margin-top: 1.5em;
+    font-size: 0.88em;
+    letter-spacing: 0.125em;
+    line-height: 1.85;
+    color: #b2b7bc;
+    font-weight: 300;
+  }
+  .lp-sig-rule {
+    width: 6.4em;
+    height: 1.5px;
+    background: #f5cf72;
+    margin: 1.9em auto 0;
+    opacity: 0.85;
   }
 
-  /* ── FEATURES ── */
+  /* ───────── FEATURES ───────── */
   .lp-features {
-    padding: 80px 60px;
-    background: #111;
+    position: absolute;
+    left: 48.5%;
+    top: 58.2%;
+    width: 47.9%;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
   }
-  .lp-feature {
+  .lp-feat { padding: 0 0.25em 0 1.45em; position: relative; }
+  .lp-feat:first-child { padding-left: 0; }
+  .lp-feat + .lp-feat::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.1em;
+    width: 1px;
+    height: 9.6em;
+    background: rgba(255,255,255,0.13);
+  }
+  .lp-feat-ico { width: 2.15em; height: 2.15em; color: #fff; margin-bottom: 1.1em; }
+  .lp-feat-t {
+    font-size: 1.06em;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.32;
+    margin-bottom: 0.55em;
+  }
+  .lp-feat-d {
+    font-size: 0.83em;
+    font-weight: 300;
+    color: #9ba0a6;
+    line-height: 1.58;
+  }
+
+  /* ───────── BANNER INFERIOR ───────── */
+  .lp-banner {
+    position: absolute;
+    left: 4.1%;
+    top: 76.2%;
+    width: 91.8%;
+    height: 12.2%;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 1.7em;
+    padding: 0 1.4em;
+    border: 1px solid rgba(245,207,114,0.26);
+    border-radius: 0.9em;
+    background: linear-gradient(100deg, rgba(245,207,114,0.045) 0%, rgba(255,255,255,0.015) 55%, rgba(245,207,114,0.03) 100%);
   }
-  .lp-feature-icon {
-    width: 44px; height: 44px;
-    background: rgba(201,168,76,0.1);
-    border: 1px solid rgba(201,168,76,0.3);
-    border-radius: 10px;
+  .lp-lock {
+    width: 4.5em;
+    height: 4.5em;
+    flex: none;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 42%, #1a1207 0%, #0a0a0d 100%);
+    border: 1px solid rgba(245,207,114,0.22);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
   }
-  .lp-feature-title {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #f0e6d3;
+  .lp-lock svg { width: 2.1em; height: 2.1em; color: #f5cf72; }
+  .lp-banner-body { flex: 1; min-width: 0; }
+  .lp-banner-head {
+    display: flex;
+    align-items: center;
+    gap: 1.1em;
+    margin-bottom: 1.25em;
   }
-  .lp-feature-desc {
-    font-size: 0.82rem;
-    color: #6a5a42;
-    line-height: 1.6;
-  }
-
-  /* ── BOTTOM BANNER ── */
-  .lp-banner {
-    background: #0a0a0a;
-    border-top: 1px solid rgba(201,168,76,0.15);
-    padding: 40px 60px;
-  }
-  .lp-banner-title {
-    font-size: 0.75rem;
-    letter-spacing: 0.25em;
-    color: #c9a84c;
-    text-transform: uppercase;
-    margin-bottom: 24px;
+  .lp-banner-head span {
+    font-size: 1.06em;
     font-weight: 600;
+    color: #fbe378;
+    white-space: nowrap;
   }
+  .lp-banner-head i { flex: 1; height: 1px; background: rgba(255,255,255,0.14); }
   .lp-banner-items {
-    display: flex;
-    gap: 40px;
-    flex-wrap: wrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
   }
-  .lp-banner-item {
+  .lp-bi {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
-    color: #8a7a5a;
+    gap: 0.75em;
+    padding: 0 1.3em;
+    position: relative;
   }
-  .lp-banner-item .lp-lock {
-    font-size: 1rem;
-    opacity: 0.5;
+  .lp-bi:first-child { padding-left: 0; }
+  .lp-bi + .lp-bi::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 2.5em;
+    background: rgba(255,255,255,0.13);
+  }
+  .lp-bi svg { width: 1.45em; height: 1.45em; flex: none; color: #e3e3e3; }
+  .lp-bi span {
+    font-size: 0.85em;
+    font-weight: 300;
+    color: #d7dade;
+    line-height: 1.5;
   }
 
-  /* ── MODAL DE LOGIN ── */
+  /* ───────── MOBILE: layout empilhado ───────── */
+  @media (max-width: 860px) {
+    #tela-login { position: static; display: none; overflow: auto; }
+    #tela-login.visivel { display: block; }
+    .lp-stage {
+      width: 100%;
+      height: auto;
+      min-height: 100vh;
+      font-size: 16px;
+      padding: 24px 20px 40px;
+    }
+    .lp-photo {
+      position: absolute;
+      left: auto; right: -8%;
+      top: 0;
+      width: 70%;
+      height: 42vh;
+      opacity: 0.22;
+    }
+    .lp-logo, .lp-entrar, .lp-tagline, .lp-title, .lp-desc,
+    .lp-cta, .lp-sig, .lp-features, .lp-banner {
+      position: static;
+      width: auto;
+      height: auto;
+    }
+    .lp-logo { margin-bottom: 44px; padding-right: 108px; gap: 14px; }
+    .lp-logo-heart { width: 46px; height: 66px; }
+    .lp-logo-name { font-size: 1.65rem; }
+    .lp-logo-sub { font-size: 0.85rem; letter-spacing: 0.16em; }
+    .lp-logo-sub2 { font-size: 0.58rem; letter-spacing: 0.12em; margin-top: 10px; }
+    .lp-entrar {
+      position: absolute;
+      top: 26px; right: 20px;
+      height: auto;
+      padding: 9px 16px;
+      font-size: 0.85rem;
+    }
+    .lp-tagline { font-size: 0.66rem; letter-spacing: 0.2em; white-space: normal; margin-bottom: 14px; }
+    .lp-title { font-size: 2.1rem; margin-bottom: 18px; }
+    .lp-desc { font-size: 0.95rem; margin-bottom: 26px; }
+    .lp-desc br { display: none; }
+    .lp-cta { width: 100%; max-width: 330px; padding: 15px 0; font-size: 1rem; margin-bottom: 38px; }
+    .lp-sig { margin: 0 0 38px; text-align: left; }
+    .lp-sig-name { font-size: 1.9rem; }
+    .lp-sig-quote { font-size: 0.72rem; }
+    .lp-sig-rule { margin-left: 0; }
+    .lp-features { grid-template-columns: 1fr 1fr; gap: 26px 0; margin-bottom: 34px; }
+    .lp-feat { padding: 0 14px 0 0; }
+    .lp-feat + .lp-feat::before { display: none; }
+    .lp-feat-ico { width: 26px; height: 26px; margin-bottom: 10px; }
+    .lp-feat-t { font-size: 0.92rem; }
+    .lp-feat-d { font-size: 0.78rem; }
+    .lp-banner { flex-direction: column; align-items: flex-start; gap: 16px; padding: 20px 18px; }
+    .lp-lock { width: 46px; height: 46px; }
+    .lp-lock svg { width: 22px; height: 22px; }
+    .lp-banner-body { width: 100%; }
+    .lp-banner-head span { font-size: 0.9rem; white-space: normal; }
+    .lp-banner-items { grid-template-columns: 1fr 1fr; gap: 16px 0; }
+    .lp-bi { padding: 0 10px 0 0; }
+    .lp-bi + .lp-bi::before { display: none; }
+    .lp-bi span { font-size: 0.76rem; }
+  }
+
+  /* ───────── MODAL DE LOGIN / CADASTRO ───────── */
   .lp-modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,4,10,0.86);
     z-index: 100;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(5px);
+    padding: 20px;
   }
   .lp-modal-overlay.active { display: flex; }
   .lp-modal {
-    background: #1a1a1a;
-    border: 1px solid rgba(201,168,76,0.3);
+    background: #0b1018;
+    border: 1px solid rgba(245,207,114,0.28);
     border-radius: 16px;
-    padding: 40px 36px;
+    padding: 38px 36px 32px;
     width: 100%;
     max-width: 420px;
     position: relative;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    box-shadow: 0 30px 90px rgba(0,0,0,0.7);
+    font-family: 'Inter', system-ui, sans-serif;
   }
   .lp-modal-close {
     position: absolute;
-    top: 16px; right: 20px;
-    font-size: 1.4rem;
-    color: #6a5a42;
+    top: 14px; right: 18px;
+    font-size: 1.5rem;
+    color: #6b7280;
     cursor: pointer;
     background: none;
     border: none;
     line-height: 1;
   }
-  .lp-modal-close:hover { color: #c9a84c; }
-  .lp-modal-logo {
-    text-align: center;
-    margin-bottom: 28px;
-  }
-  .lp-modal-logo .lp-modal-icon {
-    font-size: 2.2rem;
-    display: block;
-    margin-bottom: 8px;
-  }
+  .lp-modal-close:hover { color: #f5cf72; }
+  .lp-modal-logo { text-align: center; margin-bottom: 26px; }
+  .lp-modal-logo img { width: 38px; height: 54px; object-fit: contain; margin-bottom: 10px; }
   .lp-modal-logo h2 {
     font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.25rem;
-    color: #c9a84c;
-    font-weight: 700;
+    font-size: 1.4rem;
+    color: #fff;
+    font-weight: 500;
   }
-  .lp-modal-logo p { color: #6a5a42; font-size: 0.82rem; margin-top: 4px; }
+  .lp-modal-logo p {
+    color: #f5cf72;
+    font-size: 0.72rem;
+    margin-top: 5px;
+    letter-spacing: 0.18em;
+    font-family: 'Playfair Display', Georgia, serif;
+  }
 
-  /* Campos dentro do modal */
   .lp-modal .btn-google {
     width: 100%;
     padding: 13px;
-    border: 1.5px solid rgba(201,168,76,0.3);
+    border: 1px solid rgba(226,232,240,0.3);
     border-radius: 10px;
-    background: rgba(201,168,76,0.05);
-    color: #f0e6d3;
-    font-size: 0.9rem;
-    font-weight: 600;
+    background: rgba(255,255,255,0.04);
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 500;
+    font-family: inherit;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -362,73 +485,74 @@
     transition: all 0.2s;
     margin-bottom: 20px;
   }
-  .lp-modal .btn-google:hover { background: rgba(201,168,76,0.12); border-color: #c9a84c; }
-  .lp-modal .btn-google svg { width: 20px; height: 20px; }
+  .lp-modal .btn-google:hover { background: rgba(245,207,114,0.1); border-color: #f5cf72; }
+  .lp-modal .btn-google svg { width: 19px; height: 19px; }
 
   .lp-modal .divider {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 20px;
-    color: #4a3a2a;
-    font-size: 0.8rem;
+    color: #4b5563;
+    font-size: 0.78rem;
   }
   .lp-modal .divider::before, .lp-modal .divider::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: rgba(201,168,76,0.2);
+    background: rgba(255,255,255,0.1);
   }
 
   .lp-modal .campo { margin-bottom: 14px; }
   .lp-modal .campo label {
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 600;
-    color: #8a7a5a;
-    margin-bottom: 6px;
-    letter-spacing: 0.05em;
+    color: #9ba0a6;
+    margin-bottom: 7px;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
   }
   .lp-modal .campo input {
     width: 100%;
-    padding: 11px 14px;
-    border: 1.5px solid rgba(201,168,76,0.2);
+    padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
+    font-family: inherit;
     outline: none;
     background: rgba(255,255,255,0.04);
-    color: #f0e6d3;
+    color: #fff;
     transition: border-color 0.2s;
   }
-  .lp-modal .campo input:focus { border-color: #c9a84c; }
-  .lp-modal .campo input::placeholder { color: #4a3a2a; }
+  .lp-modal .campo input:focus { border-color: #f5cf72; }
+  .lp-modal .campo input::placeholder { color: #4b5563; }
 
   .lp-modal .btn-submit {
     width: 100%;
     padding: 13px;
-    background: #c9a84c;
-    color: #0d0d0d;
+    background: linear-gradient(135deg, #fbd484 0%, #f0bd5c 100%);
+    color: #11131a;
     border: none;
     border-radius: 10px;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     font-weight: 700;
+    font-family: inherit;
     cursor: pointer;
-    transition: background 0.2s;
-    margin-top: 4px;
-    letter-spacing: 0.05em;
+    transition: filter 0.2s;
+    margin-top: 6px;
   }
-  .lp-modal .btn-submit:hover { background: #dfc05e; }
+  .lp-modal .btn-submit:hover { filter: brightness(1.07); }
   .lp-modal .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .lp-modal .login-toggle {
     text-align: center;
     margin-top: 18px;
     font-size: 0.82rem;
-    color: #6a5a42;
+    color: #6b7280;
   }
   .lp-modal .login-toggle a {
-    color: #c9a84c;
+    color: #f5cf72;
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -438,7 +562,7 @@
   .lp-modal .msg-erro {
     background: rgba(185,28,28,0.15);
     color: #f87171;
-    border: 1px solid rgba(185,28,28,0.3);
+    border: 1px solid rgba(185,28,28,0.35);
     border-radius: 8px;
     padding: 10px 14px;
     font-size: 0.85rem;
@@ -446,29 +570,15 @@
     display: none;
   }
   .lp-modal .msg-sucesso {
-    background: rgba(26,122,74,0.15);
+    background: rgba(16,122,74,0.15);
     color: #6ee7b7;
-    border: 1px solid rgba(26,122,74,0.3);
+    border: 1px solid rgba(16,122,74,0.35);
     border-radius: 8px;
     padding: 10px 14px;
     font-size: 0.85rem;
     margin-bottom: 14px;
     display: none;
   }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 768px) {
-    .lp-nav { padding: 16px 20px; }
-    .lp-nav-brand .brand-name { font-size: 0.75rem; }
-    .lp-hero { grid-template-columns: 1fr; }
-    .lp-hero-right { display: none; }
-    .lp-hero-left { padding: 120px 20px 60px; }
-    .lp-features { grid-template-columns: 1fr 1fr; padding: 40px 20px; }
-    .lp-banner { padding: 30px 20px; }
-    .lp-banner-items { gap: 20px; }
-    .lp-modal { margin: 16px; }
-  }
-
   /* ===== AGUARDANDO APROVAÇÃO ===== */
   #tela-aguardando {
     display: none;
@@ -974,108 +1084,144 @@
 </div>
 
 <!-- TELA LOGIN -->
-<div id="tela-login" style="display:none;">
+<div id="tela-login">
+<div class="lp-stage">
 
-  <!-- NAV -->
-  <nav class="lp-nav">
-    <div class="lp-nav-brand">
-      <svg class="heart-icon" viewBox="0 0 24 24" fill="none">
-        <path d="M12 21s-7.5-4.6-9.3-9.2C1.3 8.3 3.2 5 6.5 5c2 0 3.5 1.1 4.4 2.6.3.5.4.9.6 1.4.2-.5.3-.9.6-1.4C13 6.1 14.5 5 16.5 5c3.3 0 5.2 3.3 3.8 6.8C18.5 16.4 12 21 12 21z" fill="#c9a84c" opacity="0.9"/>
-        <path d="M12 8.5c-.5-1.2-1.3-2-2.3-2.3M14.3 6.2c-1 .3-1.8 1.1-2.3 2.3M9 11.5l1.5 2M15 11.5l-1.5 2" stroke="#0d0d0d" stroke-width="0.8" stroke-linecap="round"/>
-      </svg>
-      <div class="brand-text">
-        <div class="brand-name">MedQuest</div>
-        <div class="brand-sub">Hellen Taussig · Banco de Questões</div>
-      </div>
-    </div>
-    <div class="lp-nav-actions">
-      <button class="lp-btn-outline" onclick="abrirModalLogin('login')">Entrar</button>
-      <button class="lp-btn-gold" onclick="abrirModalLogin('cadastro')">Criar conta</button>
-    </div>
-  </nav>
+  <!-- Foto -->
+  <img class="lp-photo" src="assets/taussig.webp" alt="" onerror="this.style.display='none'">
 
-  <!-- HERO -->
-  <div class="lp-hero">
-    <div class="lp-hero-left">
-      <div class="lp-tagline">Conhecimento<span>·</span>Raciocínio<span>·</span>Impacto real</div>
-      <h1 class="lp-hero-title">
-        Mais que questões.<br>
-        <em>Uma forma mais profunda<br>de aprender Medicina.</em>
-      </h1>
-      <p class="lp-hero-desc">
-        Um banco de questões construído para quem quer entender os mecanismos,
-        não apenas memorizar respostas. Gabarito comentado, foco em fisiopatologia
-        e acompanhamento real do seu progresso.
-      </p>
-      <div class="lp-cta-row">
-        <button class="lp-btn-cta" onclick="abrirModalLogin('cadastro')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <line x1="19" y1="8" x2="19" y2="14"/>
-            <line x1="22" y1="11" x2="16" y2="11"/>
-          </svg>
-          Criar conta gratuita →
-        </button>
-        <button class="lp-btn-cta-secondary" onclick="abrirModalLogin('login')">Já tenho conta</button>
-      </div>
-
-      <div class="lp-signature">
-        <div class="lp-signature-name">Hellen B. Taussig</div>
-        <div class="lp-signature-quote">"Um coração mais saudável para mais crianças."</div>
-      </div>
-    </div>
-
-    <div class="lp-hero-right">
-      <img class="lp-hero-img" src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=1200&q=80" alt="" onerror="this.style.display='none'">
+  <!-- Logo -->
+  <div class="lp-logo">
+    <img class="lp-logo-heart" src="assets/heart.png" alt="">
+    <div>
+      <div class="lp-logo-name">MedQuest</div>
+      <div class="lp-logo-sub">HELLEN TAUSSIG</div>
+      <div class="lp-logo-sub2">BANCO DE QUESTÕES MÉDICAS</div>
     </div>
   </div>
 
-  <!-- FEATURES -->
+  <!-- Entrar -->
+  <button class="lp-entrar" onclick="abrirModalLogin('login')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+    </svg>
+    Entrar
+  </button>
+
+  <!-- Tagline -->
+  <div class="lp-tagline">CONHECIMENTO<i>·</i>RACIOCÍNIO<i>·</i>IMPACTO REAL</div>
+
+  <!-- Título -->
+  <h1 class="lp-title">
+    Mais que questões.<br>
+    <b>Uma forma mais <em>profunda</em></b><br>
+    <b>de aprender Medicina.</b>
+  </h1>
+
+  <!-- Descrição -->
+  <p class="lp-desc">Um banco de questões médicas de alto nível, com gabarito <br>comentado, explicações detalhadas e foco nos mecanismos <br>que realmente importam.</p>
+
+  <!-- CTA -->
+  <button class="lp-cta" onclick="abrirModalLogin('cadastro')">
+    <svg class="lp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+    </svg>
+    Criar conta gratuita
+    <svg class="lp-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </svg>
+  </button>
+
+  <!-- Assinatura -->
+  <div class="lp-sig">
+    <div class="lp-sig-name">Hellen B. Taussig</div>
+    <div class="lp-sig-quote">“UM CORAÇÃO MAIS SAUDÁVEL<br>PARA MAIS CRIANÇAS.”</div>
+    <div class="lp-sig-rule"></div>
+  </div>
+
+  <!-- Features -->
   <div class="lp-features">
-    <div class="lp-feature">
-      <div class="lp-feature-icon">📋</div>
-      <div class="lp-feature-title">Questões atualizadas</div>
-      <div class="lp-feature-desc">Provas de residência recentes, organizadas por especialidade e tema.</div>
+    <div class="lp-feat">
+      <svg class="lp-feat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      <div class="lp-feat-t">Questões<br>atualizadas</div>
+      <div class="lp-feat-d">Baseadas em materiais<br>de referência confiáveis</div>
     </div>
-    <div class="lp-feature">
-      <div class="lp-feature-icon">💡</div>
-      <div class="lp-feature-title">Gabarito comentado</div>
-      <div class="lp-feature-desc">Cada alternativa explicada — por que está certa e por que as outras não.</div>
+    <div class="lp-feat">
+      <svg class="lp-feat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="15" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>
+      </svg>
+      <div class="lp-feat-t">Gabarito<br>comentado</div>
+      <div class="lp-feat-d">Explicações didáticas<br>e com profundidade</div>
     </div>
-    <div class="lp-feature">
-      <div class="lp-feature-icon">🫀</div>
-      <div class="lp-feature-title">Foco em mecanismos</div>
-      <div class="lp-feature-desc">Fisiopatologia e raciocínio clínico acima da memorização.</div>
+    <div class="lp-feat">
+      <svg class="lp-feat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="13" r="9"/><circle cx="11" cy="13" r="4"/><line x1="16.5" y1="7.5" x2="21" y2="3"/><polyline points="17 3 21 3 21 7"/>
+      </svg>
+      <div class="lp-feat-t">Foco em<br>mecanismos</div>
+      <div class="lp-feat-d">Raciocínio clínico<br>e integração de temas</div>
     </div>
-    <div class="lp-feature">
-      <div class="lp-feature-icon">📈</div>
-      <div class="lp-feature-title">Acompanhe seu progresso</div>
-      <div class="lp-feature-desc">Estatísticas por tema para você saber exatamente onde focar.</div>
+    <div class="lp-feat">
+      <svg class="lp-feat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="5" height="10" rx="1"/><rect x="15" y="4" width="5" height="17" rx="1"/><line x1="11.5" y1="8" x2="11.5" y2="16"/>
+      </svg>
+      <div class="lp-feat-t">Acompanhe seu<br>progresso</div>
+      <div class="lp-feat-d">Estudo direcionado<br>e sem rankings</div>
     </div>
   </div>
 
-  <!-- BANNER -->
+  <!-- Banner inferior -->
   <div class="lp-banner">
-    <div class="lp-banner-title">Após o seu login, você terá acesso a:</div>
-    <div class="lp-banner-items">
-      <div class="lp-banner-item"><span class="lp-lock">🔒</span> Banco completo de questões</div>
-      <div class="lp-banner-item"><span class="lp-lock">🔒</span> Simulados cronometrados</div>
-      <div class="lp-banner-item"><span class="lp-lock">🔒</span> Comentários detalhados</div>
-      <div class="lp-banner-item"><span class="lp-lock">🔒</span> Painel de desempenho</div>
+    <div class="lp-lock">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <div class="lp-banner-body">
+      <div class="lp-banner-head">
+        <span>Após o seu login, você terá acesso a:</span>
+        <i></i>
+      </div>
+      <div class="lp-banner-items">
+        <div class="lp-bi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span>Questões organizadas<br>por área e assunto</span>
+        </div>
+        <div class="lp-bi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="14" x2="15" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/>
+          </svg>
+          <span>Simulados personalizados<br>e revisão de erros</span>
+        </div>
+        <div class="lp-bi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+          </svg>
+          <span>Comentários em profundidade<br>e vídeos explicativos</span>
+        </div>
+        <div class="lp-bi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="12" width="5" height="9" rx="1"/><rect x="15" y="6" width="5" height="15" rx="1"/><line x1="11.5" y1="9" x2="11.5" y2="16"/>
+          </svg>
+          <span>Estatísticas individuais<br>e plano de revisão</span>
+        </div>
+      </div>
     </div>
   </div>
 
 </div>
-
+</div>
 <!-- MODAL DE LOGIN / CADASTRO -->
 <div class="lp-modal-overlay" id="modal-auth" onclick="if(event.target===this) fecharModalLogin()">
   <div class="lp-modal">
     <button class="lp-modal-close" onclick="fecharModalLogin()">&times;</button>
     <div class="lp-modal-logo">
-      <span class="lp-modal-icon">🫀</span>
+      <img src="assets/heart.png" alt="">
       <h2>MedQuest</h2>
-      <p>Hellen Taussig · Banco de Questões</p>
+      <p>HELLEN TAUSSIG</p>
     </div>
 
     <div id="msg-erro" class="msg-erro"></div>
@@ -1384,21 +1530,21 @@ async function fazerLogout() {
 // ==================== NAVEGAÇÃO DE TELAS ====================
 function mostrarTelaLogin() {
   document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('tela-login').style.display = 'flex';
+  document.getElementById('tela-login').classList.add('visivel');
   document.getElementById('tela-aguardando').style.display = 'none';
   esconderApp();
 }
 
 function mostrarTelaAguardando() {
   document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('tela-login').style.display = 'none';
+  document.getElementById('tela-login').classList.remove('visivel');
   document.getElementById('tela-aguardando').style.display = 'flex';
   esconderApp();
 }
 
 function mostrarApp() {
   document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('tela-login').style.display = 'none';
+  document.getElementById('tela-login').classList.remove('visivel');
   document.getElementById('tela-aguardando').style.display = 'none';
   // Mostra botão admin se for administrador
   if (usuarioAtual && perfilAtual && perfilAtual.admin) {
