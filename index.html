@@ -631,6 +631,23 @@
     color: var(--ouro);
   }
   .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+  .conta-btn {
+    display: flex; align-items: center; gap: 10px;
+    background: none; border: none; color: inherit;
+    font: inherit; cursor: pointer; padding: 3px 8px 3px 3px;
+    border-radius: 30px; transition: background 0.15s;
+  }
+  .conta-btn:hover { background: var(--ouro-fraco); }
+  .conta-btn:hover #user-nome-header { color: var(--ouro); }
+  @media (max-width: 560px) {
+    .app-header { padding: 10px 14px; }
+    #user-nome-header { display: none; }
+    .conta-btn { padding: 0; }
+    .app-header .logo-txt small { letter-spacing: 0.12em; font-size: 0.55rem; white-space: nowrap; }
+    .app-header .logo-txt b { font-size: 0.98rem; }
+    .btn-admin { margin-right: 2px; }
+    .user-info { gap: 8px; }
+  }
   .user-avatar {
     width: 32px; height: 32px;
     border-radius: 50%;
@@ -639,7 +656,9 @@
     color: var(--ouro);
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 0.85rem;
+    overflow: hidden;
   }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .btn-logout {
     padding: 5px 12px;
     border: 1px solid var(--borda);
@@ -727,6 +746,104 @@
     transition: background 0.15s;
   }
   .btn-revogar:hover { background: var(--vermelho-claro); }
+  /* ───────── conta / perfil ───────── */
+  #tela-perfil { max-width: 640px; margin: 0 auto; padding: 28px 20px 70px; }
+  .perfil-card {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: var(--sombra);
+  }
+  .perfil-card h3 {
+    font-size: 0.74rem;
+    color: var(--ouro);
+    margin: 0 0 18px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .perfil-aviso {
+    background: var(--ouro-fraco);
+    border: 1px solid var(--ouro-borda);
+    color: var(--ouro-forte);
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+  .perfil-foto { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+  .perfil-avatar {
+    width: 92px; height: 92px; flex: none;
+    border-radius: 50%;
+    border: 1px solid var(--ouro-borda);
+    background: var(--ouro-fraco);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.2rem;
+    color: var(--ouro);
+  }
+  .perfil-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .perfil-foto-acoes { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .perfil-foto-acoes .linha { display: flex; gap: 8px; flex-wrap: wrap; }
+  .perfil-dica { font-size: 0.74rem; color: var(--cinza); line-height: 1.5; }
+  .perfil-campo { margin-bottom: 14px; }
+  .perfil-campo label {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: var(--cinza);
+    margin-bottom: 7px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+  .perfil-campo input {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    outline: none;
+    background: rgba(255,255,255,0.04);
+    color: var(--texto);
+    transition: border-color 0.2s;
+  }
+  .perfil-campo input:focus { border-color: var(--ouro); }
+  .perfil-campo input:disabled { opacity: 0.55; cursor: not-allowed; }
+  .perfil-linha-email { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .perfil-linha-email .perfil-campo { flex: 1; min-width: 220px; margin-bottom: 0; }
+  .btn-perfil {
+    padding: 11px 20px;
+    border-radius: 9px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--ouro);
+    background: var(--ouro);
+    color: #11131a;
+    transition: filter 0.15s, background 0.15s;
+  }
+  .btn-perfil:hover:not(:disabled) { filter: brightness(1.08); }
+  .btn-perfil:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-perfil.sec { background: transparent; color: var(--ouro); border-color: var(--ouro-borda); font-weight: 600; }
+  .btn-perfil.sec:hover:not(:disabled) { background: var(--ouro-fraco); border-color: var(--ouro); filter: none; }
+  .btn-perfil.peq { padding: 7px 14px; font-size: 0.78rem; }
+  .perfil-acoes { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .perfil-msg { display: none; border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; line-height: 1.5; margin-bottom: 14px; }
+  .perfil-msg.erro { display: block; background: var(--vermelho-claro); color: var(--vermelho); border: 1px solid rgba(240,138,138,0.38); }
+  .perfil-msg.ok   { display: block; background: var(--verde-claro);   color: var(--verde);    border: 1px solid rgba(95,211,154,0.38); }
+  .perfil-nota { font-size: 0.78rem; color: var(--cinza); line-height: 1.55; margin-top: 12px; }
+  .perfil-nota b { color: var(--texto); font-weight: 600; }
+  .perfil-sair { text-align: center; margin-top: 8px; }
+  @media (max-width: 520px) {
+    .perfil-foto { flex-direction: column; align-items: flex-start; }
+    .perfil-card { padding: 18px 16px; }
+  }
+
   /* resumo de pagamentos */
   .admin-resumo {
     display: grid;
@@ -1457,6 +1574,10 @@
         <input type="text" id="input-nome" placeholder="Seu nome" />
       </div>
       <div class="campo">
+        <label>Telefone / WhatsApp</label>
+        <input type="tel" id="input-tel-cad" placeholder="(85) 99999-9999" oninput="mascaraTelefone(this)" />
+      </div>
+      <div class="campo">
         <label>E-mail</label>
         <input type="email" id="input-email-cad" placeholder="seu@email.com" />
       </div>
@@ -1490,8 +1611,10 @@
   </div>
   <div class="user-info">
     <button class="btn-admin" id="btn-admin" style="display:none;" onclick="mostrarAdmin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Admin</button>
-    <div class="user-avatar" id="user-avatar">?</div>
-    <span id="user-nome-header"></span>
+    <button class="conta-btn" onclick="mostrarPerfil()" title="Minha conta" aria-label="Minha conta">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <span id="user-nome-header"></span>
+    </button>
     <button class="btn-logout" onclick="fazerLogout()">Sair</button>
   </div>
 </div>
@@ -1518,6 +1641,85 @@
     <div class="admin-section">
       <h3>Administradores</h3>
       <div id="lista-admins"><p class="admin-vazio">Carregando...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- TELA CONTA / PERFIL -->
+<div id="tela-perfil" style="display:none;">
+  <button class="voltar-btn" id="perfil-voltar" onclick="voltarDoPerfil()">← Voltar</button>
+  <h2 class="tela-titulo" id="perfil-titulo">Minha conta</h2>
+  <p class="tela-subtitulo" id="perfil-subtitulo">Seus dados</p>
+
+  <div class="perfil-aviso" id="perfil-aviso" style="display:none;">
+    Para continuar, complete o seu cadastro com nome, telefone e uma foto.
+    Você poderá alterar essas informações quando quiser, em <b>Minha conta</b>.
+  </div>
+
+  <!-- dados pessoais -->
+  <div class="perfil-card">
+    <h3>Dados pessoais</h3>
+    <div class="perfil-msg" id="perfil-msg-dados"></div>
+
+    <div class="perfil-foto">
+      <div class="perfil-avatar" id="perfil-avatar">?</div>
+      <div class="perfil-foto-acoes">
+        <div class="linha">
+          <button type="button" class="btn-perfil sec peq" onclick="document.getElementById('perfil-arquivo').click()">Escolher foto</button>
+          <button type="button" class="btn-perfil sec peq" id="perfil-remover-foto" onclick="removerFoto()">Remover</button>
+        </div>
+        <span class="perfil-dica">JPG, PNG ou WebP. A imagem é recortada em quadrado.</span>
+        <input type="file" id="perfil-arquivo" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="escolherFoto(this)">
+      </div>
+    </div>
+
+    <div class="perfil-campo">
+      <label for="perfil-nome">Nome completo</label>
+      <input type="text" id="perfil-nome" maxlength="120" autocomplete="name">
+    </div>
+    <div class="perfil-campo">
+      <label for="perfil-telefone" id="perfil-telefone-rotulo">Telefone / WhatsApp</label>
+      <input type="tel" id="perfil-telefone" placeholder="(85) 99999-9999" autocomplete="tel" oninput="mascaraTelefone(this)">
+    </div>
+    <div class="perfil-acoes">
+      <button class="btn-perfil" id="perfil-salvar" onclick="salvarPerfil()">Salvar dados</button>
+      <button class="btn-perfil sec" id="perfil-sair" onclick="fazerLogout()" style="display:none;">Sair</button>
+    </div>
+  </div>
+
+  <!-- e-mail de acesso -->
+  <div class="perfil-card" id="perfil-card-email">
+    <h3>E-mail de acesso</h3>
+    <div class="perfil-msg" id="perfil-msg-email"></div>
+    <div class="perfil-linha-email">
+      <div class="perfil-campo">
+        <label for="perfil-email">E-mail</label>
+        <input type="email" id="perfil-email" autocomplete="email">
+      </div>
+      <button class="btn-perfil sec" id="perfil-alterar-email" onclick="alterarEmail()">Alterar e-mail</button>
+    </div>
+    <p class="perfil-nota" id="perfil-nota-email"></p>
+  </div>
+
+  <!-- senha -->
+  <div class="perfil-card" id="perfil-card-senha">
+    <h3 id="perfil-senha-titulo">Alterar senha</h3>
+    <div class="perfil-msg" id="perfil-msg-senha"></div>
+    <div class="perfil-campo" id="perfil-campo-senha-atual">
+      <label for="perfil-senha-atual">Senha atual</label>
+      <input type="password" id="perfil-senha-atual" autocomplete="current-password">
+    </div>
+    <div class="perfil-campo">
+      <label for="perfil-senha-nova">Nova senha</label>
+      <input type="password" id="perfil-senha-nova" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+    </div>
+    <div class="perfil-campo">
+      <label for="perfil-senha-conf">Confirmar nova senha</label>
+      <input type="password" id="perfil-senha-conf" autocomplete="new-password" onkeydown="if(event.key==='Enter') alterarSenha()">
+    </div>
+    <p class="perfil-nota" id="perfil-nota-senha" style="display:none;"></p>
+    <div class="perfil-acoes">
+      <button class="btn-perfil" id="perfil-alterar-senha" onclick="alterarSenha()">Alterar senha</button>
     </div>
   </div>
 </div>
@@ -1624,8 +1826,16 @@ async function iniciarAuth() {
 
   db.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
+      // o Supabase repete SIGNED_IN ao voltar para a aba ou ao reconfirmar a senha;
+      // se é a mesma pessoa, não refaz a verificação nem tira o usuário da tela atual
+      if (usuarioAtual && usuarioAtual.id === session.user.id) {
+        usuarioAtual = session.user;
+        return;
+      }
       await verificarAcesso(session.user);
     } else if (event === 'SIGNED_OUT') {
+      usuarioAtual = null;
+      perfilAtual = null;
       mostrarTelaLogin();
     }
   });
@@ -1635,37 +1845,53 @@ async function verificarAcesso(user) {
   usuarioAtual = user;
 
   // Busca/cria perfil do usuário
-  const { data: perfil, error } = await db
+  let { data: perfil, error } = await db
     .from('usuarios')
     .select('*')
     .eq('id', user.id)
     .single();
 
   if (error && error.code === 'PGRST116') {
-    // Usuário não existe na tabela ainda — cria
-    const nome = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
-    await db.from('usuarios').insert({
+    // Usuário não existe na tabela ainda — cria como pendente
+    const meta = user.user_metadata || {};
+    const novo = {
       id: user.id,
       email: user.email,
-      nome: nome,
+      nome: meta.full_name || meta.name || user.email.split('@')[0],
       aprovado: false
-    });
-    mostrarTelaAguardando();
+    };
+    if (meta.telefone) novo.telefone = meta.telefone;
+    const { data: criado } = await db.from('usuarios').insert(novo).select().single();
+    if (!criado) { mostrarTelaAguardando(); return; }
+    perfil = criado;
+  }
+
+  if (!perfil) { mostrarTelaAguardando(); return; }
+
+  // se o e-mail da conta mudou (troca confirmada), alinha a tabela;
+  // o banco sempre grava o e-mail da conta, o valor enviado é só o gatilho
+  if (perfil.email !== user.email) {
+    const { data: ajustado } = await db.from('usuarios')
+      .update({ email: user.email }).eq('id', user.id).select();
+    if (ajustado && ajustado[0]) perfil = ajustado[0];
+  }
+
+  perfilAtual = perfil;
+
+  // quem entrou por e-mail precisa ter nome, telefone e foto antes de seguir
+  if (cadastroIncompleto(user, perfil)) {
+    mostrarPerfil({ obrigatorio: true });
     return;
   }
 
-  if (!perfil || !perfil.aprovado) {
+  if (!perfil.aprovado) {
     mostrarTelaAguardando();
     return;
   }
 
   // Acesso liberado
-  perfilAtual = perfil;
-  const nome = perfil.nome || user.email.split('@')[0];
-  document.getElementById('user-nome-header').textContent = nome;
-  document.getElementById('user-avatar').textContent = nome.charAt(0).toUpperCase();
   document.getElementById('app-header').style.display = 'flex';
-
+  atualizarCabecalho();
   mostrarApp();
 }
 
@@ -1697,10 +1923,12 @@ async function submitLogin() {
 async function submitCadastro() {
   limparMensagens();
   const nome = document.getElementById('input-nome').value.trim();
+  const telefone = document.getElementById('input-tel-cad').value.trim();
   const email = document.getElementById('input-email-cad').value.trim();
   const senha = document.getElementById('input-senha-cad').value;
 
-  if (!nome || !email || !senha) { mostrarErro('Preencha todos os campos.'); return; }
+  if (!nome || !telefone || !email || !senha) { mostrarErro('Preencha todos os campos.'); return; }
+  if (!telefoneValido(telefone)) { mostrarErro('Informe um telefone válido, com DDD.'); return; }
   if (senha.length < 6) { mostrarErro('A senha deve ter no mínimo 6 caracteres.'); return; }
 
   const btn = document.getElementById('btn-cadastrar');
@@ -1708,7 +1936,7 @@ async function submitCadastro() {
 
   const { data, error } = await db.auth.signUp({
     email, password: senha,
-    options: { data: { full_name: nome } }
+    options: { data: { full_name: nome, telefone } }
   });
 
   if (error) {
@@ -1723,18 +1951,336 @@ async function submitCadastro() {
       id: data.user.id,
       email: email,
       nome: nome,
+      telefone: telefone,
       aprovado: false
     });
   }
 
-  mostrarSucesso('Conta criada! Aguarde a aprovação do administrador.');
+  mostrarSucesso('Conta criada! Entre para completar o perfil com a sua foto. Depois é só aguardar a aprovação do administrador.');
   btn.disabled = false; btn.textContent = 'Criar conta';
+}
+
+// ==================== CONTA / PERFIL ====================
+let perfilFotoNova = null;        // imagem já recortada, aguardando o "Salvar"
+let perfilFotoRemover = false;
+let perfilObrigatorio = false;    // primeiro acesso de quem se cadastrou por e-mail
+
+function esc(texto) {
+  return String(texto ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function entrouPorGoogle(user) {
+  return ((user && user.app_metadata && user.app_metadata.provider) || 'email') === 'google';
+}
+
+function fotoDoGoogle(user) {
+  const m = (user && user.user_metadata) || {};
+  return m.avatar_url || m.picture || null;
+}
+
+// quem veio por e-mail precisa informar nome, telefone e foto;
+// quem veio pelo Google já traz nome e foto da conta Google
+function cadastroIncompleto(user, perfil) {
+  if (entrouPorGoogle(user)) return false;
+  return !(perfil.nome || '').trim() || !(perfil.telefone || '').trim() || !perfil.foto_url;
+}
+
+function telefoneValido(texto) {
+  const d = String(texto || '').replace(/\D/g, '');
+  return d.length === 10 || d.length === 11;
+}
+
+function mascaraTelefone(el) {
+  const d = el.value.replace(/\D/g, '').slice(0, 11);
+  let r = d;
+  if (d.length > 10)      r = `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  else if (d.length > 6)  r = `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  else if (d.length > 2)  r = `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  else if (d.length > 0)  r = `(${d}`;
+  el.value = r;
+}
+
+// foto (ou inicial) dentro de um círculo
+function desenharAvatar(el, foto, nome) {
+  el.textContent = '';
+  const inicial = ((nome || '?').trim().charAt(0) || '?').toUpperCase();
+  if (!foto) { el.textContent = inicial; return; }
+  const img = document.createElement('img');
+  img.alt = '';
+  img.referrerPolicy = 'no-referrer';
+  img.onerror = () => { el.textContent = inicial; };
+  img.src = foto;
+  el.appendChild(img);
+}
+
+function atualizarCabecalho() {
+  if (!usuarioAtual) return;
+  const nome = (perfilAtual && perfilAtual.nome) || usuarioAtual.email.split('@')[0];
+  document.getElementById('user-nome-header').textContent = nome;
+  desenharAvatar(document.getElementById('user-avatar'),
+    (perfilAtual && perfilAtual.foto_url) || fotoDoGoogle(usuarioAtual), nome);
+}
+
+function msgPerfil(secao, tipo, texto) {
+  const el = document.getElementById('perfil-msg-' + secao);
+  el.className = 'perfil-msg' + (tipo ? ' ' + tipo : '');
+  el.textContent = texto || '';
+}
+
+function limparMsgPerfil() {
+  ['dados', 'email', 'senha'].forEach(sec => msgPerfil(sec, '', ''));
+}
+
+function mostrarPerfil(opcoes = {}) {
+  perfilObrigatorio = !!opcoes.obrigatorio;
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('tela-login').classList.remove('visivel');
+  document.getElementById('tela-aguardando').style.display = 'none';
+  esconderApp();
+  document.getElementById('app-header').style.display = perfilObrigatorio ? 'none' : 'flex';
+  preencherPerfil();
+  document.getElementById('tela-perfil').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function voltarDoPerfil() {
+  document.getElementById('tela-perfil').style.display = 'none';
+  mostrarTela('selecao');
+}
+
+function preencherPerfil() {
+  const user = usuarioAtual;
+  const perfil = perfilAtual || {};
+  const google = entrouPorGoogle(user);
+
+  perfilFotoNova = null;
+  perfilFotoRemover = false;
+  document.getElementById('perfil-arquivo').value = '';
+  limparMsgPerfil();
+
+  document.getElementById('perfil-nome').value = perfil.nome || '';
+  document.getElementById('perfil-telefone').value = perfil.telefone || '';
+  desenharAvatar(document.getElementById('perfil-avatar'),
+    perfil.foto_url || fotoDoGoogle(user), perfil.nome || user.email);
+
+  // quem entrou por e-mail não pode ficar sem foto
+  document.getElementById('perfil-remover-foto').style.display =
+    (perfil.foto_url && google) ? '' : 'none';
+  document.getElementById('perfil-telefone-rotulo').textContent =
+    google ? 'Telefone / WhatsApp (opcional)' : 'Telefone / WhatsApp';
+
+  // e-mail
+  const campoEmail = document.getElementById('perfil-email');
+  campoEmail.value = user.email;
+  campoEmail.disabled = google;
+  document.getElementById('perfil-alterar-email').style.display = google ? 'none' : '';
+  document.getElementById('perfil-nota-email').innerHTML = google
+    ? 'Você entra com a sua conta <b>Google</b>, então o e-mail é o dela e não pode ser alterado aqui.'
+    : 'Ao alterar, enviamos um link de confirmação. O e-mail só muda depois que você clicar nele.';
+
+  // senha
+  document.getElementById('perfil-campo-senha-atual').style.display = google ? 'none' : '';
+  document.getElementById('perfil-senha-titulo').textContent = google ? 'Definir senha' : 'Alterar senha';
+  document.getElementById('perfil-alterar-senha').textContent = google ? 'Definir senha' : 'Alterar senha';
+  const notaSenha = document.getElementById('perfil-nota-senha');
+  notaSenha.style.display = google ? '' : 'none';
+  notaSenha.textContent = 'Opcional. Com uma senha você também pode entrar por e-mail, além do Google.';
+  ['perfil-senha-atual', 'perfil-senha-nova', 'perfil-senha-conf']
+    .forEach(id => { document.getElementById(id).value = ''; });
+
+  // primeiro acesso: só os dados pessoais
+  document.getElementById('perfil-aviso').style.display = perfilObrigatorio ? '' : 'none';
+  document.getElementById('perfil-card-email').style.display = perfilObrigatorio ? 'none' : '';
+  document.getElementById('perfil-card-senha').style.display = perfilObrigatorio ? 'none' : '';
+  document.getElementById('perfil-voltar').style.display = perfilObrigatorio ? 'none' : '';
+  document.getElementById('perfil-sair').style.display = perfilObrigatorio ? '' : 'none';
+  document.getElementById('perfil-titulo').textContent = perfilObrigatorio ? 'Complete o seu cadastro' : 'Minha conta';
+  document.getElementById('perfil-subtitulo').textContent = perfilObrigatorio ? 'Falta pouco' : 'Seus dados';
+  document.getElementById('perfil-salvar').textContent = perfilObrigatorio ? 'Salvar e continuar' : 'Salvar dados';
+}
+
+// recorta no centro em quadrado e reduz, para a foto ficar leve
+function recortarQuadrada(arquivo, lado) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(arquivo);
+    const img = new Image();
+    img.onload = () => {
+      const m = Math.min(img.naturalWidth, img.naturalHeight);
+      const sx = (img.naturalWidth - m) / 2;
+      const sy = (img.naturalHeight - m) / 2;
+      const c = document.createElement('canvas');
+      c.width = c.height = lado;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#0a111b';
+      ctx.fillRect(0, 0, lado, lado);
+      ctx.drawImage(img, sx, sy, m, m, 0, 0, lado, lado);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => b ? resolve(b) : reject(new Error('sem imagem')), 'image/jpeg', 0.86);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('imagem inválida')); };
+    img.src = url;
+  });
+}
+
+async function escolherFoto(input) {
+  const arquivo = input.files && input.files[0];
+  if (!arquivo) return;
+  msgPerfil('dados', '', '');
+  if (!/^image\/(jpeg|png|webp)$/.test(arquivo.type)) {
+    msgPerfil('dados', 'erro', 'Use uma imagem JPG, PNG ou WebP.');
+    input.value = '';
+    return;
+  }
+  if (arquivo.size > 10 * 1024 * 1024) {
+    msgPerfil('dados', 'erro', 'A imagem é grande demais. Escolha uma de até 10 MB.');
+    input.value = '';
+    return;
+  }
+  try {
+    perfilFotoNova = await recortarQuadrada(arquivo, 512);
+    perfilFotoRemover = false;
+    const previa = document.getElementById('perfil-avatar');
+    previa.textContent = '';
+    const img = document.createElement('img');
+    img.alt = '';
+    img.src = URL.createObjectURL(perfilFotoNova);
+    previa.appendChild(img);
+  } catch (e) {
+    perfilFotoNova = null;
+    msgPerfil('dados', 'erro', 'Não foi possível ler essa imagem. Tente outra.');
+  }
+}
+
+function removerFoto() {
+  perfilFotoNova = null;
+  perfilFotoRemover = true;
+  document.getElementById('perfil-arquivo').value = '';
+  desenharAvatar(document.getElementById('perfil-avatar'),
+    fotoDoGoogle(usuarioAtual), document.getElementById('perfil-nome').value || usuarioAtual.email);
+}
+
+async function salvarPerfil() {
+  msgPerfil('dados', '', '');
+  const google = entrouPorGoogle(usuarioAtual);
+  const nome = document.getElementById('perfil-nome').value.trim();
+  const telefone = document.getElementById('perfil-telefone').value.trim();
+
+  if (nome.length < 2) { msgPerfil('dados', 'erro', 'Informe o seu nome completo.'); return; }
+  if (!google && !telefone) { msgPerfil('dados', 'erro', 'Informe o seu telefone, com DDD.'); return; }
+  if (telefone && !telefoneValido(telefone)) { msgPerfil('dados', 'erro', 'Telefone inválido. Use DDD + número, por exemplo (85) 99999-9999.'); return; }
+  if (!google && !perfilFotoNova && !(perfilAtual && perfilAtual.foto_url)) {
+    msgPerfil('dados', 'erro', 'Escolha uma foto para o seu perfil.');
+    return;
+  }
+
+  const botao = document.getElementById('perfil-salvar');
+  const rotulo = botao.textContent;
+  botao.disabled = true; botao.textContent = 'Salvando...';
+
+  try {
+    let fotoUrl = (perfilAtual && perfilAtual.foto_url) || null;
+    const caminho = `${usuarioAtual.id}/avatar.jpg`;
+
+    if (perfilFotoNova) {
+      const { error: erroEnvio } = await db.storage.from('avatars')
+        .upload(caminho, perfilFotoNova, { upsert: true, contentType: 'image/jpeg', cacheControl: '3600' });
+      if (erroEnvio) throw new Error('Não foi possível enviar a foto: ' + erroEnvio.message);
+      const { data: pub } = db.storage.from('avatars').getPublicUrl(caminho);
+      fotoUrl = `${pub.publicUrl}?v=${Date.now()}`;
+    } else if (perfilFotoRemover) {
+      await db.storage.from('avatars').remove([caminho]);
+      fotoUrl = null;
+    }
+
+    const { data, error } = await db.from('usuarios')
+      .update({ nome, telefone: telefone || null, foto_url: fotoUrl })
+      .eq('id', usuarioAtual.id)
+      .select();
+    if (error) throw new Error(error.message);
+    if (!data || !data.length) throw new Error('O servidor não aceitou a alteração. Tente sair e entrar de novo.');
+
+    perfilAtual = data[0];
+    perfilFotoNova = null;
+    perfilFotoRemover = false;
+
+    if (perfilObrigatorio) {
+      await verificarAcesso(usuarioAtual);
+      return;
+    }
+    atualizarCabecalho();
+    preencherPerfil();
+    msgPerfil('dados', 'ok', 'Dados salvos.');
+  } catch (e) {
+    msgPerfil('dados', 'erro', e.message || 'Não foi possível salvar.');
+  } finally {
+    botao.disabled = false;
+    if (document.getElementById('perfil-salvar')) botao.textContent = perfilObrigatorio ? 'Salvar e continuar' : 'Salvar dados';
+  }
+}
+
+async function alterarEmail() {
+  msgPerfil('email', '', '');
+  const novo = document.getElementById('perfil-email').value.trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(novo)) { msgPerfil('email', 'erro', 'Informe um e-mail válido.'); return; }
+  if (novo === (usuarioAtual.email || '').toLowerCase()) { msgPerfil('email', 'erro', 'Esse já é o seu e-mail atual.'); return; }
+
+  const botao = document.getElementById('perfil-alterar-email');
+  botao.disabled = true; botao.textContent = 'Enviando...';
+  const { error } = await db.auth.updateUser(
+    { email: novo },
+    { emailRedirectTo: 'https://medquest-helen-taussig.vercel.app' }
+  );
+  botao.disabled = false; botao.textContent = 'Alterar e-mail';
+
+  if (error) {
+    msgPerfil('email', 'erro', /already|registered|exists/i.test(error.message)
+      ? 'Esse e-mail já está em uso por outra conta.' : error.message);
+    return;
+  }
+  msgPerfil('email', 'ok', `Enviamos um link de confirmação para ${novo}. Abra a mensagem e clique no link para concluir a troca. Se chegar também um aviso no e-mail antigo, confirme nele igualmente.`);
+}
+
+async function alterarSenha() {
+  msgPerfil('senha', '', '');
+  const google = entrouPorGoogle(usuarioAtual);
+  const atual = document.getElementById('perfil-senha-atual').value;
+  const nova = document.getElementById('perfil-senha-nova').value;
+  const conf = document.getElementById('perfil-senha-conf').value;
+
+  if (!google && !atual) { msgPerfil('senha', 'erro', 'Informe a senha atual.'); return; }
+  if (nova.length < 6) { msgPerfil('senha', 'erro', 'A nova senha deve ter no mínimo 6 caracteres.'); return; }
+  if (nova !== conf) { msgPerfil('senha', 'erro', 'A confirmação não confere com a nova senha.'); return; }
+  if (!google && nova === atual) { msgPerfil('senha', 'erro', 'A nova senha precisa ser diferente da atual.'); return; }
+
+  const botao = document.getElementById('perfil-alterar-senha');
+  const rotulo = botao.textContent;
+  botao.disabled = true; botao.textContent = 'Salvando...';
+
+  try {
+    if (!google) {
+      const { error: erroAtual } = await db.auth.signInWithPassword({ email: usuarioAtual.email, password: atual });
+      if (erroAtual) { msgPerfil('senha', 'erro', 'A senha atual está incorreta.'); return; }
+    }
+    const { error } = await db.auth.updateUser({ password: nova });
+    if (error) {
+      msgPerfil('senha', 'erro', /different/i.test(error.message)
+        ? 'A nova senha precisa ser diferente da atual.' : error.message);
+      return;
+    }
+    ['perfil-senha-atual', 'perfil-senha-nova', 'perfil-senha-conf']
+      .forEach(id => { document.getElementById(id).value = ''; });
+    msgPerfil('senha', 'ok', google ? 'Senha definida. Agora você também pode entrar por e-mail.' : 'Senha alterada com sucesso.');
+  } finally {
+    botao.disabled = false; botao.textContent = rotulo;
+  }
 }
 
 async function fazerLogout() {
   await db.auth.signOut();
   document.getElementById('app-header').style.display = 'none';
   usuarioAtual = null;
+  perfilAtual = null;
 }
 
 // ==================== NAVEGAÇÃO DE TELAS ====================
@@ -1809,7 +2355,11 @@ function estadoPagamento(u) {
 }
 
 function identidade(u) {
-  return u.nome ? `${u.nome} · ${u.email}` : u.email;
+  return esc(u.nome ? `${u.nome} · ${u.email}` : u.email);
+}
+
+function telefoneAdmin(u) {
+  return u.telefone ? ` · ${esc(u.telefone)}` : '';
 }
 
 async function carregarUsuarios() {
@@ -1855,7 +2405,7 @@ async function carregarUsuarios() {
       <div class="usuario-card">
         <div class="usuario-info">
           <span class="usuario-email">${identidade(u)}</span>
-          <span class="usuario-data">Cadastrou-se em ${u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—'}</span>
+          <span class="usuario-data">Cadastrou-se em ${u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—'}${telefoneAdmin(u)}</span>
         </div>
         <div class="admin-acoes">
           <button class="btn-aprovar" onclick="aprovarUsuario('${u.id}')">Aprovar</button>
@@ -1870,7 +2420,7 @@ async function carregarUsuarios() {
       <div class="usuario-card ${u.pag.cartao}">
         <div class="usuario-info">
           <span class="usuario-email">${identidade(u)}</span>
-          <span class="usuario-data">${u.pag.detalhe}</span>
+          <span class="usuario-data">${u.pag.detalhe}${telefoneAdmin(u)}</span>
         </div>
         <span class="badge-pag ${u.pag.classe}">${u.pag.selo}</span>
         <div class="admin-acoes">
@@ -2000,7 +2550,7 @@ async function renovarPagamento(id, dias) {
 }
 
 function esconderApp() {
-  ['tela-selecao','tela-temas','tela-questao','tela-resultado'].forEach(id => {
+  ['tela-selecao','tela-temas','tela-questao','tela-resultado','tela-admin','tela-perfil'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
 }
@@ -2371,6 +2921,8 @@ function reiniciarTema() { iniciarTema(estadoAtual.disciplinaId, estadoAtual.tem
 function voltarSelecao() { mostrarTela('selecao'); renderDisciplinas(); }
 
 function mostrarTela(nome) {
+  document.getElementById('tela-admin').style.display = 'none';
+  document.getElementById('tela-perfil').style.display = 'none';
   document.getElementById('tela-selecao').style.display = nome === 'selecao' ? 'block' : 'none';
   document.getElementById('tela-temas').style.display = nome === 'temas' ? 'block' : 'none';
   document.getElementById('tela-questao').style.display = nome === 'questao' ? 'block' : 'none';
