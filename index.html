@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,700&family=Parisienne&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --azul: #1a56a0;
@@ -215,38 +215,6 @@
   .lp-cta .lp-ico { width: 1.25em; height: 1.25em; flex: none; stroke: #11131a; }
   .lp-cta .lp-seta { width: 1.15em; height: 1.15em; flex: none; stroke: #11131a; }
 
-  /* ───────── ASSINATURA ───────── */
-  .lp-sig {
-    position: absolute;
-    left: 76.8%;
-    top: 14.6%;
-    width: 20.9%;
-    text-align: center;
-  }
-  .lp-sig-name {
-    font-family: 'Parisienne', 'Playfair Display', cursive;
-    font-size: 2.55em;
-    font-weight: 400;
-    color: #fdfdfd;
-    line-height: 1.1;
-    letter-spacing: 0.02em;
-  }
-  .lp-sig-quote {
-    margin-top: 1.5em;
-    font-size: 0.88em;
-    letter-spacing: 0.125em;
-    line-height: 1.85;
-    color: #b2b7bc;
-    font-weight: 300;
-  }
-  .lp-sig-rule {
-    width: 6.4em;
-    height: 1.5px;
-    background: #f5cf72;
-    margin: 1.9em auto 0;
-    opacity: 0.85;
-  }
-
   /* ───────── FEATURES ───────── */
   .lp-features {
     position: absolute;
@@ -373,7 +341,7 @@
       opacity: 0.22;
     }
     .lp-logo, .lp-entrar, .lp-tagline, .lp-title, .lp-desc,
-    .lp-cta, .lp-sig, .lp-features, .lp-banner {
+    .lp-cta, .lp-features, .lp-banner {
       position: static;
       width: auto;
       height: auto;
@@ -395,10 +363,6 @@
     .lp-desc { font-size: 0.95rem; margin-bottom: 26px; }
     .lp-desc br { display: none; }
     .lp-cta { width: 100%; max-width: 330px; padding: 15px 0; font-size: 1rem; margin-bottom: 38px; }
-    .lp-sig { margin: 0 0 38px; text-align: left; }
-    .lp-sig-name { font-size: 1.9rem; }
-    .lp-sig-quote { font-size: 0.72rem; }
-    .lp-sig-rule { margin-left: 0; }
     .lp-features { grid-template-columns: 1fr 1fr; gap: 26px 0; margin-bottom: 34px; }
     .lp-feat { padding: 0 14px 0 0; }
     .lp-feat + .lp-feat::before { display: none; }
@@ -1131,13 +1095,6 @@
       <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
     </svg>
   </button>
-
-  <!-- Assinatura -->
-  <div class="lp-sig">
-    <div class="lp-sig-name">Hellen B. Taussig</div>
-    <div class="lp-sig-quote">“UM CORAÇÃO MAIS SAUDÁVEL<br>PARA MAIS CRIANÇAS.”</div>
-    <div class="lp-sig-rule"></div>
-  </div>
 
   <!-- Features -->
   <div class="lp-features">
