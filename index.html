@@ -1794,6 +1794,7 @@
 
 <!-- TELA 3: QUESTÃO -->
 <div id="tela-questao">
+  <button class="voltar-btn" onclick="voltarTemas()">← Voltar aos temas</button>
   <div class="questao-header">
     <div class="info">
       <span class="disciplina-nome" id="q-disciplina"></span>
@@ -6357,6 +6358,7 @@ function encerrarSessao() {
 }
 
 function reiniciarTema() { iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId); }
+function voltarTemas() { abrirDisciplina(estadoAtual.disciplinaId); window.scrollTo(0, 0); }
 function voltarSelecao() { mostrarTela('selecao'); renderDisciplinas(); }
 
 function mostrarTela(nome) {
