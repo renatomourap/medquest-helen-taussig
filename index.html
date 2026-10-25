@@ -229,6 +229,85 @@
   }
   .btn-logout:hover { background: rgba(255,255,255,0.15); }
 
+  .btn-admin {
+    padding: 5px 12px;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.15s;
+    margin-right: 8px;
+  }
+  .btn-admin:hover { background: rgba(255,255,255,0.3); }
+
+  .admin-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+  .admin-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .admin-header h2 { font-size: 1.3rem; color: var(--azul); margin: 0; }
+  .admin-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .admin-section h3 { font-size: 1rem; color: var(--azul); margin: 0 0 16px 0; }
+  .usuario-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .usuario-info { display: flex; flex-direction: column; gap: 2px; }
+  .usuario-email { font-weight: 600; font-size: 0.9rem; color: var(--texto); }
+  .usuario-data { font-size: 0.78rem; color: var(--cinza); }
+  .btn-aprovar {
+    padding: 6px 14px;
+    background: var(--azul);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: opacity 0.15s;
+  }
+  .btn-aprovar:hover { opacity: 0.85; }
+  .btn-revogar {
+    padding: 6px 14px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: opacity 0.15s;
+  }
+  .btn-revogar:hover { opacity: 0.85; }
+  .badge-admin {
+    font-size: 0.7rem;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+
   /* ===== TELA DE SELEÇÃO ===== */
   #tela-selecao {
     max-width: 900px;
@@ -660,9 +739,28 @@
 <div id="app-header" style="display:none;" class="app-header">
   <div class="logo">🩺 MedQuest · Helen Taussig</div>
   <div class="user-info">
+    <button class="btn-admin" id="btn-admin" style="display:none;" onclick="mostrarAdmin()">⚙️ Admin</button>
     <div class="user-avatar" id="user-avatar">?</div>
     <span id="user-nome-header"></span>
     <button class="btn-logout" onclick="fazerLogout()">Sair</button>
+  </div>
+</div>
+
+<!-- TELA ADMIN -->
+<div id="tela-admin" style="display:none;">
+  <div class="admin-container">
+    <div class="admin-header">
+      <button class="voltar-btn" onclick="voltarDoAdmin()">← Voltar</button>
+      <h2>⚙️ Painel do Administrador</h2>
+    </div>
+    <div class="admin-section">
+      <h3>Usuários Pendentes</h3>
+      <div id="lista-pendentes"><p style="color:var(--cinza)">Carregando...</p></div>
+    </div>
+    <div class="admin-section">
+      <h3>Usuários Aprovados</h3>
+      <div id="lista-aprovados"><p style="color:var(--cinza)">Carregando...</p></div>
+    </div>
   </div>
 </div>
 
@@ -755,6 +853,7 @@ const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let usuarioAtual = null;
+let perfilAtual = null;
 
 // ==================== AUTH ====================
 async function iniciarAuth() {
@@ -803,6 +902,7 @@ async function verificarAcesso(user) {
   }
 
   // Acesso liberado
+  perfilAtual = perfil;
   const nome = perfil.nome || user.email.split('@')[0];
   document.getElementById('user-nome-header').textContent = nome;
   document.getElementById('user-avatar').textContent = nome.charAt(0).toUpperCase();
@@ -898,8 +998,103 @@ function mostrarApp() {
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('tela-login').style.display = 'none';
   document.getElementById('tela-aguardando').style.display = 'none';
+  // Mostra botão admin se for administrador
+  if (usuarioAtual && perfilAtual && perfilAtual.admin) {
+    document.getElementById('btn-admin').style.display = 'inline-block';
+  }
   renderDisciplinas();
   mostrarTela('selecao');
+}
+
+async function mostrarAdmin() {
+  esconderApp();
+  document.getElementById('tela-admin').style.display = 'block';
+  await carregarUsuarios();
+}
+
+function voltarDoAdmin() {
+  document.getElementById('tela-admin').style.display = 'none';
+  mostrarTela('selecao');
+}
+
+async function carregarUsuarios() {
+  const { data: todos } = await db.from('usuarios').select('*').order('criado_em', { ascending: false });
+  if (!todos) return;
+
+  const pendentes = todos.filter(u => !u.aprovado);
+  const aprovados = todos.filter(u => u.aprovado);
+
+  // Pendentes
+  const listaPend = document.getElementById('lista-pendentes');
+  if (pendentes.length === 0) {
+    listaPend.innerHTML = '<p style="color:var(--cinza);font-size:0.9rem;">Nenhum usuário pendente.</p>';
+  } else {
+    listaPend.innerHTML = pendentes.map(u => `
+      <div class="usuario-card">
+        <div class="usuario-info">
+          <span class="usuario-email">${u.nome || '—'} &lt;${u.email}&gt;</span>
+          <span class="usuario-data">Cadastrado em ${u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—'}</span>
+        </div>
+        <button class="btn-aprovar" onclick="aprovarUsuario('${u.id}')">✓ Aprovar</button>
+      </div>
+    `).join('');
+  }
+
+  // Aprovados
+  const listaAprov = document.getElementById('lista-aprovados');
+  if (aprovados.length === 0) {
+    listaAprov.innerHTML = '<p style="color:var(--cinza);font-size:0.9rem;">Nenhum usuário aprovado.</p>';
+  } else {
+    listaAprov.innerHTML = aprovados.map(u => {
+      const validade = u.pagamento_validade ? new Date(u.pagamento_validade) : null;
+      const hoje = new Date();
+      const emDia = validade && validade > hoje;
+      const statusPag = u.pagamento_status || 'pendente';
+      const badgePag = statusPag === 'ativo' && emDia
+        ? `<span style="font-size:0.7rem;background:#d1fae5;color:#065f46;padding:2px 7px;border-radius:10px;font-weight:600;margin-left:4px;">✓ Em dia até ${validade.toLocaleDateString('pt-BR')}</span>`
+        : `<span style="font-size:0.7rem;background:#fee2e2;color:#991b1b;padding:2px 7px;border-radius:10px;font-weight:600;margin-left:4px;">⚠ ${statusPag}</span>`;
+      return `
+      <div class="usuario-card">
+        <div class="usuario-info">
+          <span class="usuario-email">
+            ${u.nome || '—'} &lt;${u.email}&gt;
+            ${u.admin ? '<span class="badge-admin">Admin</span>' : ''}
+            ${!u.admin ? badgePag : ''}
+          </span>
+          <span class="usuario-data">Aprovado</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          ${!u.admin && !emDia ? `<button class="btn-aprovar" onclick="renovarPagamento('${u.id}', 30)" style="font-size:0.75rem;padding:5px 10px;">+30 dias</button>` : ''}
+          ${!u.admin && emDia ? `<button class="btn-aprovar" onclick="renovarPagamento('${u.id}', 30)" style="font-size:0.75rem;padding:5px 10px;background:#059669;">+30 dias</button>` : ''}
+          ${u.id !== usuarioAtual.id && !u.admin ? `<button class="btn-revogar" onclick="revogarUsuario('${u.id}')" style="font-size:0.75rem;padding:5px 10px;">✗</button>` : ''}
+          ${u.id === usuarioAtual.id ? '<span style="font-size:0.8rem;color:var(--cinza)">Você</span>' : ''}
+        </div>
+      </div>
+    `}).join('');
+  }
+}
+
+async function aprovarUsuario(id) {
+  await db.from('usuarios').update({ aprovado: true }).eq('id', id);
+  await carregarUsuarios();
+}
+
+async function revogarUsuario(id) {
+  await db.from('usuarios').update({ aprovado: false }).eq('id', id);
+  await carregarUsuarios();
+}
+
+async function renovarPagamento(id, dias) {
+  const { data: u } = await db.from('usuarios').select('pagamento_validade').eq('id', id).single();
+  const base = u?.pagamento_validade && new Date(u.pagamento_validade) > new Date()
+    ? new Date(u.pagamento_validade)
+    : new Date();
+  base.setDate(base.getDate() + dias);
+  await db.from('usuarios').update({
+    pagamento_status: 'ativo',
+    pagamento_validade: base.toISOString()
+  }).eq('id', id);
+  await carregarUsuarios();
 }
 
 function esconderApp() {
