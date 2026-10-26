@@ -92,7 +92,7 @@ function tab(name){
 }
 async function show(requested="resumo"){
  if(typeof usuarioAtual==="undefined"||!usuarioAtual||!perfilAtual?.aprovado)return;
- esconderApp();section.style.display="block";fecharSidebar();setNavActive("nav-biblioteca");
+ esconderApp();section.style.display="block";fecharSidebar();setNavActive(requested==="admin"?null:"nav-resumo");
  $("mq-admin-tab").hidden=!admin();tab(requested==="admin"&&admin()?"admin":requested==="questoes_pdf"?"questoes_pdf":"resumo");
  try{await fetchList()}catch(e){$("mq-count").textContent="Falha ao carregar biblioteca: "+e.message}
 }
