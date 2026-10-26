@@ -35,6 +35,10 @@ section.innerHTML=`
 <label class="wide">Alternativa C<input id="mq-q-c" required></label><label class="wide">Alternativa D<input id="mq-q-d" required></label>
 <label>Gabarito<select id="mq-q-key"><option>A</option><option>B</option><option>C</option><option>D</option></select></label>
 <label>Hot Point<input id="mq-q-hp" value="Hot Point 1" maxlength="80"></label>
+<label>Nível de dificuldade<select id="mq-q-level">
+<option value="">Não classificada</option><option value="facil">Fácil</option>
+<option value="intermediario">Intermediário</option><option value="dificil">Difícil</option>
+<option value="muito_dificil">Muito difícil</option></select></label>
 <label class="wide">Gabarito comentado<textarea id="mq-q-comment" rows="5" required></textarea></label>
 <div class="wide"><button type="submit">Cadastrar questão</button></div></form><p id="mq-q-status" role="status"></p></div>
 <div class="mq-library-box"><h2>Importar questões por JSON</h2><p>Arquivo com lista de questões ou um objeto contendo "questoes". As questões já cadastradas não são substituídas.</p>
@@ -104,7 +108,11 @@ function valid(q,n){
  const text=String(q.enunciado||"").trim(),key=String(q.correta||"").toUpperCase();
  if(text.length<10||alts.length!==4||alts.some((a,i)=>a.letra!=="ABCD"[i]||!a.texto)||!["A","B","C","D"].includes(key)||String(q.comentario||"").trim().length<3)
  throw Error("Questão "+n+": enunciado, A–D, correta ou comentário inválido");
- return {enunciado:text,alternativas:alts,correta:key,comentario:String(q.comentario).trim(),hotpoint:String(q.hotpoint||"Hot Point").slice(0,80)};
+ const grade=String(q.nivel_dificuldade||"").trim().toLowerCase();
+ if(grade&&!["facil","intermediario","dificil","muito_dificil"].includes(grade))
+   throw Error("Questão "+n+": nível de dificuldade inválido");
+ return {enunciado:text,alternativas:alts,correta:key,comentario:String(q.comentario).trim(),
+   hotpoint:String(q.hotpoint||"Hot Point").slice(0,80),nivel_dificuldade:grade||null};
 }
 async function saveQuestions(input,disc,topic){
  if(!admin())throw Error("Cadastro exclusivo do administrador");
@@ -149,7 +157,7 @@ $("mq-q-form").onsubmit=async e=>{
  const btn=e.submitter;btn.disabled=true;
  try{
   const q={enunciado:$("mq-q-text").value,alternativas:"ABCD".split("").map(c=>({letra:c,texto:$("mq-q-"+c.toLowerCase()).value})),
-    correta:$("mq-q-key").value,comentario:$("mq-q-comment").value,hotpoint:$("mq-q-hp").value};
+    correta:$("mq-q-key").value,comentario:$("mq-q-comment").value,hotpoint:$("mq-q-hp").value,nivel_dificuldade:$("mq-q-level").value};
   const res=await saveQuestions([q],$("mq-q-area").value,$("mq-q-topic").value.trim());
   status("mq-q-status",res.added+" questão cadastrada, "+res.skipped+" repetida");
   if(res.added)for(const id of ["mq-q-text","mq-q-a","mq-q-b","mq-q-c","mq-q-d","mq-q-comment"])$(id).value="";
