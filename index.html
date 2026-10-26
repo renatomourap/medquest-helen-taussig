@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <link rel="stylesheet" href="assets/estudo-modulos.css">
+<link rel="stylesheet" href="assets/medquest-acervo.css">
 <link rel="stylesheet" href="assets/plano-semana.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2255,6 +2256,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         Resumo
       </button>
+      <button id="nav-biblioteca" onclick="abrirBiblioteca('resumo')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+        Biblioteca PDF
+      </button>
       <button id="nav-plano" onclick="abrirEstudo('plano')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Plano da Semana
@@ -2454,6 +2459,7 @@
       <h3>Conteúdo oficial — somente administradores</h3>
       <p style="color:var(--cinza);margin:0 0 14px;font-size:.88rem;">Publique resumos revisados para todos os estudantes. Questões e PDFs oficiais também possuem permissões administrativas no Supabase.</p>
       <button type="button" class="btn-perfil" onclick="abrirEstudo('resumo')">Gerenciar resumos oficiais</button>
+      <button type="button" class="btn-perfil" onclick="abrirBiblioteca('admin')" style="margin-left:8px;">Cadastrar questões e publicar PDFs</button>
     </div>
 
     <div class="admin-section">
@@ -2640,6 +2646,7 @@
 <!-- Toast for "em breve" -->
 <div id="toast-embreve" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ouro);color:#11131a;padding:10px 24px;border-radius:10px;font-size:0.88rem;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:opacity 0.3s;"></div>
 
+<script src="assets/medquest-banco-remoto.js"></script>
 <script>
 // ==================== SUPABASE ====================
 const SUPABASE_URL = 'https://gatkawdbksgkxhclyrhi.supabase.co';
@@ -3303,6 +3310,10 @@ function mostrarApp() {
   atualizarCabecalho();
   renderSidebarDisciplinas();
   irParaDashboard();
+  carregarBancoRemoto().then(() => {
+    renderSidebarDisciplinas();
+    renderDashboard();
+  }).catch(error => console.warn('Banco de questões adicional:', error));
 }
 
 async function mostrarAdmin() {
@@ -7351,6 +7362,7 @@ async function salvarProgresso(questaoIndex, letraMarcada, acertou) {
 iniciarAuth();
 </script>
 <script src="assets/estudo-modulos.js"></script>
+<script src="assets/medquest-acervo.js"></script>
 <script src="assets/plano-semana.js"></script>
 </body>
 </html>
