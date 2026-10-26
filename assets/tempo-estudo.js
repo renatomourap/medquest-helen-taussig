@@ -19,6 +19,13 @@ function elapsed(){
  if(!state)return 0;
  return (state.segments||[]).reduce((v,s)=>v+Math.max(0,(Date.parse(s.end)-Date.parse(s.start))/1000),0)+(state.running?Math.max(0,(Date.now()-Date.parse(state.running))/1000):0);
 }
+function toggleDock(){
+ const dock=$('mq-time-dock');if(!dock)return;
+ const expanded=dock.classList.toggle('mq-dock-open');
+ const top=$('mq-top-timer');if(top)top.setAttribute('aria-expanded',String(expanded));
+ const quiz=document.querySelector('.mq-question-timer');
+ if(quiz)quiz.setAttribute('aria-expanded',String(expanded));
+}
 function update(){
  const dock=$('mq-time-dock');if(!dock)return;
  if(!user()){dock.hidden=true;state=null;return}
@@ -32,19 +39,31 @@ function update(){
  start.onclick=running?pause:paused?resume:()=>dialog('start',context);
  $('mq-time-end').disabled=!state;
  const top=$('mq-top-timer');if(top)top.textContent=state?'◷ '+fmt(elapsed()):'◷ Cronômetro';
+ const quiz=document.querySelector('.mq-question-timer');
+ if(quiz)quiz.textContent=state?'◷ '+fmt(elapsed()):'◷ Cronômetro';
 }
 function attach(){
  if($('mq-time-dock'))return;
  const root=$('app-layout');if(!root)return;
  const top=document.createElement('button');top.id='mq-top-timer';top.type='button';top.className='mq-top-timer';top.textContent='◷ Cronômetro';
- top.onclick=()=>{if(!state)dialog('start',context);else $('mq-time-dock').classList.toggle('mq-dock-open')};
+ top.setAttribute('aria-controls','mq-time-dock');top.setAttribute('aria-expanded','false');
+ top.onclick=()=>{if(!state)dialog('start',context);else toggleDock()};
  document.querySelector('.topbar-right')?.prepend(top);
  const dock=document.createElement('aside');dock.id='mq-time-dock';dock.className='mq-time-dock';dock.hidden=true;dock.setAttribute('aria-label','Cronômetro de estudos');
  dock.innerHTML='<div class="mq-time-head"><div><small id="mq-time-state">Pronto</small><strong id="mq-time-clock">00:00:00</strong><span id="mq-time-label">Seu estudo</span></div><button type="button" onclick="MedQuestStudyTime.toggle()" aria-label="Expandir ou recolher controles">⌄</button></div>'+
  '<div class="mq-time-controls"><button type="button" id="mq-time-play">Iniciar</button><button type="button" id="mq-time-end" onclick="MedQuestStudyTime.finish()">Encerrar</button><button type="button" onclick="MedQuestStudyTime.manual()">+ Manual</button></div>';
  root.append(dock);
  const header=document.querySelector('.questao-header');
- if(header){let btn=document.createElement('button');btn.className='mq-question-timer';btn.type='button';btn.textContent='◷ Cronômetro';btn.onclick=()=>dialog('start',{atividade:'questoes',area_id:estadoAtual?.disciplinaId||'',assunto:$('q-tema')?.textContent||'',titulo:'Questões · '+($('q-tema')?.textContent||'Prática')});header.append(btn)}
+ if(header){
+  const btn=document.createElement('button');
+  btn.className='mq-question-timer';btn.type='button';btn.textContent='◷ Cronômetro';
+  btn.setAttribute('aria-controls','mq-time-dock');btn.setAttribute('aria-expanded','false');
+  btn.onclick=()=>{
+   if(state){toggleDock();return}
+   dialog('start',{atividade:'questoes',area_id:estadoAtual?.disciplinaId||'',assunto:$('q-tema')?.textContent||'',titulo:'Questões · '+($('q-tema')?.textContent||'Prática')});
+  };
+  header.append(btn);
+ }
  state=load();update();
 }
 function error(msg){const el=$('mq-time-error');if(el)el.textContent=msg}
@@ -144,7 +163,7 @@ const logout=window.fazerLogout;
 if(typeof logout==='function')window.fazerLogout=async(...a)=>{pause();return await logout(...a)};
 window.MedQuestStudyTime={openStart:obj=>dialog('start',obj||context),manual:()=>dialog('manual',{atividade:'outros',titulo:'',area_id:'',assunto:''}),
  edit:item=>dialog('edit',item),close:closeDialog,start,pause,resume,finish,
- toggle:()=>$('mq-time-dock')?.classList.toggle('mq-dock-open'),setContext:x=>{context={...context,...x};update()},
+ toggle:toggleDock,setContext:x=>{context={...context,...x};update()},
  seconds:elapsed,refresh:update};
 window.addEventListener('storage',event=>{if(event.key===key()){state=load();update()}});
 
