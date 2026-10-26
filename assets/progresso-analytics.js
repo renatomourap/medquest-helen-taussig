@@ -155,7 +155,7 @@ function render(){
   card('questions','Questões respondidas',fnum(s.n),compare(s.n,p.n),cl(s.n,p.n)),
   card('target','Taxa de acerto',pp(pNow),compare(pNow,pOld,'pp'),cl(pNow,pOld)),
   card('book','Assuntos praticados',fnum(s.topics),s.topics?'Conteúdos diferentes':'Nenhum assunto praticado','mp-muted'),
-  card('clock','Tempo de estudo',humanTime(seconds),seconds?'Tempo registrado nas questões':'Medição iniciada a partir de agora','mp-muted'),
+  card('clock','Tempo de estudo',humanTime(seconds),'Questões · aba ativa e interação recente','mp-muted'),
   card('flame','Sequência de estudos',streak(rows)+' '+(streak(rows)===1?'dia':'dias'),'Dias consecutivos de questões','mp-muted')
  ].join('');
  const dPct=pNow??0,wrong=s.n-s.good;
