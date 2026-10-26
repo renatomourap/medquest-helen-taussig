@@ -7362,20 +7362,62 @@ function abrirDisciplina(disciplinaId) {
   mostrarTela('temas');
 }
 
-function iniciarTema(disciplinaId, temaId) {
+// Reconstitui o bloco pelas respostas persistidas do usuário atual, nunca pelo índice.
+async function restaurarRespostasSessao(sessao = estadoAtual) {
+  const usuarioId = usuarioAtual?.id;
+  if (!usuarioId || sessao !== estadoAtual) return;
+  const versao = (sessao.recuperacaoVersao || 0) + 1;
+  sessao.recuperacaoVersao = versao;
+  sessao.carregandoRespostas = true;
+  sessao.erroRespostas = false;
+  renderQuestao(sessao.questaoIndex);
+  const atual = () => sessao === estadoAtual && usuarioAtual?.id === usuarioId && sessao.recuperacaoVersao === versao;
+  try {
+    const ids = [...new Set(sessao.questoes.map(q => q.id))];
+    const salvas = [];
+    for (let offset = 0; offset < ids.length; offset += 200) {
+      const resultado = await db.from('progresso')
+        .select('questao_id,disciplina_id,tema_id,resposta,acertou')
+        .eq('usuario_id', usuarioId).in('questao_id', ids.slice(offset, offset + 200));
+      if (!atual()) return;
+      if (resultado.error) throw resultado.error;
+      salvas.push(...(resultado.data || []));
+    }
+    const porId = new Map(salvas.map(r => [String(r.questao_id), r]));
+    const respostas = {};
+    sessao.questoes.forEach((q, index) => {
+      const r = porId.get(String(q.id));
+      if (!r || r.disciplina_id !== (q.__mqAreaId || sessao.disciplinaId) ||
+          r.tema_id !== (q.__mqTemaId || sessao.temaId) ||
+          !q.alternativas.some(a => a.letra === r.resposta)) return;
+      respostas[index] = { marcada: r.resposta, acertou: r.resposta === q.correta };
+    });
+    sessao.respostas = respostas;
+  } catch (erro) {
+    if (!atual()) return;
+    sessao.erroRespostas = true;
+    console.warn('Não foi possível recuperar as respostas do bloco:', erro.message);
+  }
+  if (!atual()) return;
+  sessao.carregandoRespostas = false;
+  renderQuestao(sessao.questaoIndex);
+}
+
+function iniciarTema(disciplinaId, temaId, opcoes = {}) {
   const disc = BANCO.disciplinas.find(d => d.id === disciplinaId);
   const tema = disc.temas.find(t => t.id === temaId);
-  estadoAtual = { disciplinaId, temaId, questaoIndex: 0, respostas: {}, questoes: tema.questoes };
+  estadoAtual = { disciplinaId, temaId, questaoIndex: 0, respostas: {}, questoes: tema.questoes, carregandoRespostas: !opcoes.novaTentativa && !!usuarioAtual };
   document.getElementById('q-disciplina').textContent = disc.nome.toUpperCase();
   document.getElementById('q-tema').textContent = tema.nome;
   renderMiniaturas();
   renderQuestao(0);
   mostrarTela('questao');
+  if (estadoAtual.carregandoRespostas) return restaurarRespostasSessao(estadoAtual);
 }
 
 // Inicia uma sessão com todos os resultados do filtro, inclusive de assuntos diferentes.
 // Cada questão conserva sua origem para o histórico e o progresso individuais.
-function iniciarQuestoesFiltradas(itens) {
+function iniciarQuestoesFiltradas(itens, opcoes = {}) {
   if (!Array.isArray(itens) || !itens.length) return;
   const validos = itens.filter(item => item && item.questao && item.areaId && item.temaId);
   if (!validos.length) return;
@@ -7384,6 +7426,7 @@ function iniciarQuestoesFiltradas(itens) {
     disciplinaId: primeira.areaId,
     temaId: primeira.temaId,
     questaoIndex: 0, respostas: {},
+    carregandoRespostas: !opcoes.novaTentativa && !!usuarioAtual,
     filtrada: true,
     itensFiltrados: validos,
     questoes: validos.map(item => ({
@@ -7400,6 +7443,7 @@ function iniciarQuestoesFiltradas(itens) {
   renderQuestao(0);
   mostrarTela('questao');
   window.scrollTo(0, 0);
+  if (estadoAtual.carregandoRespostas) return restaurarRespostasSessao(estadoAtual);
 }
 
 function renderQuestao(index) {
@@ -7421,7 +7465,23 @@ function renderQuestao(index) {
   const altContainer = document.getElementById('alternativas');
   altContainer.innerHTML = '';
   const resp = estadoAtual.respostas[index];
-  q.alternativas.forEach(alt => {
+  const aguardando = estadoAtual.carregandoRespostas || estadoAtual.erroRespostas;
+  if (aguardando) {
+    const aviso = document.createElement('p');
+    aviso.setAttribute('role', 'status');
+    aviso.textContent = estadoAtual.erroRespostas
+      ? 'Não foi possível recuperar suas respostas salvas. Tente novamente para continuar.'
+      : 'Recuperando suas respostas salvas…';
+    altContainer.appendChild(aviso);
+    if (estadoAtual.erroRespostas) {
+      const tentar = document.createElement('button');
+      tentar.type = 'button'; tentar.className = 'btn-nav';
+      tentar.textContent = 'Tentar novamente';
+      tentar.onclick = () => restaurarRespostasSessao(estadoAtual);
+      altContainer.appendChild(tentar);
+    }
+  }
+  if (!aguardando) q.alternativas.forEach(alt => {
     const div = document.createElement('div');
     div.className = 'alternativa';
     if (resp) {
@@ -7445,6 +7505,7 @@ function renderQuestao(index) {
 }
 
 function responder(index, letraMarcada) {
+  if (estadoAtual.carregandoRespostas || estadoAtual.erroRespostas || estadoAtual.respostas[index]) return;
   const q = estadoAtual.questoes[index];
   estadoAtual.respostas[index] = { marcada: letraMarcada, acertou: letraMarcada === q.correta };
   salvarProgresso(index, letraMarcada, letraMarcada === q.correta);
@@ -7495,10 +7556,10 @@ function encerrarSessao() {
 
 function reiniciarTema() {
   if (estadoAtual.filtrada && estadoAtual.itensFiltrados?.length) {
-    iniciarQuestoesFiltradas(estadoAtual.itensFiltrados);
+    iniciarQuestoesFiltradas(estadoAtual.itensFiltrados, { novaTentativa: true });
     return;
   }
-  iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId);
+  iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId, { novaTentativa: true });
 }
 function voltarTemas() {
   if (estadoAtual.filtrada) {
@@ -7691,7 +7752,7 @@ async function salvarProgresso(questaoIndex, letraMarcada, acertou) {
 // ==================== INICIAR ====================
 iniciarAuth();
 </script>
-<script src="assets/estudo-modulos.js?v=dashboard-ipad-sem-anotacoes-20261026"></script>
+<script src="assets/estudo-modulos.js?v=restaurar-respostas-20261026"></script>
 <script src="assets/medquest-acervo.js?v=cronometro-pdf-20261026"></script>
 <script src="assets/plano-semana.js"></script>
 <script src="assets/catalogo-questoes.js?v=hotpoints-ordem-condicional-20261026"></script>

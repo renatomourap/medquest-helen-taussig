@@ -307,6 +307,6 @@
  let hide=window.esconderApp;window.esconderApp=function(){hide();$('tela-estudo').style.display='none'};
  let screen=window.mostrarTela;window.mostrarTela=function(n){screen(n);$('tela-estudo').style.display='none'};
  let dash=window.irParaDashboard;window.irParaDashboard=function(){dash();home()};
- let start=window.iniciarTema;window.iniciarTema=function(a,t){start(a,t);activity({tipo:'questoes',area_id:a,tema_id:t})};
+ let start=window.iniciarTema;window.iniciarTema=function(a,t,opcoes){const pending=start(a,t,opcoes);activity({tipo:'questoes',area_id:a,tema_id:t});return pending};
  let render=window.renderQuestao;window.renderQuestao=function(i){render(i);if(estadoAtual?.disciplinaId)activity({tipo:'questoes',area_id:estadoAtual.disciplinaId,tema_id:estadoAtual.temaId,questao_index:i})};
 })();
