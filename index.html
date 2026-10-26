@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<link rel="stylesheet" href="assets/estudo-modulos.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedQuest — Helen Taussig</title>
@@ -2249,21 +2250,21 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
         Questões
       </button>
-      <button onclick="avisoEmBreve('Resumo')">
+      <button id="nav-resumo" onclick="abrirEstudo('resumo')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Resumo <span class="em-breve">Em breve</span>
+        Resumo
       </button>
-      <button onclick="avisoEmBreve('Plano da Semana')">
+      <button id="nav-plano" onclick="abrirEstudo('plano')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Plano da Semana <span class="em-breve">Em breve</span>
+        Plano da Semana
       </button>
-      <button onclick="avisoEmBreve('Anotações')">
+      <button id="nav-notas" onclick="abrirEstudo('anotacao')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        Anotações <span class="em-breve">Em breve</span>
+        Anotações
       </button>
-      <button onclick="avisoEmBreve('Progresso')">
+      <button id="nav-progresso" onclick="abrirEstudo('progresso')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        Progresso <span class="em-breve">Em breve</span>
+        Progresso
       </button>
 
       <hr class="sidebar-divider">
@@ -2334,17 +2335,17 @@
 
             <!-- Quick actions -->
             <div class="dash-actions">
-              <div class="action-card" onclick="continuarDeOndeParou()">
+              <div class="action-card" onclick="studyContinue()">
                 <div class="ac-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 </div>
                 <div class="ac-text">
                   <h3>Continue de onde parou</h3>
-                  <p>Retome o último tema estudado</p>
+                  <p id="study-home-last">Retome questões, anotações ou resumos.</p>
                 </div>
                 <span class="ac-arrow">→</span>
               </div>
-              <div class="action-card" onclick="irParaDashboard()">
+              <div class="action-card" onclick="studyPractice()">
                 <div class="ac-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
                 </div>
@@ -2396,11 +2397,7 @@
                   Plano da Semana
                 </h3>
               </div>
-              <div class="rp-placeholder">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Organize seus estudos semanais com metas e lembretes.
-                <span class="em-breve-tag">Em breve</span>
-              </div>
+              <div class="study-home-box" id="study-home-plan"><p>Nenhuma meta nesta semana.</p></div>
             </div>
 
             <!-- Últimas anotações -->
@@ -2411,11 +2408,7 @@
                   Últimas anotações
                 </h3>
               </div>
-              <div class="rp-placeholder">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                Faça anotações durante o estudo e revise aqui.
-                <span class="em-breve-tag">Em breve</span>
-              </div>
+              <div class="study-home-box" id="study-home-notes"><p>Nenhuma anotação ainda.</p></div>
             </div>
 
             <!-- Estatísticas -->
@@ -2445,6 +2438,7 @@
         </div>
       </div>
 
+<div id="tela-estudo" class="study-screen" style="display:none"><div class="study-head"><div><h1 id="study-title">Estudos</h1><p style="color:var(--cinza)">Materiais e desempenho personalizados</p></div><button onclick="irParaDashboard()">← Voltar ao início</button></div><div id="study-msg" style="min-height:24px"></div><div id="study-content"></div></div>
 <!-- TELA ADMIN -->
 <div id="tela-admin" style="display:none;">
   <div class="admin-container">
@@ -3544,7 +3538,7 @@ async function renovarPagamento(id, dias) {
 }
 
 function esconderApp() {
-  ['tela-dashboard','tela-selecao','tela-temas','tela-questao','tela-resultado','tela-admin','tela-perfil'].forEach(id => {
+  ['tela-dashboard','tela-estudo','tela-selecao','tela-temas','tela-questao','tela-resultado','tela-admin','tela-perfil'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -7353,5 +7347,6 @@ async function salvarProgresso(questaoIndex, letraMarcada, acertou) {
 // ==================== INICIAR ====================
 iniciarAuth();
 </script>
+<script src="assets/estudo-modulos.js"></script>
 </body>
 </html>
