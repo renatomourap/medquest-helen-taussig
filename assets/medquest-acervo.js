@@ -69,16 +69,33 @@ function render(){
   const h=document.createElement("h3");h.textContent=item.titulo;
   const p=document.createElement("p");p.textContent=item.descricao||"Material acadêmico em PDF";
   const controls=document.createElement("div");controls.className="mq-actions";
-  const open=document.createElement("button");open.textContent="Abrir PDF";open.onclick=()=>openPDF(item.arquivo_path);controls.append(open);
+  const open=document.createElement("button");open.textContent="Ler PDF";open.onclick=()=>openPDF(item);controls.append(open);
   if(admin()){const del=document.createElement("button");del.className="outline";del.textContent="Excluir";del.onclick=()=>removePDF(item);controls.append(del)}
   card.append(k,h,p,controls);container.append(card);
  }
 }
-async function openPDF(path){
- const w=window.open("about:blank","_blank");
- const r=await db.storage.from("materiais_medquest").createSignedUrl(path,120);
- if(r.error||!r.data?.signedUrl){if(w)w.close();alert("Não foi possível abrir o PDF: "+(r.error?.message||"indisponível"));return}
- if(w)w.location.replace(r.data.signedUrl);else window.location.href=r.data.signedUrl;
+function closeReader(){
+ const el=document.getElementById("mq-pdf-reader");
+ if(el)el.remove();
+}
+async function openPDF(item){
+ const r=await db.storage.from("materiais_medquest").createSignedUrl(item.arquivo_path,3600);
+ if(r.error||!r.data?.signedUrl){alert("Não foi possível abrir o PDF: "+(r.error?.message||"indisponível"));return}
+ closeReader();
+ const layer=document.createElement("div");layer.id="mq-pdf-reader";layer.className="mq-pdf-reader";
+ const card=document.createElement("section");card.className="mq-pdf-reader-card";card.setAttribute("aria-label","Leitor de PDF acadêmico");
+ const head=document.createElement("header");head.className="mq-pdf-reader-head";
+ const info=document.createElement("div"),title=document.createElement("h2"),sub=document.createElement("span");
+ title.textContent=item.titulo;sub.textContent=(areas[item.disciplina_id]||item.disciplina_id)+" · "+item.tema_id;info.append(title,sub);
+ const actions=document.createElement("div");actions.className="mq-pdf-reader-actions";
+ const timer=document.createElement("button");timer.type="button";timer.textContent="◷ Iniciar cronômetro";
+ timer.onclick=()=>window.MedQuestStudyTime?.openStart({atividade:"pdf",titulo:item.titulo,area_id:item.disciplina_id,assunto:item.tema_id});
+ const open=document.createElement("a");open.href=r.data.signedUrl;open.target="_blank";open.rel="noopener noreferrer";open.textContent="Abrir em outra aba";
+ const close=document.createElement("button");close.type="button";close.textContent="Fechar PDF";close.onclick=closeReader;
+ actions.append(timer,open,close);head.append(info,actions);
+ const iframe=document.createElement("iframe");iframe.className="mq-pdf-frame";iframe.src=r.data.signedUrl;iframe.title="Leitura do PDF "+item.titulo;
+ card.append(head,iframe);layer.append(card);document.body.append(layer);
+ window.MedQuestStudyTime?.setContext({atividade:"pdf",titulo:item.titulo,area_id:item.disciplina_id,assunto:item.tema_id});
 }
 async function removePDF(item){
  if(!admin()||!confirm("Excluir este arquivo permanentemente?"))return;
@@ -297,4 +314,5 @@ window.esconderApp=function(){oldHide();section.style.display="none"};
 const oldScreen=window.mostrarTela;
 window.mostrarTela=function(name){oldScreen(name);section.style.display="none"};
 window.abrirBiblioteca=show;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.getElementById("mq-study-dialog")&&!document.getElementById("mq-study-dialog").hidden)return;if(e.key==="Escape")closeReader()});
 })();
