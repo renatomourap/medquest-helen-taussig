@@ -322,11 +322,17 @@
     }
     if(field==='hotpoint'){
       const unique=new Map(prior.map(r=>[r.hotpointKey,r]));
-      return [...unique.values()].sort((a,b)=>
-        compararNomes(a.temaName,b.temaName)||sortHP(a.hotpoint,b.hotpoint))
-        // Exiba só o nome do Hot Point; o ID (temaId|Hot Point N)
-        // permanece associado ao assunto de origem para filtrar sem ambiguidades.
-        .map(r=>[r.hotpointKey, r.hotpointTitle||r.hotpoint, true]);
+      // Sem assunto: ordenar alfabeticamente pelos títulos.
+      // Com assunto: respeitar a sequência didática Hot Point 1 → 5 do PDF.
+      const ordem=(a,b)=>filters.assunto
+        ? sortHP(a.hotpoint,b.hotpoint)
+        : compararNomes(a.hotpointTitle||a.hotpoint,b.hotpointTitle||b.hotpoint)
+          ||compararNomes(a.temaName,b.temaName)
+          ||sortHP(a.hotpoint,b.hotpoint);
+      return [...unique.values()].sort(ordem)
+        // Mostrar exclusivamente o título, mas manter a chave temaId|Hot Point
+        // para que assuntos com títulos iguais não misturem suas questões.
+        .map(r=>[r.hotpointKey,r.hotpointTitle||r.hotpoint,true]);
     }
     const counts=Object.fromEntries(levels.map(([k])=>[k,prior.filter(r=>r.dificuldade===k).length]));
     return levels.map(([k,v])=>[k,v,counts[k]>0,counts[k]]);
