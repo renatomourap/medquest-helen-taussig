@@ -23,3 +23,7 @@
 .study-home-box{font-size:.8rem;color:var(--cinza);line-height:1.6}
 .study-home-box p{padding:4px 0}.study-home-box small{float:right;color:var(--ouro)}
 @media(max-width:700px){.study-row,.study-screen .study-head{align-items:flex-start;flex-direction:column}.study-stats{grid-template-columns:1fr}.study-screen{padding:20px 14px}}
+
+.study-official-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;color:var(--texto);font-size:.92rem;padding:15px;background:var(--superficie-2);border-radius:10px;max-height:none}
+.study-form label:has(input[type="checkbox"]){display:flex;flex-direction:row;align-items:center;gap:10px;color:var(--ouro)}
+.study-form label input[type="checkbox"]{width:18px;height:18px;accent-color:var(--ouro)}
