@@ -34,7 +34,7 @@ async function readTable(table,columns,dateColumn,start,user){
 async function open(){
  const user=usuarioAtual?.id,token=++request;
  if(!user)return;
- if(loadedUser===user){render();return;}
+ // Releia o histórico a cada visita para incluir novas tentativas.
  $('study-content').innerHTML='<div class="mp-empty">Carregando seu histórico de estudos…</div>';
  const earliest=add(today(),-60).toISOString();
  const results=await Promise.allSettled([
@@ -170,7 +170,7 @@ function render(){
   '<select class="mp-chart-selector" aria-label="Métrica do gráfico" onchange="MedQuestProgress.chart(this.value)"><option value="taxa"'+(metric==='taxa'?' selected':'')+'>Taxa de acerto</option><option value="quantidade"'+(metric==='quantidade'?' selected':'')+'>Questões por dia</option></select></div>'+
   '<div class="mp-line-plot">'+lineChart(rows)+'</div><p class="mp-data-note">Dias sem respostas não são considerados como zero de acerto.</p></section>'+
   '<section class="mp-panel mp-panel-distribution"><div class="mp-panel-head">'+header('target','Distribuição de resultados',s.n+' questões respondidas.')+'</div>'+
-  '<div class="mp-distribution-body"><div class="mp-donut" style="--mp-good:'+dPct+'%"><div class="mp-donut-label"><b>'+pp(pNow)+'</b><span>de acerto</span></div></div>'+
+  '<div class="mp-distribution-body"><div class="mp-donut" style="'+(s.n?'--mp-good:'+dPct+'%':'background:#263442')+'"><div class="mp-donut-label"><b>'+pp(pNow)+'</b><span>de acerto</span></div></div>'+
   '<div class="mp-legend"><div><i class="mp-legend-dot correct"></i><span>Corretas<small>'+s.good+' ('+dPct+'%)</small></span></div>'+
   '<div><i class="mp-legend-dot wrong"></i><span>Incorretas<small>'+wrong+' ('+(s.n?100-dPct:0)+'%)</small></span></div></div></div></section>'+
   '<section class="mp-panel mp-panel-areas"><div class="mp-panel-head">'+header('book','Desempenho por '+(mode==='geral'?'área':'assunto'),'Sua taxa de acerto em cada conteúdo.')+'</div><div class="mp-bars">'+bars(rows)+'</div></section>'+
@@ -187,9 +187,13 @@ const configure=(what,value)=>{
 window.MedQuestProgress={open,reload:()=>{loadedUser='';open()},range:v=>configure('range',v),area:v=>configure('area',v),mode:v=>configure('mode',v),chart:v=>configure('chart',v)};
 let lastUserAction=Date.now();
 ['pointerdown','keydown','wheel','touchstart'].forEach(name=>document.addEventListener(name,()=>{lastUserAction=Date.now()},{passive:true}));
+let activeSeconds=0;
 setInterval(async()=>{
  if(!usuarioAtual?.id||document.visibilityState!=='visible'||!document.hasFocus()||$('tela-questao')?.style.display!=='block'||Date.now()-lastUserAction>240000)return;
+ activeSeconds+=10;
+ if(activeSeconds<60)return;
+ activeSeconds-=60;
  try{let r=await db.from('tempo_estudo_eventos').insert({usuario_id:usuarioAtual.id,origem:'questoes',segundos:60});if(r.error)console.warn('Tempo de estudo:',r.error.message)}
  catch(e){console.warn('Registro de tempo:',e)}
-},60000);
+},10000);
 })();
