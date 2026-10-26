@@ -162,3 +162,15 @@
  #mq-questoes-gerais .mq-q-filter-menu{max-height:min(295px,45vh)}
  #mq-questoes-gerais .mq-q-filter-option{padding:12px 9px;font-size:13px}
 }
+
+
+/* Permite a leitura completa dos títulos científicos extensos de cada Hot Point. */
+#mq-questoes-gerais .mq-q-filter[data-mq-filter-wrap="hotpoint"] .mq-q-filter-menu{
+  width:min(480px,calc(100vw - 72px));max-width:calc(100vw - 72px);
+  right:auto;white-space:normal
+}
+@media(max-width:580px){
+ #mq-questoes-gerais .mq-q-filter[data-mq-filter-wrap="hotpoint"] .mq-q-filter-menu{
+   left:0;right:0;width:100%;max-width:100%
+ }
+}
