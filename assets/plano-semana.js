@@ -97,6 +97,17 @@
      (s.total===0?'<div class="weekly-empty"><div class="weekly-empty-icon">☷</div><strong>Sua semana começa aqui</strong><p>Escolha os assuntos e as metas que deseja cumprir. Você pode alterar tudo depois.</p><button type="button" onclick="PlanoMedQuest.newTask(null)">Criar primeira atividade</button></div>':'')+
      '<div class="weekly-days">'+groups+'</div><div id="weekly-editor-root"></div></div>';
  }
+ function numericControl(id,value,min,label){
+   const arrow=(direction,title,points)=>
+     '<button type="button" aria-label="'+title+'" title="'+title+'" onclick="PlanoMedQuest.adjustNumber(\''+id+'\','+direction+')">'+
+     '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="'+points+'"/></svg></button>';
+   return '<div class="weekly-number-control">'+
+     '<input id="'+id+'" type="number" inputmode="numeric" min="'+min+'" max="10000" step="1" aria-label="'+label+'" value="'+Number(value)+'">'+
+     '<div class="weekly-number-stepper">'+
+       arrow(1,'Aumentar '+label,'6 15 12 9 18 15')+
+       arrow(-1,'Diminuir '+label,'6 9 12 15 18 9')+
+     '</div></div>';
+ }
  function editor(row,day){
    editing=row?.id||null;
    const chosenDay=row?.dia_semana??day;
@@ -105,12 +116,21 @@
      '<div class="weekly-modal-head"><div><span>PLANEJAMENTO INDIVIDUAL</span><h3 id="weekly-editor-title">'+(row?'Editar atividade':'Nova atividade de estudo')+'</h3></div><button type="button" class="weekly-modal-x" onclick="PlanoMedQuest.closeEditor()" aria-label="Fechar">×</button></div>'+
      '<div class="weekly-modal-fields"><label>O que você pretende estudar?<input id="weekly-title" maxlength="180" placeholder="Ex.: Resolver 50 questões de Imunologia" value="'+escapeHTML(row?.titulo||'')+'"></label>'+
      '<div class="weekly-fields-pair"><label>Área de estudo<select id="weekly-area">'+opts(row?.area_id||'')+'</select></label><label>Dia da semana<select id="weekly-day">'+options+'</select></label></div>'+
-     '<div class="weekly-fields-pair"><label>Meta de realização<input id="weekly-target" type="number" min="1" max="10000" step="1" value="'+(row?.meta||1)+'"></label>'+
-     '<label>Quanto já realizou?<input id="weekly-realized" type="number" min="0" max="10000" step="1" value="'+(row?.realizado||0)+'"></label></div>'+
+     '<div class="weekly-fields-pair"><label>Meta de realização'+numericControl('weekly-target',row?.meta??1,1,'meta de realização')+'</label>'+
+     '<label>Quanto já realizou?'+numericControl('weekly-realized',row?.realizado??0,0,'quantidade realizada')+'</label></div>'+
      '<label>Observações (opcional)<textarea id="weekly-notes" maxlength="500" rows="3" placeholder="Ex.: Revisar TLR, citocinas e interferons">'+escapeHTML(row?.observacoes||'')+'</textarea></label></div>'+
      '<div id="weekly-modal-error" role="alert" class="weekly-modal-error" style="display:none"></div>'+
      '<div class="weekly-modal-actions"><button type="button" onclick="PlanoMedQuest.closeEditor()">Cancelar</button><button type="button" id="weekly-save-btn" class="weekly-save" onclick="PlanoMedQuest.save()">Salvar atividade</button></div></div></div>';
    $('weekly-title')?.focus();
+ }
+ function adjustNumber(id,direction){
+   if(id!=='weekly-target'&&id!=='weekly-realized')return;
+   const el=$(id);if(!el)return;
+   const min=Number(el.min)||0,max=10000;
+   const current=el.value.trim()===''?min:Number(el.value);
+   const next=Math.max(min,Math.min(max,Math.trunc(Number.isFinite(current)?current:min)+direction));
+   el.value=String(next);
+   el.dispatchEvent(new Event('input',{bubbles:true}));
  }
  function closeEditor(){const el=$('weekly-editor-root');if(el)el.innerHTML='';editing=null;}
  async function refreshHome(){
@@ -201,7 +221,7 @@
    filter:v=>{filter=v;render()},
    newTask:d=>editor(null,d),
    edit:id=>{let row=records.find(x=>x.id===id);if(row)editor(row,row.dia_semana)},
-   closeEditor,save,remove,toggle,
+   closeEditor,save,remove,toggle,adjustNumber,
    change:(id,d)=>{const p=records.find(x=>x.id===id);if(p)updateRow(id,{realizado:Math.max(0,Math.min(p.meta,p.realizado+d)),concluido:Math.max(0,Math.min(p.meta,p.realizado+d))>=p.meta})}
  };
 })();
