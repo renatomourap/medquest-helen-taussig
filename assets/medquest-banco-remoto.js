@@ -31,7 +31,11 @@ async function carregarBancoRemoto() {
       tema = { id: item.tema_id, nome: item.tema_nome || item.tema_id, questoes: [] };
       disciplina.temas.push(tema);
     }
-    if (tema.questoes.some(q => q.id === item.id || q.enunciado === item.enunciado)) continue;
+    const existente = tema.questoes.find(q => q.id === item.id || q.enunciado === item.enunciado);
+    if (existente) {
+      if (item.nivel_dificuldade) existente.nivel_dificuldade = item.nivel_dificuldade;
+      continue;
+    }
     const alts = Array.isArray(item.alternativas) ? item.alternativas : [];
     if (alts.length !== 4) continue;
     tema.questoes.push({
