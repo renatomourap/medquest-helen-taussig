@@ -1,0 +1,89 @@
+/* MedQuest | Tempo de estudo, leitura integrada, histórico e formulário. */
+.mq-top-timer,.mq-question-timer{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #80663b;color:#f0ca75;background:#17222c;border-radius:9px;padding:8px 11px;font:700 .73rem Inter,Arial,sans-serif;white-space:nowrap;cursor:pointer}
+.mq-top-timer:hover,.mq-question-timer:hover{background:#303022}
+.mq-question-timer{margin-left:auto;font-size:.78rem}
+.mq-time-dock{position:fixed;bottom:16px;right:16px;z-index:119;width:min(292px,calc(100vw - 32px));padding:12px;background:#0d1825;border:1px solid #84683d;border-radius:13px;box-shadow:0 14px 40px rgba(0,0,0,.5);color:#eef3f7}
+.mq-time-dock[hidden]{display:none!important}
+.mq-time-head{display:flex;gap:10px;align-items:start;justify-content:space-between}
+.mq-time-head>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.mq-time-head small{font-size:.65rem;color:#e4ba65;text-transform:uppercase;letter-spacing:.06em}
+.mq-time-head strong{font-size:1.35rem;line-height:1.1;font-variant-numeric:tabular-nums;color:#fff;font-weight:700}
+.mq-time-head span{font-size:.66rem;color:#acbac9;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:235px}
+.mq-time-head>button{border:0;background:transparent;color:#d3b472;font-size:1.1rem;padding:2px 5px;cursor:pointer}
+.mq-time-controls{display:flex;gap:5px;margin-top:11px}
+.mq-time-controls>button{flex:1;min-width:0;border:1px solid #66563a;border-radius:7px;color:#efc975;background:transparent;padding:8px 4px;cursor:pointer;font:650 .68rem Inter,sans-serif}
+.mq-time-controls>button:first-child{background:#eec56c;color:#141c24}
+.mq-time-controls>button:disabled{opacity:.4;cursor:not-allowed}
+.mq-time-dock:not(.mq-dock-open) .mq-time-controls{display:none}
+.mq-time-dock:not(.mq-dock-open){width:210px}
+.mq-time-dock:not(.mq-dock-open) .mq-time-head strong{font-size:1.18rem}
+.mq-study-dialog{position:fixed;inset:0;z-index:550;display:flex;align-items:center;justify-content:center;background:rgba(0,6,12,.78);backdrop-filter:blur(4px);padding:18px;overflow-y:auto}
+.mq-study-dialog[hidden]{display:none!important}
+.mq-study-dialog-card{width:min(540px,100%);max-height:calc(100dvh - 36px);overflow-y:auto;background:#0c1724;border:1px solid #765d33;border-radius:16px;padding:23px;box-shadow:0 22px 66px rgba(0,0,0,.64)}
+.mq-study-dialog-card header{display:flex;justify-content:space-between;align-items:start;gap:12px;margin-bottom:20px}
+.mq-study-dialog-card header small{color:#f2c86d;font-size:.66rem;font-weight:800;letter-spacing:.13em}
+.mq-study-dialog-card header h2{font:500 1.45rem 'Playfair Display',Georgia,serif;margin:5px 0 0;color:#fff}
+.mq-study-dialog-card header>button{background:none;border:0;font-size:1.5rem;color:#aab8c5;cursor:pointer}
+#mq-study-session-form{display:grid;gap:13px}
+#mq-study-session-form label{display:grid;gap:6px;font-size:.76rem;font-weight:650;color:#b5c3d2;min-width:0}
+#mq-study-session-form input,#mq-study-session-form textarea,#mq-study-session-form select{box-sizing:border-box;width:100%;min-width:0;padding:11px 12px;border:1px solid #334555;border-radius:9px;color:#edf2f7;background:#152231;font:inherit}
+#mq-study-session-form textarea{resize:vertical}
+#mq-study-session-form input:focus-visible,#mq-study-session-form select:focus-visible{outline:2px solid #efc975;outline-offset:1px}
+.mq-study-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mq-study-description{background:#132333;border-radius:9px;color:#b8c6d5;font-size:.78rem;line-height:1.5;padding:13px;margin:0}
+.mq-study-error{font-size:.78rem;color:#fa979c;min-height:2px;margin:0}
+.mq-study-dialog-card footer{display:flex;justify-content:flex-end;gap:10px}
+.mq-study-dialog-card footer button{border:1px solid #66563c;background:transparent;color:#efc975;border-radius:9px;padding:10px 17px;cursor:pointer;font-size:.78rem;font-weight:750}
+.mq-study-dialog-card footer button.mq-study-gold{background:#eec66d;color:#111b24}
+.mq-study-dialog-card footer button:disabled{opacity:.6}
+.mq-history-panel{margin-top:15px;padding:18px;background:#0b1927;border:1px solid #2a3a4a;border-radius:14px;color:#eaf0f5;min-width:0}
+.mq-history-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:15px}
+.mq-history-head h2{color:#fff;font-weight:720;font-size:.95rem}
+.mq-history-head p{color:#96a6b6;font-size:.73rem;margin:5px 0 0}
+.mq-history-head button{background:#edc66e;border:1px solid #edc66e;color:#111b24;border-radius:9px;padding:9px 13px;font-weight:750;font-size:.76rem;cursor:pointer;white-space:nowrap}
+.mq-history-filters{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;padding:10px;border:1px solid #2b3a47;border-radius:10px}
+.mq-history-filters label{display:flex;gap:9px;align-items:center;color:#b6c5d5;font-size:.73rem}
+.mq-history-filters select{min-width:165px;max-width:200px;border:1px solid #405162;padding:9px;background:#122233;color:#fff;border-radius:8px}
+.mq-history-summary{display:flex;align-items:baseline;gap:10px}
+.mq-history-summary strong{font-size:1.2rem;color:#f1c872;font-variant-numeric:tabular-nums}
+.mq-history-summary span{color:#93a2b2;font-size:.71rem}
+.mq-history-day{border:1px solid #2c3a47;background:#0b1724;border-radius:10px;margin-bottom:9px;overflow:hidden}
+.mq-history-day summary{cursor:pointer;display:flex;justify-content:space-between;gap:12px;list-style:none;padding:13px 15px;color:#e4ebf1;font-size:.8rem;text-transform:capitalize}
+.mq-history-day summary::-webkit-details-marker{display:none}
+.mq-history-day summary:before{content:'▸';color:#eec56f;margin-right:6px}
+.mq-history-day[open] summary:before{content:'▾'}
+.mq-history-day summary span{flex:1}
+.mq-history-day summary b{color:#f0c975}
+.mq-history-line{display:flex;justify-content:space-between;align-items:center;gap:14px;border-top:1px solid #283949;padding:12px 15px}
+.mq-history-line>div:first-child{display:flex;flex-direction:column;gap:5px;min-width:0}
+.mq-history-line b{font-size:.77rem;color:#fff;overflow-wrap:anywhere}
+.mq-history-line small{font-size:.69rem;color:#a5b4c2;line-height:1.4}
+.mq-history-line>strong{color:#efc977}
+.mq-history-line-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.mq-history-line-actions strong{font-size:.78rem;color:#f1cb7c;margin-right:5px}
+.mq-history-line-actions button{border:1px solid #4f4c42;background:transparent;color:#dfc38b;padding:5px 8px;border-radius:7px;font-size:.68rem;cursor:pointer}
+.mq-history-line-actions button:last-child{color:#fa979c;border-color:#633946}
+.mq-history-empty{font-size:.83rem;color:#99aabc;padding:15px;line-height:1.5}
+.mq-history-footnote{color:#8698aa;font-size:.69rem;line-height:1.5;margin:13px 0 0}
+.mq-pdf-reader{position:fixed;inset:0;background:rgba(0,5,12,.85);z-index:500;display:flex;justify-content:center;align-items:center;padding:clamp(8px,1.5vw,20px)}
+.mq-pdf-reader[hidden]{display:none!important}
+.mq-pdf-reader-card{display:flex;flex-direction:column;background:#0b1622;border:1px solid #76613c;border-radius:14px;overflow:hidden;width:min(1100px,100%);height:min(94dvh,920px);min-height:330px}
+.mq-pdf-reader-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;flex-wrap:wrap}
+.mq-pdf-reader-head>div:first-child{min-width:150px;flex:1}
+.mq-pdf-reader-head h2{color:#fff;font:600 .88rem Inter,Arial,sans-serif;margin:0 0 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mq-pdf-reader-head span{color:#a0afbf;font-size:.68rem}
+.mq-pdf-reader-actions{display:flex;gap:6px;flex-wrap:wrap}
+.mq-pdf-reader-actions button,.mq-pdf-reader-actions a{font-size:.71rem;border:1px solid #675438;background:transparent;color:#edc371;padding:8px 10px;border-radius:8px;text-decoration:none;cursor:pointer;white-space:nowrap}
+.mq-pdf-reader-actions button:first-child{background:#edc371;color:#121b24;font-weight:700}
+.mq-pdf-frame{flex:1;min-height:0;width:100%;border:0;background:#111}
+@media(max-width:680px){
+ .mq-top-timer{font-size:.68rem;padding:7px}
+ .mq-time-dock{right:8px;bottom:8px;width:min(270px,calc(100vw - 16px))}
+ .mq-study-cols{grid-template-columns:1fr}
+ .mq-study-dialog-card{padding:16px}
+ .mq-history-head,.mq-history-filters,.mq-history-line{align-items:flex-start;flex-direction:column}
+ .mq-history-filters label{width:100%;justify-content:space-between}
+ .mq-history-filters select{max-width:100%}
+ .mq-history-line-actions{justify-content:flex-start}
+ .mq-pdf-reader-card{height:97dvh}
+}
