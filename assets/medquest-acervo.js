@@ -20,7 +20,7 @@ section.innerHTML=`
 <p id="mq-count"></p><div id="mq-list" class="mq-library-grid"></div><p id="mq-empty" class="mq-msg" hidden>Nenhum material publicado nesta categoria.</p>
 </div>
 <div id="mq-editor" hidden>
-<div class="mq-library-box"><h2>Publicar PDF</h2><p>Somente administradores. Arquivo privado para alunos aprovados (até 15 MB).</p>
+<div class="mq-library-box"><h2>Publicar PDF</h2><p>Somente administradores. Arquivo privado para alunos aprovados (até 35 MB).</p>
 <form id="mq-pdf-form" class="mq-library-form">
 <label>Tipo<select id="mq-pdf-type"><option value="resumo">Resumo</option><option value="questoes_pdf">Caderno de questões</option></select></label>
 <label>Disciplina<select id="mq-pdf-area"></select></label><label>Assunto<input id="mq-pdf-topic" maxlength="160" required></label>
@@ -131,8 +131,8 @@ document.querySelectorAll("[data-mq-tab]").forEach(btn=>btn.onclick=()=>tab(btn.
 $("mq-pdf-form").onsubmit=async e=>{
  e.preventDefault();if(!admin())return;
  const f=$("mq-pdf-file").files[0],disc=$("mq-pdf-area").value,topic=$("mq-pdf-topic").value.trim(),title=$("mq-pdf-title").value.trim();
- if(!f||!topic||!title||f.size>15728640||!(f.type==="application/pdf"||f.name.toLowerCase().endsWith(".pdf")))
- return status("mq-pdf-status","Selecione um PDF válido de até 15 MB",true);
+ if(!f||!topic||!title||f.size>36700160||!(f.type==="application/pdf"||f.name.toLowerCase().endsWith(".pdf")))
+ return status("mq-pdf-status","Selecione um PDF válido de até 35 MB",true);
  const btn=e.submitter;btn.disabled=true;btn.textContent="Publicando...";
  const path=disc+"/"+slug(topic)+"/"+crypto.randomUUID()+".pdf";
  try{
@@ -171,6 +171,119 @@ $("mq-json-form").onsubmit=async e=>{
  }catch(error){status("mq-json-status",error.message,true)}
  finally{btn.disabled=false;btn.textContent="Validar e importar"}
 };
+
+// Envio administrativo em lote: preenche automaticamente disciplina e assunto
+// a partir dos títulos dos resumos MDA II, mantendo todos os PDFs originais.
+const bulkPanel=document.createElement("div");
+bulkPanel.className="mq-library-box";
+bulkPanel.innerHTML='<h2>Publicar vários resumos de uma vez</h2>'+
+ '<p>Selecione os PDFs finais. Confira a disciplina e o assunto de cada arquivo antes de publicar. '+
+ 'Tamanho máximo por PDF: 35 MB. A publicação é exclusiva do administrador.</p>'+
+ '<input type="file" id="mq-bulk-files" accept=".pdf,application/pdf" multiple aria-label="Selecionar resumos em PDF">'+
+ '<div id="mq-bulk-rows" class="mq-bulk-rows"></div>'+
+ '<div style="margin-top:16px"><button type="button" id="mq-bulk-send" disabled>Publicar os resumos</button></div>'+
+ '<p id="mq-bulk-status" role="status" aria-live="polite"></p>';
+$("mq-editor").append(bulkPanel);
+const summaryTypes=[
+ ["microbiota","microbiologia","Microbiota Humana"],
+ ["infeccao-hospitalar","microbiologia","Infecção Hospitalar"],
+ ["biofilme","microbiologia","Biofilmes Bacterianos"],
+ ["staphylococcus","microbiologia","Staphylococcus sp."],
+ ["hipersensibilidade","imunologia","Distúrbios de Hipersensibilidade"],
+ ["imunodeficiencias","imunologia","Imunodeficiências Primárias"],
+ ["antibiotico-i-","farmacologia","Antibióticos I — Beta-lactâmicos"],
+ ["antibioticos-i-","farmacologia","Antibióticos I — Beta-lactâmicos"],
+ ["antibiotico-ii-","farmacologia","Antibióticos II — Síntese Proteica"],
+ ["anibioticos-ii-","farmacologia","Antibióticos II — Síntese Proteica"],
+ ["antibioticos-ii-","farmacologia","Antibióticos II — Síntese Proteica"],
+ ["antibiotico-iii-","farmacologia","Antibióticos III — Sulfonamidas e Quinolonas"],
+ ["antibioticos-iii-","farmacologia","Antibióticos III — Sulfonamidas e Quinolonas"],
+ ["sulfonamidas","farmacologia","Antibióticos III — Sulfonamidas e Quinolonas"],
+ ["quinolonas","farmacologia","Antibióticos III — Sulfonamidas e Quinolonas"],
+ ["beta-lactamicos","farmacologia","Antibióticos I — Beta-lactâmicos"],
+ ["b-lactamicos","farmacologia","Antibióticos I — Beta-lactâmicos"],
+ ["sintese-proteicas","farmacologia","Antibióticos II — Síntese Proteica"],
+ ["sintese-proteica","farmacologia","Antibióticos II — Síntese Proteica"]
+];
+let queuedSummaries=[];
+const autoSummary=(filename)=>{
+ const clean=slug(filename);
+ const match=summaryTypes.find(([key])=>clean.includes(key));
+ return match?{area:match[1],topic:match[2]}:{area:"microbiologia",topic:filename.replace(/\.pdf$/i,"").trim()};
+};
+const createBulkField=(title,value)=>{
+ const label=document.createElement("label");label.textContent=title;
+ const field=document.createElement("input");field.value=value;field.required=true;field.maxLength=160;
+ label.append(field);return {label,input:field};
+};
+$("mq-bulk-files").onchange=e=>{
+ queuedSummaries=[];const container=$("mq-bulk-rows");container.replaceChildren();
+ const files=Array.from(e.target.files||[]);
+ $("mq-bulk-send").disabled=!files.length;
+ if(!files.length){status("mq-bulk-status","");return}
+ for(const f of files){
+  const preset=autoSummary(f.name),row=document.createElement("div");row.className="mq-bulk-row";
+  const fileName=document.createElement("div");fileName.className="mq-bulk-filename";
+  fileName.textContent=f.name+" · "+(f.size/1048576).toFixed(1)+" MB";
+  const d=document.createElement("label");d.textContent="Disciplina";
+  const area=document.createElement("select");
+  for(const [key,name] of names())area.add(new Option(name,key));
+  area.value=preset.area;d.append(area);
+  const topic=createBulkField("Assunto",preset.topic);
+  const title=createBulkField("Título","Resumo — "+preset.topic);
+  row.append(fileName,d,topic.label,title.label);container.append(row);
+  queuedSummaries.push({file:f,area,topic:topic.input,title:title.input});
+ }
+ $("mq-bulk-send").textContent="Publicar "+files.length+(files.length===1?" resumo":" resumos");
+ status("mq-bulk-status","Confira as informações e publique usando a conta de administrador.");
+};
+$("mq-bulk-send").onclick=async e=>{
+ if(!admin())return status("mq-bulk-status","Publicação exclusiva do administrador.",true);
+ if(!queuedSummaries.length)return;
+ const candidates=queuedSummaries.map(item=>({
+  file:item.file,disc:item.area.value,topic:item.topic.value.trim(),title:item.title.value.trim()
+ }));
+ if(candidates.some(x=>!x.topic||!x.title||!areas[x.disc]||
+       x.file.size>36700160||x.file.size===0||
+       !(x.file.type==="application/pdf"||x.file.name.toLowerCase().endsWith(".pdf"))))
+  return status("mq-bulk-status","Revise os campos e confirme que cada PDF tem até 35 MB.",true);
+ if(!confirm("Publicar "+candidates.length+" resumos oficiais no MedQuest?"))return;
+ const btn=e.currentTarget;btn.disabled=true;
+ let imported=0,skipped=0;const failed=[];
+ try{
+  await fetchList();
+  const present=new Set(list.filter(x=>x.tipo==="resumo")
+    .map(x=>x.disciplina_id+"|"+slug(x.tema_id)));
+  for(let index=0;index<candidates.length;index++){
+   const x=candidates[index],identifier=x.disc+"|"+slug(x.topic);
+   if(present.has(identifier)){skipped++;continue}
+   btn.textContent="Publicando "+(index+1)+" de "+candidates.length+"...";
+   status("mq-bulk-status","Enviando: "+x.file.name+" ("+(index+1)+"/"+candidates.length+")");
+   const path=x.disc+"/"+slug(x.topic)+"/"+crypto.randomUUID()+".pdf";
+   try{
+    const upload=await db.storage.from("materiais_medquest").upload(path,x.file,{
+      contentType:"application/pdf",upsert:false
+    });
+    if(upload.error)throw upload.error;
+    const saved=await db.from("materiais_medquest").insert({
+      tipo:"resumo",disciplina_id:x.disc,tema_id:x.topic,
+      titulo:x.title,arquivo_path:path
+    });
+    if(saved.error){
+      await db.storage.from("materiais_medquest").remove([path]);
+      throw saved.error;
+    }
+    present.add(identifier);imported++;
+   }catch(error){failed.push(x.file.name+": "+error.message)}
+  }
+  const count=imported+" publicados, "+skipped+" já existentes";
+  status("mq-bulk-status",failed.length?count+"; "+failed.length+" falharam. "+failed.join(" | "):count,
+    failed.length>0);
+  await fetchList();
+ }catch(error){status("mq-bulk-status","Falha: "+error.message,true)}
+ finally{btn.disabled=false;btn.textContent="Publicar "+queuedSummaries.length+" resumos"}
+};
+
 const oldHide=window.esconderApp;
 window.esconderApp=function(){oldHide();section.style.display="none"};
 const oldScreen=window.mostrarTela;
