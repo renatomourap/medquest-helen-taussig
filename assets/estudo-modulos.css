@@ -27,3 +27,50 @@
 .study-official-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;color:var(--texto);font-size:.92rem;padding:15px;background:var(--superficie-2);border-radius:10px;max-height:none}
 .study-form label:has(input[type="checkbox"]){display:flex;flex-direction:row;align-items:center;gap:10px;color:var(--ouro)}
 .study-form label input[type="checkbox"]{width:18px;height:18px;accent-color:var(--ouro)}
+
+
+/* Resumos: acervo visual + documento PDF original, sem substituir o original por texto */
+.study-pdf-toolbar{padding:10px 0 22px;align-items:center}
+.study-pdf-toolbar p{font-size:14px;color:var(--texto);margin:0 0 7px;line-height:1.6}
+.study-pdf-toolbar small{font-size:12px;color:var(--cinza);display:block}
+.study-pdf-grid{display:grid;grid-template-columns:1fr;gap:13px}
+.study-pdf-card{display:flex;align-items:center;gap:20px;padding:22px 24px;
+ border:1px solid rgba(201,162,94,.22);border-radius:15px;
+ background:linear-gradient(110deg,rgba(16,34,51,.98),rgba(9,19,32,.98));min-height:115px}
+.study-pdf-symbol{font-size:29px;flex:0 0 54px;width:54px;height:60px;display:flex;align-items:center;
+ justify-content:center;color:#e5c27d;background:rgba(220,180,106,.07);
+ border:1px solid rgba(220,180,106,.22);border-radius:12px}
+.study-pdf-meta{flex:1;min-width:0}
+.study-pdf-meta h3{font:600 19px/1.35 'Playfair Display',Georgia,serif;color:#f2f1eb;margin:0 0 6px}
+.study-pdf-meta p{color:#aab8c6;margin:0 0 8px;font-size:13px}
+.study-pdf-meta small{font-size:12px}
+.study-pdf-ready{color:#83d6a9}
+.study-pdf-await{color:#adbac6;line-height:1.5;font-size:12px}
+.study-pdf-buttons{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.study-pdf-buttons .study-pdf-read{background:linear-gradient(115deg,#e8bf75,#cd9f51);color:#101925;
+ border:0;font-weight:700;padding:12px 17px;white-space:nowrap}
+#study-pdf-feedback{min-height:12px;font-size:13px;margin:2px 0 16px;line-height:1.5}
+.study-pdf-dialog{position:fixed;inset:0;z-index:20000;display:flex;flex-direction:column;
+ background:#070e18;color:#f7f7f7}
+.study-pdf-dialog-head{min-height:75px;display:flex;align-items:center;justify-content:space-between;
+ padding:15px 24px;gap:16px;background:linear-gradient(115deg,#0b192b,#111c2b);
+ border-bottom:1px solid rgba(218,178,101,.24)}
+.study-pdf-dialog-title{display:flex;flex-direction:column;gap:5px;min-width:0}
+.study-pdf-dialog-title strong{font:600 19px/1.3 Georgia,serif;color:#eacb8f;overflow:hidden;text-overflow:ellipsis}
+.study-pdf-dialog-title small{font-size:12px;color:#b8c4d1}
+.study-pdf-dialog-actions{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.study-pdf-dialog-actions :is(button,a){display:inline-block;padding:10px 16px;border:1px solid rgba(218,178,101,.38);
+ border-radius:9px;background:transparent;color:#eacb8f;font:600 13px/1.3 Inter,sans-serif;
+ text-decoration:none;cursor:pointer;white-space:nowrap}
+.study-pdf-dialog-actions button{background:#e3bf7e;color:#121926}
+.study-pdf-iframe{display:block;border:0;width:100%;flex:1;min-height:0;background:#e4e4e4}
+@media(max-width:710px){
+ .study-pdf-card{flex-wrap:wrap;gap:12px;padding:17px}
+ .study-pdf-symbol{flex:0 0 43px;width:43px;height:47px}
+ .study-pdf-meta h3{font-size:17px}
+ .study-pdf-buttons{flex-basis:100%}
+ .study-pdf-buttons button{width:100%}
+ .study-pdf-dialog-head{padding:12px;min-height:68px;flex-wrap:wrap}
+ .study-pdf-dialog-title strong{font-size:15px}
+ .study-pdf-dialog-actions :is(button,a){padding:8px 10px;font-size:12px}
+}
