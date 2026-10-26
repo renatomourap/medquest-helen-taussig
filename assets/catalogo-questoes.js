@@ -64,7 +64,10 @@
     "Pulgas, piolhos e percevejos",
     "Carrapatos e ácaros de importância médica"
   ],
-  "introducao-a-parasitologia": [
+  "hipersensibilidade": ["Fundamentos da hipersensibilidade e inflamação crônica","Hipersensibilidade tipos II, III e IV","Alergia: IgE, mastócitos e resposta Th2","Autoimunidade e doenças imunomediadas","Tratamento e imunomodulação"],
+    "microbiota-humana": ["Conceitos, microbioma e métodos de estudo","Ecossistemas e distribuição da microbiota","Colonização, proteção e funções metabólicas","Disbiose e infecções oportunistas","Probióticos, prebióticos e intervenções"],
+    "infeccao-hospitalar": ["Definição e manifestações das IRAS","Epidemiologia e vigilância hospitalar","Transmissão, biofilmes e resistência","Prevenção, controle e uso racional de dispositivos","Vulnerabilidade do hospedeiro e abordagem clínica"],
+    "introducao-a-parasitologia": [
     "Parasitismo e expressão clínica",
     "Habitat, hospedeiros e especificidade",
     "Ecologia de populações parasitárias",
@@ -80,6 +83,190 @@
     const m=String(q.hotpoint||'').match(/(?:hot\s*point|hp)[\s.:#-]*0?([1-9]\d*)/i);
     return m?'Hot Point '+Number(m[1]):String(q.hotpoint||'').trim()||'Não definido';
   };
+  // Classificação editorial das 140 questões locais legadas.
+  // A dificuldade explícita do PDF/Supabase sempre tem precedência sobre essa classificação.
+  const localGrades={
+  "imunodeficiencias-primarias": {
+    "intermediario": [
+      1,
+      3,
+      4,
+      8
+    ],
+    "dificil": [
+      2,
+      5,
+      6,
+      10
+    ],
+    "muito_dificil": [
+      7,
+      9
+    ]
+  },
+  "hipersensibilidade": {
+    "intermediario": [
+      101,
+      102,
+      104,
+      107,
+      112,
+      125
+    ],
+    "dificil": [
+      103,
+      105,
+      106,
+      108,
+      110,
+      113,
+      115,
+      117,
+      119,
+      122,
+      123,
+      126,
+      128,
+      130
+    ],
+    "muito_dificil": [
+      109,
+      111,
+      114,
+      116,
+      118,
+      120,
+      121,
+      124,
+      127,
+      129
+    ]
+  },
+  "microbiota-humana": {
+    "intermediario": [
+      201,
+      205,
+      208,
+      209,
+      211,
+      214,
+      215,
+      217,
+      218,
+      221,
+      222,
+      225,
+      227,
+      228,
+      231,
+      238,
+      241,
+      244,
+      245,
+      247
+    ],
+    "dificil": [
+      202,
+      204,
+      206,
+      207,
+      212,
+      213,
+      216,
+      219,
+      220,
+      223,
+      226,
+      229,
+      232,
+      233,
+      237,
+      239,
+      242,
+      243,
+      246,
+      248,
+      249
+    ],
+    "muito_dificil": [
+      203,
+      210,
+      224,
+      230,
+      234,
+      235,
+      236,
+      240,
+      250
+    ]
+  },
+  "infeccao-hospitalar": {
+    "intermediario": [
+      301,
+      302,
+      306,
+      308,
+      311,
+      314,
+      321,
+      322,
+      331,
+      332,
+      333,
+      336,
+      338,
+      341,
+      346
+    ],
+    "dificil": [
+      303,
+      304,
+      305,
+      307,
+      309,
+      312,
+      313,
+      315,
+      317,
+      319,
+      323,
+      325,
+      328,
+      330,
+      334,
+      335,
+      337,
+      340,
+      342,
+      343,
+      344,
+      345,
+      347
+    ],
+    "muito_dificil": [
+      310,
+      316,
+      318,
+      320,
+      324,
+      326,
+      327,
+      329,
+      339,
+      348,
+      349,
+      350
+    ]
+  }
+};
+  const gradeIndex=Object.fromEntries(Object.entries(localGrades).map(([topic,classes])=>[
+    topic,Object.fromEntries(Object.entries(classes).flatMap(([grade,ids])=>ids.map(id=>[id,grade])))
+  ]));
+  for(const disc of BANCO.disciplinas||[]) for(const topic of disc.temas||[])
+    for(const question of topic.questoes||[]){
+      const level=gradeIndex[topic.id]?.[question.id];
+      if(!question.nivel_dificuldade && level) question.nivel_dificuldade=level;
+    }
   const normalizeLevel=q=>{
     const raw=q.nivel_dificuldade ?? q.dificuldade ?? q.nivel;
     if(!raw)return 'nao_classificada';
