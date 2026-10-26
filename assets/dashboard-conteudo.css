@@ -1,0 +1,51 @@
+/* Apenas os três blocos pedidos; mantém a estrutura responsiva e o Plano da Semana. */
+#tela-dashboard #dash-disc-grid.mq-area-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+#tela-dashboard .mq-area-card{grid-column:span 2;position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;min-height:205px;padding:0;border:1px solid color-mix(in srgb,var(--mq-area) 55%,#14263b);border-radius:12px;background-color:#0b1829;background-size:auto 100%;background-position:right center;background-repeat:no-repeat;text-align:left;cursor:pointer;color:#eaf0f7;transition:border-color .18s,transform .18s;font:inherit}
+#tela-dashboard .mq-area-card:nth-last-child(-n+2){grid-column:span 3;min-height:160px}
+#tela-dashboard .mq-area-card:before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#071422f2,#071422a6 65%,#07142235),linear-gradient(0deg,#071422d9,transparent)}
+#tela-dashboard .mq-area-card:after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(120deg,color-mix(in srgb,var(--mq-area) 13%,transparent),transparent)}
+#tela-dashboard .mq-area-card:hover{border-color:var(--mq-area);transform:translateY(-2px)}
+#tela-dashboard .mq-area-card:disabled{cursor:default;opacity:.65;transform:none}
+#tela-dashboard .mq-area-card:focus-visible{outline:2px solid #f2ce85;outline-offset:3px}
+.mq-area-card-body{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:17px 17px 18px;width:100%;min-width:0;box-sizing:border-box}
+.mq-area-symbol{color:var(--mq-area);width:33px;height:33px;margin-bottom:2px}
+.mq-area-symbol svg{display:block;width:100%;height:100%}
+.mq-area-card-body>strong{font:600 19px/1.3 'Playfair Display',Georgia,serif;color:#fff}
+.mq-area-description{font-size:11px;line-height:1.55;color:#bdc9d7;max-width:210px;min-height:34px}
+.mq-area-badges{display:flex;gap:6px;flex-wrap:wrap;padding-right:23px;margin-top:3px}
+.mq-area-badges>span{font-size:10px;color:#e0e9f2;padding:4px 7px;border:1px solid color-mix(in srgb,var(--mq-area) 55%,transparent);border-radius:7px;background:color-mix(in srgb,var(--mq-area) 12%,#081522)}
+.mq-area-card-body>small{font-size:10px;color:#adbdce}
+.mq-area-arrow{position:absolute;right:13px;bottom:17px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#ffffff0d;border:1px solid #ffffff26;font-size:22px;color:#dce6f1}
+#tela-dashboard #dash-progress.mq-progress-overview{display:grid;grid-template-columns:minmax(190px,1fr) minmax(220px,1.4fr);gap:23px;align-items:center;padding:22px;background:linear-gradient(130deg,#0d1d2e,#091623);border:1px solid #324459;border-radius:13px}
+.mq-coverage-summary{display:flex;align-items:center;gap:15px;min-width:0}
+.mq-coverage-ring{width:95px;height:95px;flex:0 0 95px;display:grid;place-items:center;position:relative;border-radius:50%;background:conic-gradient(#e9c575 var(--coverage),#22354a 0)}
+.mq-coverage-ring:before{content:'';position:absolute;inset:9px;border-radius:50%;background:#0b1a2a}
+.mq-coverage-ring strong{position:relative;color:#f0d08b;font-size:22px;font-weight:650}
+.mq-coverage-summary h3{font-size:13px;color:#e9eff7;margin:0 0 7px}
+.mq-coverage-summary p{font-size:11px;line-height:1.6;color:#b4c4d7;margin:0}
+.mq-coverage-summary small{display:block;font-size:9px;color:#8ea2b8;margin-top:6px}
+.mq-area-progress{display:grid;gap:13px;min-width:0}
+.mq-area-progress-row{display:grid;grid-template-columns:minmax(85px,1fr) minmax(45px,1fr) 68px;align-items:center;gap:10px;font-size:10px;color:#b5c5d8}
+.mq-area-progress-row>span:first-child:before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;background:var(--mq-area)}
+.mq-area-progress-row>span:last-child{text-align:right;color:#b5c5d8;font-variant-numeric:tabular-nums}
+.mq-area-progress-track{height:7px;background:#213347;border-radius:20px;overflow:hidden}
+.mq-area-progress-track>span{display:block;height:100%;background:var(--mq-area);border-radius:20px}
+#tela-dashboard #stats-row.mq-dashboard-stats{display:flex;flex-direction:column;gap:16px;padding:0;margin-top:0}
+.mq-stat-modes{display:flex;border:1px solid #33485d;border-radius:9px;padding:3px;background:#0a1828;width:100%}
+.mq-stat-modes button{flex:1;padding:9px 6px;border:0;border-radius:6px;background:transparent;color:#b1c1d3;font:600 11px Inter,system-ui;cursor:pointer}
+.mq-stat-modes button[aria-pressed=true]{background:#e9c575;color:#111d29}
+.mq-stat-modes button:focus-visible{outline:2px solid #f1d38c;outline-offset:1px}
+.mq-dashboard-stats>label{display:flex;flex-direction:column;gap:7px;color:#a7b9cd;font-size:11px;min-width:0;width:100%}
+.mq-dashboard-stats .mq-control-trigger{font-size:11px;min-width:0;white-space:normal}
+.mq-stat-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%}
+.mq-stat-metrics>div{display:flex;flex-direction:column;gap:7px;min-width:0}
+.mq-stat-metrics strong{font-size:20px;line-height:1.25;color:#f0cf87;font-weight:650;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.mq-stat-metrics span{font-size:10px;color:#b2c3d6;line-height:1.5}
+.mq-stat-explainer{color:#8fa4bc;font-size:10px;line-height:1.7;margin:0}
+.mq-dashboard-loading,.mq-dashboard-data-error{color:#b0c1d4;font-size:12px;line-height:1.6;margin:0}
+#dash-progress>button{background:#e6c47b;border:0;border-radius:8px;padding:10px;color:#102033;cursor:pointer}
+@media(max-width:1199px){#tela-dashboard #dash-progress.mq-progress-overview{grid-template-columns:1fr}.mq-area-description{font-size:10px}.mq-area-card-body{padding:14px}.mq-area-card-body>strong{font-size:17px}}
+@media(max-width:760px){#tela-dashboard #dash-disc-grid.mq-area-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#tela-dashboard .mq-area-card,#tela-dashboard .mq-area-card:nth-last-child(-n+2){grid-column:auto;min-height:180px}#tela-dashboard .mq-area-card:last-child{grid-column:1/-1;min-height:150px}.mq-area-badges>span{font-size:9px}.mq-coverage-summary{gap:16px}#tela-dashboard #dash-progress.mq-progress-overview{padding:18px;gap:20px}.mq-area-progress-row{font-size:11px;grid-template-columns:110px minmax(40px,1fr) 72px}}
+@media(max-width:420px){#tela-dashboard #dash-disc-grid.mq-area-grid{grid-template-columns:1fr}#tela-dashboard .mq-area-card,#tela-dashboard .mq-area-card:nth-last-child(-n+2),#tela-dashboard .mq-area-card:last-child{grid-column:auto;min-height:155px}.mq-area-card-body{padding:17px}.mq-area-card-body>strong{font-size:19px}.mq-area-description{max-width:230px;min-height:0;font-size:11px}.mq-area-symbol{width:28px;height:28px}.mq-area-progress-row{grid-template-columns:102px minmax(35px,1fr) 70px;gap:6px}}
+@media(prefers-reduced-motion:reduce){#tela-dashboard .mq-area-card{transition:none}}
+.mq-dashboard-section-note{font-size:11px;line-height:1.6;color:#9daec2;margin:-3px 0 14px}

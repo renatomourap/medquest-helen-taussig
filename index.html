@@ -2245,6 +2245,7 @@
 <link rel="icon" type="image/png" href="/assets/icons/medquest-192.png">
 <link rel="stylesheet" href="/assets/instalar-app.css?v=1">
 <link rel="stylesheet" href="assets/resultado-feedback.css?v=1">
+<link rel="stylesheet" href="assets/dashboard-conteudo.css?v=1">
 </head>
 <body>
 
@@ -2608,6 +2609,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>
               <h2>Explorar por área</h2>
             </div>
+            <p class="mq-dashboard-section-note">Escolha uma área para acessar as questões e os resumos publicados.</p>
             <div class="dash-disc-grid" id="dash-disc-grid"></div>
 
             <!-- Meu Progresso -->
@@ -2615,22 +2617,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
               <h2>Meu progresso</h2>
             </div>
-            <div class="dash-progress" id="dash-progress">
-              <div class="progress-row">
-                <div class="donut-wrap">
-                  <svg viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--borda)" stroke-width="2.5"/>
-                    <circle id="donut-bar" cx="18" cy="18" r="15.9" fill="none" stroke="var(--ouro)" stroke-width="2.5" stroke-dasharray="0 100" stroke-linecap="round"/>
-                  </svg>
-                  <div class="donut-label" id="donut-label">0%</div>
-                </div>
-                <div class="progress-detail">
-                  <h3>Desempenho geral</h3>
-                  <p class="p-sub" id="progress-sub">Responda questões para ver seu progresso</p>
-                  <div class="progress-legend" id="progress-legend"></div>
-                </div>
-              </div>
-            </div>
+            <div class="dash-progress" id="dash-progress" aria-label="Progresso nas questões disponíveis"></div>
           </div>
 
           <!-- Right sidebar -->
@@ -2655,20 +2642,7 @@
                   Estatísticas
                 </h3>
               </div>
-              <div class="stats-row" id="stats-row">
-                <div class="stat-box">
-                  <div class="sb-num" id="dash-stat-total">0</div>
-                  <div class="sb-label">Questões<br>respondidas</div>
-                </div>
-                <div class="stat-box">
-                  <div class="sb-num" id="dash-stat-acertos">0</div>
-                  <div class="sb-label">Acertos</div>
-                </div>
-                <div class="stat-box">
-                  <div class="sb-num" id="dash-stat-temas">0</div>
-                  <div class="sb-label">Temas<br>estudados</div>
-                </div>
-              </div>
+              <div class="stats-row" id="stats-row" aria-label="Estatísticas individuais"></div>
             </div>
           </div>
         </div>
@@ -7645,73 +7619,10 @@ function renderSidebarDisciplinas() {
 }
 
 async function renderDashboard() {
-  // Nome
-  const nome = (perfilAtual && perfilAtual.nome) || (usuarioAtual ? usuarioAtual.email.split('@')[0] : 'Estudante');
-  const dashNome = document.getElementById('dash-nome');
-  if (dashNome) dashNome.textContent = nome;
-
-  // Disciplinas grid
-  const grid = document.getElementById('dash-disc-grid');
-  if (grid) {
-    grid.innerHTML = '';
-    disciplinasAlfabeticas().forEach(d => {
-      const totalQ = d.temas.reduce((s, t) => s + t.questoes.length, 0);
-      const temTemas = d.temas.length > 0;
-      const card = document.createElement('div');
-      card.className = 'dash-disc-card';
-      if (ILUSTRACOES.includes(d.id)) {
-        card.style.backgroundImage = `url(assets/disciplinas/${d.id}.png)`;
-      }
-      card.innerHTML = `
-        <div class="ddc-overlay">
-          <div class="ddc-nome">${d.nome}</div>
-          <div class="ddc-info">${temTemas ? totalQ + (totalQ !== 1 ? ' questões' : ' questão') : 'Sem questões cadastradas'}</div>
-        </div>
-      `;
-      card.style.cursor = 'pointer';
-      card.onclick = () => abrirModalidade(d.id);
-      grid.appendChild(card);
-    });
-  }
-
-  // Estatísticas e progresso via Supabase
-  let totalResp = 0, totalAcertos = 0, temasSet = new Set();
-  if (usuarioAtual) {
-    try {
-      const { data } = await db.from('progresso').select('*').eq('usuario_id', usuarioAtual.id);
-      if (data) {
-        totalResp = data.length;
-        totalAcertos = data.filter(r => r.acertou).length;
-        data.forEach(r => { if (r.tema_id) temasSet.add(r.tema_id); });
-      }
-    } catch(e) { /* silencioso */ }
-  }
-
-  // Stats
-  const sTot = document.getElementById('dash-stat-total');
-  const sAce = document.getElementById('dash-stat-acertos');
-  const sTem = document.getElementById('dash-stat-temas');
-  if (sTot) sTot.textContent = totalResp;
-  if (sAce) sAce.textContent = totalResp > 0 ? Math.round((totalAcertos / totalResp) * 100) + '%' : '0%';
-  if (sTem) sTem.textContent = temasSet.size;
-
-  // Donut
-  const totalQuestoes = BANCO.disciplinas.reduce((s, d) => s + d.temas.reduce((ss, t) => ss + t.questoes.length, 0), 0);
-  const pct = totalQuestoes > 0 ? Math.round((totalResp / totalQuestoes) * 100) : 0;
-  const donutBar = document.getElementById('donut-bar');
-  const donutLabel = document.getElementById('donut-label');
-  if (donutBar) donutBar.setAttribute('stroke-dasharray', pct + ' ' + (100 - pct));
-  if (donutLabel) donutLabel.textContent = pct + '%';
-
-  // Legend
-  const legend = document.getElementById('progress-legend');
-  if (legend) {
-    legend.innerHTML = `
-      <div class="pl-item"><span class="pl-dot" style="background:var(--ouro);"></span> Respondidas: ${totalResp}</div>
-      <div class="pl-item"><span class="pl-dot" style="background:#4ade80;"></span> Acertos: ${totalAcertos}</div>
-      <div class="pl-item"><span class="pl-dot" style="background:#f87171;"></span> Erros: ${totalResp - totalAcertos}</div>
-    `;
-  }
+  const nome = perfilAtual?.nome || (usuarioAtual?.email ? usuarioAtual.email.split('@')[0] : 'Estudante');
+  const destino = document.getElementById('dash-nome');
+  if (destino) destino.textContent = nome;
+  if (window.MedQuestDashboard) await window.MedQuestDashboard.render();
 }
 
 function continuarDeOndeParou() {
@@ -7769,5 +7680,6 @@ iniciarAuth();
 <script src="assets/progresso-analytics.js?v=historico-manual-20261026"></script>
 <script src="/assets/instalar-app.js?v=1"></script>
 <script src="assets/resultado-feedback.js?v=1"></script>
+<script src="assets/dashboard-conteudo.js?v=1"></script>
 </body>
 </html>
