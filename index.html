@@ -2071,6 +2071,178 @@
       min-height: 152px;
     }
   }
+
+  /* iPad Safari — evita a versão intermediária esticada do dashboard.
+     Preserva a identidade MedQuest: azul-marinho, dourado e cartões ilustrados.
+     Não altera a experiência no desktop e nos celulares comuns. */
+  @media (min-width: 700px) and (max-width: 1366px) {
+    html.mq-ipad-safari .main-area,
+    html.mq-ipad-safari #tela-dashboard .dash-center,
+    html.mq-ipad-safari #tela-dashboard .dash-wrapper {
+      min-width: 0;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-disc-grid {
+      min-width: 0;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-disc-card {
+      background-size: auto 100%;
+      background-position: right center;
+      background-repeat: no-repeat;
+      background-color: #0a111b;
+      isolation: isolate;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-disc-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(5,12,22,.94) 0%,rgba(5,12,22,.57) 46%,rgba(5,12,22,.12) 100%),
+                  linear-gradient(0deg,rgba(5,12,22,.78),transparent 80%);
+    }
+    html.mq-ipad-safari #tela-dashboard .ddc-overlay {
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+    }
+    html.mq-ipad-safari #tela-dashboard .ddc-nome {
+      color: #fff;
+      line-height: 1.28;
+      overflow-wrap: break-word;
+    }
+    html.mq-ipad-safari #tela-dashboard .ddc-info {
+      color: #f2cd83;
+      font-variant-numeric: tabular-nums;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-disc-card:focus-visible {
+      outline: 2px solid #e7bd6d;
+      outline-offset: 3px;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-right .right-panel {
+      min-width: 0;
+    }
+  }
+
+  /* iPad em paisagem: 3 cartões equilibrados, como na grade principal
+     do MedQuest, em vez dos 2 cartões excessivamente ampliados. */
+  @media (min-width: 820px) and (max-width: 1199px) and (orientation: landscape) {
+    html.mq-ipad-safari .sidebar { width: 198px; }
+    html.mq-ipad-safari .main-area { margin-left: 198px; }
+    html.mq-ipad-safari .sidebar-logo { padding: 16px 12px 12px; gap: 8px; }
+    html.mq-ipad-safari .sidebar-nav { padding: 6px 8px; }
+    html.mq-ipad-safari .sidebar-nav a,
+    html.mq-ipad-safari .sidebar-nav button { padding: 9px 10px; gap: 10px; }
+    html.mq-ipad-safari .sidebar-section-title { padding: 8px 12px 4px; }
+    html.mq-ipad-safari .sidebar-disc { padding: 8px 11px; }
+
+    html.mq-ipad-safari #tela-dashboard .dash-wrapper {
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 0;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-center {
+      padding: 10px 16px 14px;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-hero {
+      min-height: 114px;
+      padding: 18px 23px;
+      margin-bottom: 11px;
+      border-radius: 12px;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-hero h1 {
+      font-size: clamp(1.43rem, 2.1vw, 1.8rem);
+      line-height: 1.22;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-hero .frase { font-size: .79rem; }
+    html.mq-ipad-safari #tela-dashboard .dash-actions {
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 10px;
+      margin-bottom: 13px;
+    }
+    html.mq-ipad-safari #tela-dashboard .action-card {
+      min-width: 0;
+      min-height: 64px;
+      padding: 10px 12px;
+      gap: 10px;
+      border-radius: 11px;
+    }
+    html.mq-ipad-safari #tela-dashboard .action-card .ac-icon {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      border-radius: 9px;
+    }
+    html.mq-ipad-safari #tela-dashboard .action-card .ac-text { min-width: 0; }
+    html.mq-ipad-safari #tela-dashboard .action-card .ac-text h3 { font-size: .84rem; }
+    html.mq-ipad-safari #tela-dashboard .action-card .ac-text p { font-size: .71rem; }
+    html.mq-ipad-safari #tela-dashboard .dash-section-head {
+      margin-bottom: 9px;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-section-head h2 { font-size: 1.12rem; }
+    html.mq-ipad-safari #tela-dashboard .dash-disc-grid {
+      grid-template-columns: repeat(3,minmax(0,1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-disc-card {
+      min-height: 0;
+      height: clamp(122px, 16dvh, 154px);
+      border-radius: 13px;
+    }
+    html.mq-ipad-safari #tela-dashboard .ddc-overlay { padding: 12px; }
+    html.mq-ipad-safari #tela-dashboard .ddc-nome { font-size: .9rem; font-weight: 700; }
+    html.mq-ipad-safari #tela-dashboard .ddc-info { font-size: .76rem; margin-top: 3px; }
+    html.mq-ipad-safari #tela-dashboard .dash-progress {
+      padding: 14px 16px;
+      margin-bottom: 11px;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-right {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 12px;
+      border-left: 0;
+      border-top: 1px solid var(--borda);
+      padding: 12px 16px 20px;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-right .right-panel {
+      margin: 0;
+      padding: 14px;
+    }
+  }
+
+  /* iPad retrato: grade de duas colunas sem cortar títulos ou imagens. */
+  @media (min-width: 700px) and (max-width: 959px) and (orientation: portrait) {
+    html.mq-ipad-safari #tela-dashboard .dash-center { padding: 14px 18px 20px; }
+    html.mq-ipad-safari #tela-dashboard .dash-disc-grid {
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 12px;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-disc-card {
+      min-height: 160px;
+      border-radius: 13px;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-right {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 12px;
+      padding: 14px 18px;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-right .right-panel {
+      margin: 0;
+    }
+  }
+
+  /* No modo desktop do Safari, o iPad pode anunciar viewport de 1200–1366 px:
+     preserve os painéis e o encaixe sem ampliar a ilustração dos cartões. */
+  @media (min-width: 1200px) and (max-width: 1366px) {
+    html.mq-ipad-safari #tela-dashboard .dash-disc-card {
+      background-size: auto 100%;
+    }
+    html.mq-ipad-safari #tela-dashboard .dash-right {
+      scrollbar-width: thin;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -2414,7 +2586,7 @@
                 </div>
                 <div class="ac-text">
                   <h3>Continue de onde parou</h3>
-                  <p id="study-home-last">Retome questões, anotações ou resumos.</p>
+                  <p id="study-home-last">Retome questões e resumos.</p>
                 </div>
                 <span class="ac-arrow">→</span>
               </div>
@@ -2472,17 +2644,6 @@
                 <button type="button" class="weekly-open-all" onclick="abrirEstudo('plano')">Ver todas →</button>
               </div>
               <div class="study-home-box" id="study-home-plan"><p>Nenhuma meta nesta semana.</p></div>
-            </div>
-
-            <!-- Últimas anotações -->
-            <div class="right-panel">
-              <div class="rp-head">
-                <h3>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                  Últimas anotações
-                </h3>
-              </div>
-              <div class="study-home-box" id="study-home-notes"><p>Nenhuma anotação ainda.</p></div>
             </div>
 
             <!-- Estatísticas -->
@@ -7530,7 +7691,7 @@ async function salvarProgresso(questaoIndex, letraMarcada, acertou) {
 // ==================== INICIAR ====================
 iniciarAuth();
 </script>
-<script src="assets/estudo-modulos.js?v=pdf-original-20261026"></script>
+<script src="assets/estudo-modulos.js?v=dashboard-ipad-sem-anotacoes-20261026"></script>
 <script src="assets/medquest-acervo.js?v=cronometro-pdf-20261026"></script>
 <script src="assets/plano-semana.js"></script>
 <script src="assets/catalogo-questoes.js?v=hotpoints-ordem-condicional-20261026"></script>
