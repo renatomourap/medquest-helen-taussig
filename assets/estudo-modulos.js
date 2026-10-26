@@ -11,6 +11,7 @@
  const show=kind=>{
   mode=kind;esconderApp();$('tela-estudo').style.display='block';fecharSidebar();setNavActive(({resumo:'nav-resumo',anotacao:'nav-notas',plano:'nav-plano',progresso:'nav-progresso'})[kind]);
   $('study-title').textContent=({resumo:'Resumos',anotacao:'Anotações',plano:'Plano da Semana',progresso:'Meu progresso'})[kind];
+  const subtitle=$('study-subtitle');if(subtitle)subtitle.textContent=({resumo:'Consulte os materiais oficiais publicados pela administração.',anotacao:'Registre e organize seus aprendizados pessoais.',plano:'Organize o que estudar em cada dia, suas metas e revisões.',progresso:'Acompanhe seus resultados nos exercícios.'})[kind];
   $('study-msg').textContent='';$('study-content').innerHTML='<p>Carregando…</p>';
   if(kind==='resumo')readOfficial();else if(kind==='anotacao')readDocs();else if(kind==='plano')window.PlanoMedQuest.open();else readProgress();
  };
