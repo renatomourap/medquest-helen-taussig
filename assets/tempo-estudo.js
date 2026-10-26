@@ -20,9 +20,9 @@ function elapsed(){
 }
 function update(){
  const dock=$('mq-time-dock');if(!dock)return;
- if(!user()){dock.hidden=true;return}
+ if(!user()){dock.hidden=true;state=null;return}
  dock.hidden=false;
- if(!state)state=load();
+ if(!state||state.owner!==user())state=load();
  const running=Boolean(state?.running),paused=Boolean(state&&!running);
  $('mq-time-clock').textContent=fmt(Math.max(0,elapsed()));
  $('mq-time-state').textContent=running?'Contando':paused?'Pausado':'Pronto para estudar';
@@ -109,7 +109,7 @@ async function finish(){
    dia:localDay(first),segundos:seconds,inicio_em:first,fim_em:last,segmentos:item.segments.map(s=>({inicio:s.start,fim:s.end}))};
   const r=await db.from('estudo_sessoes').upsert(data,{onConflict:'id'}).select('id');
   if(r.error)throw r.error;
-  clear();window.MedQuestProgress?.reload?.();alert('Sessão salva no histórico de estudos.');
+  clear();if($('tela-estudo')?.style.display==='block'&&$('study-title')?.textContent==='Meu progresso')window.MedQuestProgress?.reload?.();alert('Sessão salva no histórico de estudos.');
  }catch(ex){console.error(ex);alert('Falha ao salvar sessão: '+ex.message+'. Ela continua pausada para uma nova tentativa.')}
  finally{busy=false}
 }
@@ -125,7 +125,7 @@ async function manualSave(values,common){
  const r=editRecord?await db.from('estudo_sessoes').update(obj).eq('id',editRecord.id).eq('usuario_id',user()).select('id'):
  await db.from('estudo_sessoes').insert(obj).select('id');
  if(r.error)throw r.error;if(!r.data?.length)throw Error('Banco não confirmou a gravação.');
- window.MedQuestProgress?.reload?.();
+ if($('tela-estudo')?.style.display==='block'&&$('study-title')?.textContent==='Meu progresso')window.MedQuestProgress?.reload?.();
 }
 const logout=window.fazerLogout;
 if(typeof logout==='function')window.fazerLogout=async(...a)=>{pause();return await logout(...a)};
