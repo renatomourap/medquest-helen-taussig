@@ -111,7 +111,7 @@
         incomplete+' '+(incomplete===1?'questão':'questões')+'. Essas questões permanecem acessíveis em “Não classificada”.</p>':'')+
       '</section>';
     const groups=(BANCO.disciplinas||[]).map(d=>{
-      const topics=(d.temas||[]).map(t=>{
+      const cards=(d.temas||[]).map(t=>{
         const qs=matched.filter(r=>r.areaId===d.id&&r.temaId===t.id);
         if(!qs.length)return '';
         return '<article class="mq-q-topic"><div><h3>'+E(t.nome)+'</h3>'+
@@ -119,8 +119,8 @@
           '</span></div><button type="button" class="mq-q-open" data-d="'+E(d.id)+
           '" data-t="'+E(t.id)+'" aria-label="Praticar '+qs.length+' questões de '+E(t.nome)+'">'+
           'Praticar <span aria-hidden="true">›</span></button></article>';
-      }).join('');
-      const visible=topics.filter(Boolean);
+      });
+      const visible=cards.filter(Boolean);
       if(!visible.length)return '';
       const dCount=matched.filter(r=>r.areaId===d.id).length;
       return '<section class="mq-q-area"><div class="mq-q-area-head"><div><h2>'+E(d.nome)+'</h2>'+
