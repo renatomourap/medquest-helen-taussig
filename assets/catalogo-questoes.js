@@ -390,6 +390,15 @@
       (!filtersOn?'<span class="mq-q-filter-tip">Selecione um ou mais filtros para personalizar sua lista.</span>':'')+
       '</div><button class="mq-q-clear" type="button" id="mq-q-clear"'+(!filtersOn?' disabled':'')+
       '>↺ Limpar filtros</button></div>'+
+      '<div class="mq-q-filter-actions"><span class="mq-q-filter-action-hint">'+
+      (filtersOn?matched.length+' '+(matched.length===1?'questão selecionada':'questões selecionadas'):
+        'Escolha pelo menos um filtro para iniciar a resolução.')+'</span>'+
+      '<button id="mq-q-apply" type="button" class="mq-q-apply"'+
+      (!filtersOn||matched.length===0?' disabled':'')+
+      ' aria-label="Filtrar e resolver as questões selecionadas">'+
+      '<span aria-hidden="true">⌕</span> Filtrar'+
+      (filtersOn?' <span class="mq-q-apply-count">('+matched.length+')</span>':'')+
+      ' <span aria-hidden="true">›</span></button></div>'+
       (incomplete?'<p class="mq-q-grade-note">A classificação de dificuldade ainda não foi atribuída a '+
         incomplete+' '+(incomplete===1?'questão':'questões')+'. Essas questões permanecem acessíveis em “Não classificada”.</p>':'')+
       '</section>';
@@ -459,6 +468,18 @@
           e.preventDefault();openDropdown='';render();$('mq-q-filter-'+key)?.focus();
         }
       });
+    });
+    el.querySelector('#mq-q-apply')?.addEventListener('click',()=>{
+      // Resolve a seleção inteira, mesmo com vários assuntos ou disciplinas.
+      const selecionadas=flatten().filter(row=>matches(row));
+      if(!fields.some(field=>filters[field.key]) || !selecionadas.length)return;
+      if(typeof window.iniciarQuestoesFiltradas!=='function'){
+        console.error('O leitor de questões filtradas não está disponível.');
+        return;
+      }
+      openDropdown='';
+      filteredSession=null;
+      window.iniciarQuestoesFiltradas(selecionadas);
     });
     el.querySelector('#mq-q-clear')?.addEventListener('click',()=>clearFilters());
     el.querySelector('#mq-q-reset-empty')?.addEventListener('click',()=>clearFilters());
