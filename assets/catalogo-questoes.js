@@ -3,6 +3,12 @@
   'use strict';
   const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const $=id=>document.getElementById(id);
+  // Ordenação pt-BR: ignora caixa/acentos e considera números nos nomes.
+  const compararNomes=(a,b)=>String(a||'').localeCompare(String(b||''),'pt-BR',{
+    sensitivity:'base',numeric:true
+  });
+  const areasEmOrdem=()=>[...(BANCO.disciplinas||[])].sort((a,b)=>compararNomes(a.nome,b.nome));
+  const assuntosEmOrdem=d=>[...(d.temas||[])].sort((a,b)=>compararNomes(a.nome,b.nome));
   const fields=[
     {key:'area',label:'Área',placeholder:'Todas as áreas',icon:'◈'},
     {key:'assunto',label:'Assunto',placeholder:'Todos os assuntos',icon:'▤'},
@@ -306,18 +312,18 @@
   function selectOptions(field,rows){
     const prior=rows.filter(r=>matches(r,field));
     if(field==='area'){
-      const opts=(BANCO.disciplinas||[]).map(d=>[d.id,d.nome]);
+      const opts=areasEmOrdem().map(d=>[d.id,d.nome]);
       return opts.map(([k,v])=>[k,v,prior.some(r=>r.areaId===k)]);
     }
     if(field==='assunto'){
       const ids=new Map(prior.map(r=>[r.temaId,r.temaName]));
-      return [...ids.entries()].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'))
+      return [...ids.entries()].sort((a,b)=>compararNomes(a[1],b[1]))
         .map(([k,v])=>[k,v,true]);
     }
     if(field==='hotpoint'){
       const unique=new Map(prior.map(r=>[r.hotpointKey,r]));
       return [...unique.values()].sort((a,b)=>
-        a.temaName.localeCompare(b.temaName,'pt-BR')||sortHP(a.hotpoint,b.hotpoint))
+        compararNomes(a.temaName,b.temaName)||sortHP(a.hotpoint,b.hotpoint))
         .map(r=>[r.hotpointKey,
           (filters.assunto?'':r.temaName+' · ')+r.hotpoint+
           (r.hotpointTitle?' — '+r.hotpointTitle:''),
@@ -387,8 +393,8 @@
       (incomplete?'<p class="mq-q-grade-note">A classificação de dificuldade ainda não foi atribuída a '+
         incomplete+' '+(incomplete===1?'questão':'questões')+'. Essas questões permanecem acessíveis em “Não classificada”.</p>':'')+
       '</section>';
-    const groups=(BANCO.disciplinas||[]).map(d=>{
-      const cards=(d.temas||[]).map(t=>{
+    const groups=areasEmOrdem().map(d=>{
+      const cards=assuntosEmOrdem(d).map(t=>{
         const qs=matched.filter(r=>r.areaId===d.id&&r.temaId===t.id);
         if(!qs.length)return '';
         return '<article class="mq-q-topic"><div><h3>'+E(t.nome)+'</h3>'+
