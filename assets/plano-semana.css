@@ -294,3 +294,78 @@ input.weekly-checkbox:disabled{
  .weekly-cal-weekdays span{font-size:.68rem}
 }
 @media(prefers-reduced-motion:reduce){.weekly-cal-chevron{transition:none}}
+
+
+/* Correção responsiva do calendário: flutua sem aumentar o modal.
+   Não cria rolagem horizontal nem esconde os botões do formulário. */
+.weekly-modal-backdrop {
+  box-sizing:border-box;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:clamp(10px,2vh,18px);
+}
+.weekly-modal {
+  position:relative;
+  box-sizing:border-box;
+  width:min(570px,100%);
+  max-width:570px;
+  max-height:none;
+  overflow:visible;
+}
+.weekly-modal-fields,
+.weekly-calendar-fields,
+.weekly-date-group,
+.weekly-date-anchor { min-width:0; }
+.weekly-date-anchor { position:relative; z-index:20; }
+.weekly-date-popover {
+  box-sizing:border-box;
+  position:absolute;
+  top:calc(100% + 7px);
+  left:auto;
+  right:0;
+  z-index:40;
+  width:min(326px, calc(100vw - 52px));
+  max-width:calc(100vw - 52px);
+  min-width:0;
+  margin:0;
+  padding:10px;
+  overflow:hidden;
+  box-shadow:0 18px 50px rgba(0,0,0,.65);
+}
+.weekly-date-popover[hidden] { display:none!important; }
+.weekly-cal-heading { min-width:0; }
+.weekly-cal-heading strong { min-width:0; font-size:.73rem; overflow:hidden; text-overflow:ellipsis; }
+.study-screen .weekly-cal-day { min-height:0; }
+.weekly-cal-shortcuts { min-width:0; }
+.study-screen .weekly-cal-shortcuts button { min-width:0; padding:7px 2px; overflow-wrap:anywhere; }
+@media(max-width:710px) {
+  .weekly-modal-backdrop { padding:12px; }
+  .weekly-modal { width:100%; max-width:570px; }
+  .weekly-date-popover { width:min(326px,100%); min-width:0; max-width:100%; }
+  .weekly-calendar-fields { grid-template-columns:1fr; }
+}
+@media(max-height:650px) {
+  .weekly-modal-backdrop { align-items:center; }
+  .weekly-modal { padding:17px 20px; }
+  .weekly-modal-head { margin-bottom:12px; }
+  .weekly-modal-fields { gap:10px; }
+  .weekly-modal-fields textarea { min-height:56px; }
+  .weekly-modal-actions { margin-top:13px; }
+}
+@media(max-height:580px) {
+  /* Em telas baixas, o calendário vira sobreposição central, sem rolagem interna do formulário. */
+  .weekly-date-popover {
+    position:fixed;
+    top:50%;
+    left:50%;
+    right:auto;
+    transform:translate(-50%,-50%);
+    width:min(335px, calc(100vw - 28px));
+    max-width:calc(100vw - 28px);
+    max-height:calc(100dvh - 30px);
+    overflow-y:auto;
+    overflow-x:hidden;
+    z-index:500;
+  }
+}
