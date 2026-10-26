@@ -168,7 +168,7 @@
   }
   show(last?.tipo==='resumo'?'resumo':last?.tipo==='anotacao'?'anotacao':'progresso');
  };
- window.studyPractice=()=>{let d=BANCO.disciplinas.find(x=>x.temas.length);if(d)abrirDisciplina(d.id)};
+ window.studyPractice=()=>abrirQuestoesGerais();
  window.studyArea=id=>abrirModalidade(id);
  let hide=window.esconderApp;window.esconderApp=function(){hide();$('tela-estudo').style.display='none'};
  let screen=window.mostrarTela;window.mostrarTela=function(n){screen(n);$('tela-estudo').style.display='none'};
