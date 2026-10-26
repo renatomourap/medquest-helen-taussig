@@ -13,7 +13,7 @@
   $('study-title').textContent=({resumo:'Resumos',anotacao:'Anotações',plano:'Plano da Semana',progresso:'Meu progresso'})[kind];
   const subtitle=$('study-subtitle');if(subtitle)subtitle.textContent=({resumo:'Consulte os materiais oficiais publicados pela administração.',anotacao:'Registre e organize seus aprendizados pessoais.',plano:'Organize o que estudar em cada dia, suas metas e revisões.',progresso:'Acompanhe seus resultados nos exercícios.'})[kind];
   $('study-msg').textContent='';$('study-content').innerHTML='<p>Carregando…</p>';
-  if(kind==='resumo')readOfficial();else if(kind==='anotacao')readDocs();else if(kind==='plano')window.PlanoMedQuest.open();else readProgress();
+  if(kind==='resumo')readOfficial();else if(kind==='anotacao')readDocs();else if(kind==='plano')window.PlanoMedQuest.open();else window.MedQuestProgress.open();
  };
  const docCard=d=>'<article class="study-row"><div><b>'+E(d.titulo)+'</b><p>'+E(area(d.area_id))+' · '+E(d.assunto)+'</p></div><div><button onclick="studyEdit(\''+d.id+'\')">Abrir</button><button onclick="studyDelete(\''+d.id+'\')">Excluir</button></div></article>';
  async function readDocs(){try{docs=await fetch('estudo_documentos',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('tipo',mode).order('atualizado_em',{ascending:false}));paintDocs();if(window.studyPendingDocument){const id=window.studyPendingDocument;window.studyPendingDocument=null;const found=docs.find(d=>d.id===id);if(found)editor(found)}}catch(e){error(e)}}
