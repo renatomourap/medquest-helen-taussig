@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="assets/medquest-acervo.css">
 <link rel="stylesheet" href="assets/plano-semana.css">
 <link rel="stylesheet" href="assets/catalogo-questoes.css">
+<link rel="stylesheet" href="assets/progresso-analytics.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedQuest — Helen Taussig</title>
@@ -7437,15 +7438,28 @@ function continuarDeOndeParou() {
 async function salvarProgresso(questaoIndex, letraMarcada, acertou) {
   if (!usuarioAtual) return;
   try {
-    await db.from('progresso').upsert({
+    const recordedAt = new Date().toISOString();
+    const answer = {
       usuario_id: usuarioAtual.id,
       disciplina_id: estadoAtual.disciplinaId,
       tema_id: estadoAtual.temaId,
       questao_id: estadoAtual.questoes[questaoIndex].id,
       resposta: letraMarcada,
       acertou: acertou,
-      respondido_em: new Date().toISOString()
-    }, { onConflict: 'usuario_id,questao_id' });
+      respondido_em: recordedAt
+    };
+    const lastAnswer = await db.from('progresso').upsert(answer, { onConflict: 'usuario_id,questao_id' });
+    if (lastAnswer.error) throw lastAnswer.error;
+    // Histórico permanente de tentativas, para gráficos e filtros cronológicos.
+    const event = await db.from('historico_respostas').insert({
+      usuario_id: answer.usuario_id,
+      disciplina_id: answer.disciplina_id,
+      tema_id: answer.tema_id,
+      questao_id: answer.questao_id,
+      acertou: answer.acertou,
+      respondido_em: recordedAt
+    });
+    if (event.error) console.warn('Histórico de respostas:', event.error.message);
   } catch(e) { /* silencioso */ }
 }
 
@@ -7456,5 +7470,6 @@ iniciarAuth();
 <script src="assets/medquest-acervo.js"></script>
 <script src="assets/plano-semana.js"></script>
 <script src="assets/catalogo-questoes.js"></script>
+<script src="assets/progresso-analytics.js"></script>
 </body>
 </html>
