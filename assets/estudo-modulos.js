@@ -42,10 +42,31 @@
  };
  window.studyDelete=async id=>{if(!confirm('Excluir este documento?'))return;try{await fetch('estudo_documentos',t=>t.delete().eq('id',id).eq('usuario_id',usuarioAtual.id));await readDocs();note('Excluído.')}catch(e){error(e)}};
 
- // Official content is shared and curated by administrators only.
- // Supabase RLS is the authoritative permission check; UI visibility is supplementary.
+
+ // O resumo completo e fiel é o PDF ORIGINAL, não a transcrição textual.
+ // Metadados antigos da tabela conteudos_oficiais servem apenas para classificar assuntos.
  let officialTexts=[],officialPdfs=[],officialEditing=null;
  const isEditor=()=>perfilAtual?.admin===true;
+ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+   .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+ const pdfFor=d=>officialPdfs.find(p=>p.disciplina_id===d.area_id &&
+   (norm(p.tema_id)===norm(d.assunto) || norm(p.titulo)===norm(d.titulo)));
+ const fileTopic=file=>{
+   const n=norm(file.name.replace(/\.pdf$/i,''));
+   const map={'1':'microbiota-humana','2':'infeccao-hospitalar','3':'biofilmes-bacterianos',
+     '4':'staphylococcus-sp','5':'disturbios-de-hipersensibilidade',
+     '6':'imunodeficiencias-primarias','7':'antibioticos-i-beta-lactamicos',
+     '8':'antibioticos-ii-sintese-proteica','9':'antibioticos-iii-sulfonamidas-e-quinolonas'};
+   const prefix=n.match(/^([1-9])-/)?.[1];
+   if(prefix&&map[prefix]){
+     const matched=officialTexts.find(d=>norm(d.assunto)===map[prefix]);
+     if(matched)return matched;
+   }
+   return officialTexts.find(d=>{
+     const topic=norm(d.assunto),title=norm(d.titulo);
+     return (topic.length>6&&n.includes(topic))||(title.length>6&&n.includes(title));
+   });
+ };
  async function readOfficial(){
    try{
      const results=await Promise.all([
@@ -61,37 +82,139 @@
      }
    }catch(e){error(e)}
  }
+ const feedback=(message,fail=false)=>{
+   const box=$('study-pdf-feedback');if(!box)return;
+   box.textContent=message;box.style.color=fail?'#f5a0a0':'#86dbb8';
+ };
  function paintOfficial(){
-   $('study-content').innerHTML='<div class="study-toolbar"><p>Resumos oficiais publicados pela administração do MedQuest.</p>'+
-     (isEditor()?'<button onclick="studyOfficialNew()">+ Novo resumo oficial (Admin)</button>':'')+
-     '<select id="study-official-filter" onchange="studyOfficialFilter()">'+opts(filter)+'</select></div><div id="study-list"></div><div id="study-editor"></div>';
+   $('study-content').innerHTML=
+     '<div class="study-toolbar study-pdf-toolbar"><div><p>Leia o documento original, com capa, imagens, tabelas e diagramação preservadas.</p>'+
+     '<small>Arquivos originais disponíveis somente para contas aprovadas.</small></div>'+
+     (isEditor()?'<button onclick="studyOfficialBatch()">Publicar PDFs originais</button>'+
+       '<input id="study-pdf-upload" type="file" accept=".pdf,application/pdf" multiple hidden>':'')+
+     '<select id="study-official-filter" aria-label="Filtrar por disciplina" onchange="studyOfficialFilter()">'+opts(filter)+'</select></div>'+
+     '<p id="study-pdf-feedback" role="status" aria-live="polite"></p>'+
+     '<div id="study-list" class="study-pdf-grid"></div><div id="study-editor"></div>';
+   const picker=$('study-pdf-upload');
+   if(picker)picker.onchange=ev=>window.studyOfficialBatchFiles(Array.from(ev.target.files||[]));
    window.studyOfficialFilter=()=>{
      const chosen=$('study-official-filter')?.value||'';
-     const filteredTexts=officialTexts.filter(x=>!chosen||x.area_id===chosen);
-     const filteredPdfs=officialPdfs.filter(x=>!chosen||x.disciplina_id===chosen);
-     const items=filteredTexts.map(d=>'<article class="study-row"><div><b>'+E(d.titulo)+'</b><p>'+
-       E(area(d.area_id))+' · '+E(d.assunto||'Resumo oficial')+(d.publicado?'':' · Rascunho não publicado')+
-       '</p></div><div><button onclick="studyOfficialOpen(\''+d.id+'\')">Ler resumo</button>'+
-       (isEditor()?'<button onclick="studyOfficialEdit(\''+d.id+'\')">Editar</button><button onclick="studyOfficialDelete(\''+d.id+'\')">Excluir</button>':'')+
-       '</div></article>').join('');
-     const pdfs=filteredPdfs.map(d=>'<article class="study-row"><div><b>'+E(d.titulo)+'</b><p>'+E(area(d.disciplina_id))+' · Arquivo PDF oficial</p></div><div><button onclick="studyOfficialPdf(\''+d.id+'\')">Abrir PDF</button></div></article>').join('');
-     $('study-list').innerHTML=items+pdfs||'<p class="study-empty">Ainda não há resumos oficiais publicados para esta área.</p>';
+     const summaries=officialTexts.filter(d=>(d.publicado||isEditor())&&(!chosen||d.area_id===chosen));
+     const accounted=new Set(summaries.map(d=>pdfFor(d)?.id).filter(Boolean));
+     const additional=officialPdfs.filter(p=>(!chosen||p.disciplina_id===chosen)&&!accounted.has(p.id));
+     let cards=summaries.map(d=>{
+       const pdf=pdfFor(d);
+       const action=pdf?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+pdf.id+'\')">Ler resumo <span aria-hidden="true">↗</span></button>':
+         isEditor()?'<button onclick="studyOfficialAttach(\''+d.id+'\')">Publicar PDF original</button>':
+         '<span class="study-pdf-await">PDF original aguardando publicação</span>';
+       return '<article class="study-pdf-card"><div class="study-pdf-symbol" aria-hidden="true">▤</div>'+
+         '<div class="study-pdf-meta"><h3>'+E(d.titulo)+'</h3><p>'+E(area(d.area_id))+' · '+E(d.assunto)+'</p>'+
+         '<small class="'+(pdf?'study-pdf-ready':'study-pdf-await')+'">'+
+         (pdf?'PDF original disponível':'Arquivo original pendente')+'</small></div>'+
+         '<div class="study-pdf-buttons">'+action+'</div></article>';
+     }).join('');
+     cards+=additional.map(p=>'<article class="study-pdf-card"><div class="study-pdf-symbol" aria-hidden="true">▤</div>'+
+       '<div class="study-pdf-meta"><h3>'+E(p.titulo)+'</h3><p>'+E(area(p.disciplina_id))+' · '+E(p.tema_id)+'</p>'+
+       '<small class="study-pdf-ready">PDF original disponível</small></div><div class="study-pdf-buttons">'+
+       '<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">Ler resumo ↗</button></div></article>').join('');
+     $('study-list').innerHTML=cards||'<p class="study-empty">Nenhum resumo cadastrado para esta área.</p>';
    };
    studyOfficialFilter();
  }
+ function pdfViewer(doc,url){
+   document.getElementById('study-pdf-dialog')?.remove();
+   const dialog=document.createElement('div');dialog.id='study-pdf-dialog';
+   dialog.className='study-pdf-dialog';dialog.setAttribute('role','dialog');
+   dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-label','PDF original: '+doc.titulo);
+   const top=document.createElement('header');top.className='study-pdf-dialog-head';
+   const heading=document.createElement('div');heading.className='study-pdf-dialog-title';
+   const h=document.createElement('strong');h.textContent=doc.titulo;
+   const meta=document.createElement('small');meta.textContent=area(doc.disciplina_id)+' · PDF original';
+   heading.append(h,meta);
+   const controls=document.createElement('div');controls.className='study-pdf-dialog-actions';
+   const link=document.createElement('a');link.href=url;link.target='_blank';
+   link.rel='noopener noreferrer';link.textContent='Abrir em nova aba';
+   const exit=document.createElement('button');exit.type='button';exit.textContent='Fechar ×';
+   exit.onclick=()=>{dialog.remove();document.removeEventListener('keydown',escape)};
+   controls.append(link,exit);top.append(heading,controls);
+   const frame=document.createElement('iframe');frame.className='study-pdf-iframe';
+   frame.title='PDF original - '+doc.titulo;
+   frame.src=url+'#toolbar=1&navpanes=0&view=FitH';
+   dialog.append(top,frame);document.body.append(dialog);exit.focus();
+   function escape(e){if(e.key==='Escape')exit.click()}
+   document.addEventListener('keydown',escape);
+ }
  window.studyOfficialOpen=id=>{
-   const d=officialTexts.find(x=>x.id===id);
-   if(!d)return;
-   $('study-editor').innerHTML='<div class="study-form"><h3>'+E(d.titulo)+'</h3><p>'+E(area(d.area_id))+' · '+E(d.assunto)+'</p><div class="study-official-body">'+E(d.conteudo)+'</div><div><button onclick="studyCancel()">Fechar</button></div></div>';
-   activity({tipo:'resumo',referencia_id:d.id,area_id:d.area_id});
+   const doc=officialTexts.find(x=>x.id===id);if(!doc)return;
+   const pdf=pdfFor(doc);
+   if(pdf)window.studyOfficialPdf(pdf.id);
+   else feedback('Este resumo ainda não possui o PDF original publicado. A transcrição sem figuras não será usada como substituta.',true);
  };
  window.studyOfficialPdf=async id=>{
-   const d=officialPdfs.find(x=>x.id===id);if(!d)return;
+   const doc=officialPdfs.find(x=>x.id===id);if(!doc)return;
    try{
-     const r=await db.storage.from('materiais_medquest').createSignedUrl(d.arquivo_path,120);
-     if(r.error)throw r.error;
-     if(r.data?.signedUrl)window.open(r.data.signedUrl,'_blank','noopener,noreferrer');
-   }catch(e){error(e)}
+     feedback('Abrindo o PDF original…');
+     const result=await db.storage.from('materiais_medquest').createSignedUrl(doc.arquivo_path,7200);
+     if(result.error)throw result.error;
+     if(!result.data?.signedUrl)throw Error('Arquivo indisponível.');
+     feedback('');pdfViewer(doc,result.data.signedUrl);
+     activity({tipo:'resumo',area_id:doc.disciplina_id});
+   }catch(e){feedback('Erro ao abrir documento: '+e.message,true)}
+ };
+ async function publishPdf(file,doc){
+   if(!isEditor())throw Error('Apenas administradores podem publicar resumos.');
+   if(pdfFor(doc))return false;
+   if(!file||file.size<1||file.size>36700160||
+     !(file.type==='application/pdf'||file.name.toLowerCase().endsWith('.pdf')))
+     throw Error('Arquivo inválido ou maior que 35 MB: '+(file?.name||''));
+   const path=doc.area_id+'/'+norm(doc.assunto)+'/'+crypto.randomUUID()+'.pdf';
+   const upload=await db.storage.from('materiais_medquest').upload(path,file,{contentType:'application/pdf',upsert:false});
+   if(upload.error)throw upload.error;
+   const save=await db.from('materiais_medquest').insert({tipo:'resumo',
+     disciplina_id:doc.area_id,tema_id:doc.assunto,titulo:doc.titulo,
+     descricao:'PDF original — '+file.name,arquivo_path:path});
+   if(save.error){
+     await db.storage.from('materiais_medquest').remove([path]);
+     throw save.error;
+   }
+   officialPdfs.push({id:'temp-'+crypto.randomUUID(),disciplina_id:doc.area_id,tema_id:doc.assunto,
+     titulo:doc.titulo,arquivo_path:path});
+   return true;
+ }
+ window.studyOfficialAttach=id=>{
+   if(!isEditor())return;
+   const doc=officialTexts.find(d=>d.id===id);if(!doc)return;
+   const picker=document.createElement('input');picker.type='file';picker.accept='.pdf,application/pdf';
+   picker.hidden=true;document.body.append(picker);
+   picker.onchange=async()=>{
+     const file=picker.files?.[0];picker.remove();if(!file)return;
+     try{feedback('Publicando '+file.name+'…');await publishPdf(file,doc);
+       await readOfficial();feedback('PDF original publicado: '+doc.titulo)}
+     catch(e){feedback('Falha na publicação: '+e.message,true)}
+   };
+   picker.click();
+ };
+ window.studyOfficialBatch=()=>{if(isEditor())$('study-pdf-upload')?.click()};
+ window.studyOfficialBatchFiles=async files=>{
+   if(!isEditor()||!files.length)return;
+   const chosen=files.map(file=>({file,doc:fileTopic(file)}));
+   const unknown=chosen.filter(x=>!x.doc).map(x=>x.file.name);
+   if(unknown.length){
+     feedback('Não foi possível identificar: '+unknown.join(', ')+'. Publique estes arquivos individualmente.',true);
+     return;
+   }
+   if(!confirm('Publicar '+chosen.length+' PDFs originais no MedQuest?'))return;
+   let saved=0,skipped=0;const fails=[];
+   for(let i=0;i<chosen.length;i++){
+     const {file,doc}=chosen[i];
+     try{
+       feedback('Publicando '+(i+1)+'/'+chosen.length+': '+file.name);
+       if(await publishPdf(file,doc))saved++;else skipped++;
+     }catch(e){fails.push(file.name+': '+e.message)}
+   }
+   await readOfficial();
+   feedback(saved+' arquivo(s) original(is) publicado(s), '+skipped+' já existente(s).'+
+     (fails.length?' Erros: '+fails.join(' | '):''),!!fails.length);
  };
  const editOfficial=d=>{
    if(!isEditor())return error(Error('Apenas administradores podem publicar materiais oficiais.'));
