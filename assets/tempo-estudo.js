@@ -29,10 +29,8 @@ function toggleDock(){
 function update(){
  const dock=$('mq-time-dock');if(!dock)return;
  if(!user()){dock.hidden=true;state=null;return}
+ dock.hidden=false;
  if(!state||state.owner!==user())state=load();
- // Sem estudo ativo, a barra superior é suficiente: não cobrir o dashboard.
- dock.hidden=!state;
- if(!state)dock.classList.remove('mq-dock-open');
  const running=Boolean(state?.running),paused=Boolean(state&&!running);
  $('mq-time-clock').textContent=fmt(Math.max(0,elapsed()));
  $('mq-time-state').textContent=running?'Contando':paused?'Pausado':'Pronto para estudar';
