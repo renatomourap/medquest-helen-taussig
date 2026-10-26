@@ -2219,18 +2219,8 @@
         <label>Nome</label>
         <input type="text" id="input-nome" placeholder="Seu nome" />
       </div>
-      <div class="campo">
-        <label>Nome de usuário</label>
-        <div class="campo-arroba">
-          <input type="text" id="input-user-cad" maxlength="20" placeholder="seunome" autocapitalize="none"
-                 autocomplete="username" spellcheck="false" oninput="aoDigitarUsername(this, 'dica-user-cad')" />
-        </div>
-        <div class="dica-user" id="dica-user-cad"></div>
-      </div>
-      <div class="campo">
-        <label>Telefone / WhatsApp</label>
-        <input type="tel" id="input-tel-cad" placeholder="(85) 99999-9999" oninput="mascaraTelefone(this)" />
-      </div>
+
+
       <div class="campo">
         <label>E-mail</label>
         <input type="email" id="input-email-cad" placeholder="seu@email.com" />
@@ -2251,8 +2241,8 @@
 <div id="tela-aguardando" style="display:none;">
   <div class="aguardando-card">
     <svg class="emoji-big" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22"/><path d="M7 2v4.2c0 .5.2 1 .6 1.4L12 12l4.4-4.4c.4-.4.6-.9.6-1.4V2"/></svg>
-    <h2>Cadastro em análise</h2>
-    <p>Seu cadastro foi recebido! Um administrador irá aprovar seu acesso em breve.<br><br>Você receberá uma confirmação por e-mail quando o acesso for liberado.</p>
+    <h2>Acesso indisponível</h2>
+    <p>Esta conta está bloqueada ou ainda não possui um perfil habilitado. Se precisar de ajuda, contate o administrador.</p>
     <button class="btn-sair-aguard" onclick="fazerLogout()">Sair</button>
   </div>
 </div>
@@ -2723,35 +2713,16 @@ async function iniciarAuth() {
 async function verificarAcesso(user) {
   usuarioAtual = user;
 
-  // Busca/cria perfil do usuário
-  let { data: perfil, error } = await db
-    .from('usuarios')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  // Supabase cria um perfil de estudante aprovado no banco no momento do cadastro.
+  // O navegador nunca define permissões de administrador ou de aprovação.
+  let { data: perfil, error } = await db.from('usuarios')
+    .select('*').eq('id', user.id).single();
 
-  if (error && error.code === 'PGRST116') {
-    // Usuário não existe na tabela ainda — cria como pendente
-    const meta = user.user_metadata || {};
-    const novo = {
-      id: user.id,
-      email: user.email,
-      nome: meta.full_name || meta.name || user.email.split('@')[0],
-      aprovado: false
-    };
-    if (meta.telefone) novo.telefone = meta.telefone;
-    if (meta.username) novo.username = meta.username;
-    let { data: criado, error: erroCriar } = await db.from('usuarios').insert(novo).select().single();
-    if (!criado && erroCriar && erroCriar.code === '23505' && novo.username) {
-      // alguém pegou o nome de usuário nesse meio tempo: cria sem ele e pede outro no primeiro acesso
-      delete novo.username;
-      ({ data: criado } = await db.from('usuarios').insert(novo).select().single());
-    }
-    if (!criado) { mostrarTelaAguardando(); return; }
-    perfil = criado;
+  if (error || !perfil) {
+    console.error('Perfil de estudante indisponível:', error);
+    mostrarTelaAguardando();
+    return;
   }
-
-  if (!perfil) { mostrarTelaAguardando(); return; }
 
   // se o e-mail da conta mudou (troca confirmada), alinha a tabela;
   // o banco sempre grava o e-mail da conta, o valor enviado é só o gatilho
@@ -2762,12 +2733,6 @@ async function verificarAcesso(user) {
   }
 
   perfilAtual = perfil;
-
-  // quem entrou por e-mail precisa ter nome, telefone e foto antes de seguir
-  if (cadastroIncompleto(user, perfil)) {
-    mostrarPerfil({ obrigatorio: true });
-    return;
-  }
 
   if (!perfil.aprovado) {
     mostrarTelaAguardando();
@@ -2824,53 +2789,39 @@ async function submitLogin() {
 async function submitCadastro() {
   limparMensagens();
   const nome = document.getElementById('input-nome').value.trim();
-  const username = normalizarUsername(document.getElementById('input-user-cad').value);
-  const telefone = document.getElementById('input-tel-cad').value.trim();
   const email = document.getElementById('input-email-cad').value.trim();
   const senha = document.getElementById('input-senha-cad').value;
 
-  if (!nome || !username || !telefone || !email || !senha) { mostrarErro('Preencha todos os campos.'); return; }
-  if (!usernameFormatoValido(username)) { mostrarErro('O nome de usuário deve ter de 3 a 20 caracteres (letras minúsculas, números, ponto ou sublinhado) e não pode ser um nome reservado.'); return; }
-  if (!telefoneValido(telefone)) { mostrarErro('Informe um telefone válido, com DDD.'); return; }
+  if (!nome || !email || !senha) { mostrarErro('Informe nome, e-mail e senha.'); return; }
+  if (nome.length > 120) { mostrarErro('O nome deve ter no máximo 120 caracteres.'); return; }
   if (senha.length < 6) { mostrarErro('A senha deve ter no mínimo 6 caracteres.'); return; }
 
   const btn = document.getElementById('btn-cadastrar');
-  btn.disabled = true; btn.textContent = 'Criando conta...';
-
-  const livre = await usernameDisponivel(username);
-  if (livre !== true) {
-    mostrarErro(livre === false
-      ? `O nome de usuário @${username} já está em uso. Escolha outro.`
-      : 'Não foi possível verificar o nome de usuário agora. Tente novamente em instantes.');
-    btn.disabled = false; btn.textContent = 'Criar conta';
-    return;
-  }
-
-  const { data, error } = await db.auth.signUp({
-    email, password: senha,
-    options: { data: { full_name: nome, username, telefone } }
-  });
-
-  if (error) {
-    mostrarErro(error.message === 'User already registered' ? 'Este e-mail já está cadastrado.' : error.message);
-    btn.disabled = false; btn.textContent = 'Criar conta';
-    return;
-  }
-
-  // Insere na tabela aguardando aprovação
-  if (data.user) {
-    await db.from('usuarios').upsert({
-      id: data.user.id,
-      email: email,
-      nome: nome,
-      username: username,
-      telefone: telefone,
-      aprovado: false
+  btn.disabled = true;
+  btn.textContent = 'Criando conta...';
+  try {
+    const { data, error } = await db.auth.signUp({
+      email, password: senha,
+      options: { data: { full_name: nome }, emailRedirectTo: window.location.origin }
     });
+    if (error) {
+      mostrarErro(error.message === 'User already registered'
+        ? 'Este e-mail já está cadastrado.' : error.message);
+      return;
+    }
+    if (data?.session) {
+      mostrarSucesso('Conta criada! Seu acesso de estudante já está liberado.');
+    } else {
+      mostrarSucesso('Cadastro recebido! Caso seja necessário confirmar seu e-mail, abra o link enviado para ativar a conta. Não é necessária aprovação do administrador.');
+    }
+    // A criação do perfil aprovado é feita pelo trigger do banco, nunca pelo cliente.
+  } catch (e) {
+    console.error('Falha no cadastro:', e);
+    mostrarErro('Não foi possível criar a conta. Tente novamente.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Criar conta';
   }
-
-  mostrarSucesso('Conta criada! Entre para completar o perfil com a sua foto. Depois é só aguardar a aprovação do administrador.');
-  btn.disabled = false; btn.textContent = 'Criar conta';
 }
 
 // ==================== CONTA / PERFIL ====================
@@ -2892,13 +2843,8 @@ function fotoDoGoogle(user) {
   return m.avatar_url || m.picture || null;
 }
 
-// todos precisam de nome de usuário; quem veio por e-mail também informa nome, telefone e foto
-// (quem veio pelo Google já traz nome e foto da conta Google)
-function cadastroIncompleto(user, perfil) {
-  if (!(perfil.username || '').trim()) return true;
-  if (entrouPorGoogle(user)) return false;
-  return !(perfil.nome || '').trim() || !(perfil.telefone || '').trim() || !perfil.foto_url;
-}
+// Dados adicionais do perfil são opcionais, inclusive na primeira entrada.
+function cadastroIncompleto(user, perfil) { return false; }
 
 // ── nome de usuário: único na plataforma ──
 const USERNAME_RESERVADOS = ['admin', 'administrador', 'administrator', 'suporte', 'support',
@@ -3073,11 +3019,10 @@ function preencherPerfil() {
   desenharAvatar(document.getElementById('perfil-avatar'),
     perfil.foto_url || fotoDoGoogle(user), perfil.nome || user.email);
 
-  // quem entrou por e-mail não pode ficar sem foto
+  // Telefone e imagem de perfil são opcionais para ambos os métodos de cadastro.
   document.getElementById('perfil-remover-foto').style.display =
-    (perfil.foto_url && google) ? '' : 'none';
-  document.getElementById('perfil-telefone-rotulo').textContent =
-    google ? 'Telefone / WhatsApp (opcional)' : 'Telefone / WhatsApp';
+    perfil.foto_url ? '' : 'none';
+  document.getElementById('perfil-telefone-rotulo').textContent = 'Telefone / WhatsApp (opcional)';
 
   // e-mail
   const campoEmail = document.getElementById('perfil-email');
@@ -3099,9 +3044,8 @@ function preencherPerfil() {
     .forEach(id => { document.getElementById(id).value = ''; });
 
   // primeiro acesso: só os dados pessoais
-  document.getElementById('perfil-aviso').innerHTML = google
-    ? 'Para continuar, escolha o seu <b>nome de usuário</b>. Ele é único na plataforma e você pode alterá-lo quando quiser, em <b>Minha conta</b>.'
-    : 'Para continuar, complete o seu cadastro com nome de usuário, nome, telefone e uma foto. Você poderá alterar essas informações quando quiser, em <b>Minha conta</b>.';
+  document.getElementById('perfil-aviso').textContent = 'Nome de usuário, telefone e foto podem ser adicionados quando você desejar.';
+
   document.getElementById('perfil-aviso').style.display = perfilObrigatorio ? '' : 'none';
   document.getElementById('perfil-card-email').style.display = perfilObrigatorio ? 'none' : '';
   document.getElementById('perfil-card-senha').style.display = perfilObrigatorio ? 'none' : '';
@@ -3179,14 +3123,13 @@ async function salvarPerfil() {
   const nome = document.getElementById('perfil-nome').value.trim();
   const telefone = document.getElementById('perfil-telefone').value.trim();
 
-  if (!username) { msgPerfil('dados', 'erro', 'Escolha o seu nome de usuário.'); return; }
-  if (!usernameFormatoValido(username)) { msgPerfil('dados', 'erro', 'O nome de usuário deve ter de 3 a 20 caracteres (letras minúsculas, números, ponto ou sublinhado) e não pode ser um nome reservado.'); return; }
-  if (nome.length < 2) { msgPerfil('dados', 'erro', 'Informe o seu nome.'); return; }
-  if (!google && !telefone) { msgPerfil('dados', 'erro', 'Informe o seu telefone, com DDD.'); return; }
-  if (telefone && !telefoneValido(telefone)) { msgPerfil('dados', 'erro', 'Telefone inválido. Use DDD + número, por exemplo (85) 99999-9999.'); return; }
-  if (!google && !perfilFotoNova && !(perfilAtual && perfilAtual.foto_url)) {
-    msgPerfil('dados', 'erro', 'Escolha uma foto para o seu perfil.');
+  if (username && !usernameFormatoValido(username)) {
+    msgPerfil('dados', 'erro', 'Nome de usuário inválido: use de 3 a 20 caracteres e evite nomes reservados.');
     return;
+  }
+  if (nome.length < 2) { msgPerfil('dados', 'erro', 'Informe seu nome.'); return; }
+  if (telefone && !telefoneValido(telefone)) {
+    msgPerfil('dados', 'erro', 'Telefone inválido. Use DDD + número.'); return;
   }
 
   const botao = document.getElementById('perfil-salvar');
@@ -3194,9 +3137,11 @@ async function salvarPerfil() {
   botao.disabled = true; botao.textContent = 'Salvando...';
 
   try {
-    const livre = await usernameDisponivel(username);
-    if (livre === false) throw new Error(`O nome de usuário @${username} já está em uso. Escolha outro.`);
-    if (livre === null) throw new Error('Não foi possível verificar o nome de usuário agora. Tente novamente em instantes.');
+    if (username) {
+      const livre = await usernameDisponivel(username);
+      if (livre === false) throw new Error('Este nome de usuário já está em uso.');
+      if (livre === null) throw new Error('Não foi possível verificar o nome de usuário.');
+    }
 
     let fotoUrl = (perfilAtual && perfilAtual.foto_url) || null;
     const caminho = `${usuarioAtual.id}/avatar.jpg`;
@@ -3213,7 +3158,7 @@ async function salvarPerfil() {
     }
 
     const { data, error } = await db.from('usuarios')
-      .update({ username, nome, telefone: telefone || null, foto_url: fotoUrl })
+      .update({ username: username || null, nome, telefone: telefone || null, foto_url: fotoUrl })
       .eq('id', usuarioAtual.id)
       .select();
     if (error) {
@@ -3331,11 +3276,10 @@ function mostrarApp() {
   document.getElementById('tela-login').classList.remove('visivel', 'logado');
   document.getElementById('tela-aguardando').style.display = 'none';
   document.getElementById('app-layout').classList.add('visivel');
-  // Mostra botão admin se for administrador
-  if (usuarioAtual && perfilAtual && perfilAtual.admin) {
-    document.getElementById('btn-admin').style.display = 'inline-block';
-    document.getElementById('btn-admin-sidebar').style.display = 'flex';
-  }
+  // Nunca reutilizar controles administrativos ao trocar para uma conta estudante.
+  const admin = Boolean(usuarioAtual && perfilAtual && perfilAtual.admin);
+  document.getElementById('btn-admin').style.display = admin ? 'inline-block' : 'none';
+  document.getElementById('btn-admin-sidebar').style.display = admin ? 'flex' : 'none';
   atualizarCabecalho();
   renderSidebarDisciplinas();
   irParaDashboard();
@@ -3430,13 +3374,13 @@ async function carregarUsuarios() {
     </div>
     <div class="resumo-item ${pendentes.length ? 'aviso' : ''}">
       <div class="resumo-num">${pendentes.length}</div>
-      <div class="resumo-label">Aguardando<br>aprovação</div>
+      <div class="resumo-label">Contas<br>bloqueadas</div>
     </div>`;
 
   // ── cadastros aguardando aprovação ──
   const listaPend = document.getElementById('lista-pendentes');
   listaPend.innerHTML = pendentes.length === 0
-    ? '<p class="admin-vazio">Nenhum cadastro aguardando.</p>'
+    ? '<p class="admin-vazio">Nenhuma conta bloqueada.</p>'
     : pendentes.map(u => `
       <div class="usuario-card">
         <div class="usuario-info">
@@ -3444,7 +3388,7 @@ async function carregarUsuarios() {
           <span class="usuario-data">Cadastrou-se em ${u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—'}${telefoneAdmin(u)}</span>
         </div>
         <div class="admin-acoes">
-          <button class="btn-aprovar" onclick="aprovarUsuario('${u.id}')">Aprovar</button>
+          <button class="btn-aprovar" onclick="aprovarUsuario('${u.id}')">Reativar</button>
         </div>
       </div>`).join('');
 
