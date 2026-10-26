@@ -2237,7 +2237,7 @@
   </div>
 </div>
 
-<!-- TELA AGUARDANDO APROVAÇÃO -->
+<!-- TELA DE ACESSO BLOQUEADO -->
 <div id="tela-aguardando" style="display:none;">
   <div class="aguardando-card">
     <svg class="emoji-big" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22"/><path d="M7 2v4.2c0 .5.2 1 .6 1.4L12 12l4.4-4.4c.4-.4.6-.9.6-1.4V2"/></svg>
@@ -2482,8 +2482,9 @@
     </div>
 
     <div class="admin-section">
-      <h3>Cadastros aguardando aprovação</h3>
-      <div id="lista-pendentes"><p class="admin-vazio">Carregando...</p></div>
+      <h3>Acessos bloqueados</h3>
+      <p style="color:var(--cinza);font-size:.83rem;line-height:1.5;margin:0 0 12px;">Novos estudantes entram automaticamente após autenticação por e-mail ou Google. Aqui aparecem apenas contas bloqueadas, que você pode reativar.</p>
+      <div id="lista-bloqueados"><p class="admin-vazio">Carregando...</p></div>
     </div>
 
     <div class="admin-section">
@@ -3261,7 +3262,7 @@ function mostrarTelaLogin() {
 }
 
 function mostrarTelaAguardando() {
-  // Conta autenticada aguardando aprovação: encerra o modal de acesso.
+  // Conta autenticada com acesso bloqueado: encerra o modal de acesso.
   fecharModalLogin();
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('tela-login').classList.remove('visivel');
@@ -3350,7 +3351,7 @@ async function carregarUsuarios() {
     return;
   }
 
-  const pendentes = todos.filter(u => !u.aprovado);
+  const bloqueados = todos.filter(u => !u.aprovado && !u.admin);
   const admins    = todos.filter(u => u.aprovado && u.admin);
   const pagantes  = todos.filter(u => u.aprovado && !u.admin)
                          .map(u => ({ ...u, pag: estadoPagamento(u) }))
@@ -3372,30 +3373,30 @@ async function carregarUsuarios() {
       <div class="resumo-num">${conta('emdia')}</div>
       <div class="resumo-label">Em dia</div>
     </div>
-    <div class="resumo-item ${pendentes.length ? 'aviso' : ''}">
-      <div class="resumo-num">${pendentes.length}</div>
+    <div class="resumo-item ${bloqueados.length ? 'aviso' : ''}">
+      <div class="resumo-num">${bloqueados.length}</div>
       <div class="resumo-label">Contas<br>bloqueadas</div>
     </div>`;
 
-  // ── cadastros aguardando aprovação ──
-  const listaPend = document.getElementById('lista-pendentes');
-  listaPend.innerHTML = pendentes.length === 0
+  // ── contas bloqueadas (novos cadastros não dependem de aprovação) ──
+  const listaBloqueados = document.getElementById('lista-bloqueados');
+  listaBloqueados.innerHTML = bloqueados.length === 0
     ? '<p class="admin-vazio">Nenhuma conta bloqueada.</p>'
-    : pendentes.map(u => `
+    : bloqueados.map(u => `
       <div class="usuario-card">
         <div class="usuario-info">
           <span class="usuario-email">${identidade(u)}</span>
           <span class="usuario-data">Cadastrou-se em ${u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—'}${telefoneAdmin(u)}</span>
         </div>
         <div class="admin-acoes">
-          <button class="btn-aprovar" onclick="aprovarUsuario('${u.id}')">Reativar</button>
+          <button class="btn-aprovar" onclick="reativarUsuario('${u.id}')">Reativar</button>
         </div>
       </div>`).join('');
 
   // ── mensalidades ──
   const listaPag = document.getElementById('lista-pagamentos');
   listaPag.innerHTML = pagantes.length === 0
-    ? '<p class="admin-vazio">Nenhum assinante aprovado ainda.</p>'
+    ? '<p class="admin-vazio">Nenhum estudante ativo ainda.</p>'
     : pagantes.map(u => `
       <div class="usuario-card ${u.pag.cartao}">
         <div class="usuario-info">
@@ -3506,7 +3507,7 @@ async function copiarCobranca() {
   setTimeout(() => { botao.textContent = 'Copiar mensagem'; }, 1800);
 }
 
-async function aprovarUsuario(id) {
+async function reativarUsuario(id) {
   await db.from('usuarios').update({ aprovado: true }).eq('id', id);
   await carregarUsuarios();
 }
