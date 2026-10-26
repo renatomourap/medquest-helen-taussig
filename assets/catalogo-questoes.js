@@ -164,7 +164,7 @@
   }
   function clearFilters(){for(const field of fields)filters[field.key]='';render();}
   function applyQuestions(list){
-    if(!list.length || !window.estadoAtual)return;
+    if(!list.length || typeof estadoAtual==='undefined')return;
     estadoAtual.questoes=list;
     estadoAtual.questaoIndex=0;estadoAtual.respostas={};
     renderMiniaturas();renderQuestao(0);
