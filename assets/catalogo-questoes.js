@@ -30,7 +30,7 @@
     }).join('');
     id('mq-questoes-gerais').innerHTML=header+'<div class="mq-q-groups">'+groups+'</div>';
     id('mq-questoes-gerais').querySelectorAll('.mq-q-open').forEach(button=>{
-      button.addEventListener('click',()=>iniciarTema(button.dataset.d,button.dataset.t));
+      button.addEventListener('click',()=>{window.__mqFromCatalog=true;iniciarTema(button.dataset.d,button.dataset.t)});
     });
   }
   async function open(){
