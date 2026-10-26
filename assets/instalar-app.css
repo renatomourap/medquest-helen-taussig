@@ -1,0 +1,17 @@
+[data-mq-install][hidden]{display:none!important}
+.mq-install-public{position:fixed;bottom:14px;left:20px;z-index:4;padding:9px 14px;background:#0b1724;border:1px solid #8b7347;border-radius:9px;color:#edcb86;font:600 12px Inter,system-ui;cursor:pointer}
+.mq-install-overlay{position:fixed;inset:0;z-index:25000;display:grid;place-items:center;background:#000b;padding:20px;backdrop-filter:blur(5px)}
+.mq-install-card{box-sizing:border-box;width:min(100%,470px);max-height:calc(100dvh - 40px);overflow:auto;border:1px solid #9b7e48;border-radius:18px;background:#0d1b2b;padding:25px;color:#eaf0f7;box-shadow:0 20px 80px #0009;font:14px/1.7 Inter,system-ui}
+.mq-install-card header{display:flex;gap:15px;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.mq-install-card h2{font:500 24px/1.35 'Playfair Display',Georgia,serif;color:#f0cd86;margin:0}
+.mq-install-card header button{background:transparent;border:0;color:#b7c6d7;font-size:25px;cursor:pointer}
+.mq-install-card img{border-radius:12px;margin-bottom:10px}
+.mq-install-card p{color:#b8c8d9;margin:8px 0 16px}
+.mq-install-card ol{padding-left:22px;margin:0 0 20px}
+.mq-install-card li{padding-left:4px;margin-bottom:11px}
+.mq-install-card li::marker{color:#ecc77c;font-weight:750}
+.mq-install-card .mq-install-note{padding:12px;border:1px solid #4a4b40;border-radius:9px;background:#252b2b;color:#e5c98f;font-size:12px}
+.mq-install-done{width:100%;border:0;border-radius:9px;padding:12px;background:#edc77c;color:#0b1724;font:700 14px system-ui;cursor:pointer}
+.mq-install-card :focus-visible,[data-mq-install]:focus-visible{outline:2px solid #f2cc7e;outline-offset:3px}
+@media(max-width:860px){.mq-install-public{position:static;margin:0 20px 24px}.mq-install-card{padding:20px}}
+@media(display-mode:standalone){html,body{overscroll-behavior-y:none}}
