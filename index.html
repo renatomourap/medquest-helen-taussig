@@ -2657,15 +2657,23 @@ async function iniciarAuth() {
     mostrarTelaLogin();
   }
 
-  db.auth.onAuthStateChange(async (event, session) => {
+  // O callback do Supabase deve ser síncrono: chamadas assíncronas a db
+  // dentro dele podem bloquear a autenticação (deadlock do auth-js).
+  db.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) {
-      // o Supabase repete SIGNED_IN ao voltar para a aba ou ao reconfirmar a senha;
-      // se é a mesma pessoa, não refaz a verificação nem tira o usuário da tela atual
       if (usuarioAtual && usuarioAtual.id === session.user.id) {
         usuarioAtual = session.user;
         return;
       }
-      await verificarAcesso(session.user);
+      // Fora do callback e do lock interno de autenticação.
+      setTimeout(() => {
+        if (usuarioAtual && usuarioAtual.id === session.user.id) return;
+        verificarAcesso(session.user).catch(error => {
+          console.error('Não foi possível verificar o acesso:', error);
+          mostrarTelaLogin();
+          mostrarErro('Não foi possível verificar sua conta. Atualize a página e tente novamente.');
+        });
+      }, 0);
     } else if (event === 'SIGNED_OUT') {
       usuarioAtual = null;
       perfilAtual = null;
@@ -2751,10 +2759,27 @@ async function submitLogin() {
   const btn = document.getElementById('btn-entrar');
   btn.disabled = true; btn.textContent = 'Entrando...';
 
-  const { error } = await db.auth.signInWithPassword({ email, password: senha });
-  if (error) {
-    mostrarErro('E-mail ou senha incorretos.');
-    btn.disabled = false; btn.textContent = 'Entrar';
+  let limiteTempo;
+  try {
+    const { error } = await Promise.race([
+      db.auth.signInWithPassword({ email, password: senha }),
+      new Promise((_, reject) => {
+        limiteTempo = setTimeout(() => reject(new Error('LOGIN_TIMEOUT')), 20000);
+      })
+    ]);
+    if (error) {
+      mostrarErro('Não foi possível entrar: ' + (error.message || 'verifique seu e-mail e senha.'));
+    }
+    // Se autenticou, o onAuthStateChange processará o perfil fora do lock.
+  } catch (error) {
+    console.error('Falha ao autenticar:', error);
+    mostrarErro(error.message === 'LOGIN_TIMEOUT'
+      ? 'A autenticação demorou demais. Recarregue a página e tente novamente.'
+      : 'Ocorreu um erro ao entrar. Tente novamente.');
+  } finally {
+    clearTimeout(limiteTempo);
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
   }
 }
 
