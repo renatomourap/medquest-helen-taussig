@@ -262,3 +262,19 @@
     min-width:40px;
   }
 }
+
+/* iPad Safari: o cronômetro ativo fica disponível na barra superior, mas não
+   cobre os cartões do dashboard. Aberto manualmente, ancora sob o cabeçalho. */
+@media (min-width:720px) and (max-width:1366px) {
+  #app-layout:has(#tela-dashboard[style*="display: block"]) #mq-time-dock:not(.mq-dock-open) {
+    display:none!important;
+  }
+  #app-layout:has(#tela-dashboard[style*="display: block"]) #mq-time-dock.mq-dock-open {
+    top:calc(66px + env(safe-area-inset-top,0px));
+    right:calc(12px + env(safe-area-inset-right,0px));
+    bottom:auto;
+    width:min(284px,calc(100vw - 24px));
+    max-height:calc(100dvh - 82px);
+    overflow-y:auto;
+  }
+}
