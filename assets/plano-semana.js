@@ -18,6 +18,7 @@
  const area=id=>BANCO.disciplinas.find(d=>d.id===id)?.nome||'Estudo geral';
  const opts=selected=>'<option value="">Geral / livre</option>'+BANCO.disciplinas.map(d=>'<option value="'+escapeHTML(d.id)+'" '+(selected===d.id?'selected':'')+'>'+escapeHTML(d.nome)+'</option>').join('');
  let viewed=monday(new Date()), records=[],filter='todas',editing=null,loading=false,screenVersion=0,homeVersion=0;
+ let scheduledDate=null,calendarMonth=null,pickerOpen=false;
  const saving=new Set();
  const weekRange=week=>human(week)+' — '+human(addDays(week,6));
  const currentUser=()=>usuarioAtual?.id||null;
@@ -108,19 +109,103 @@
        arrow(-1,'Diminuir '+label,'6 9 12 15 18 9')+
      '</div></div>';
  }
+
+ const dateLabel=s=>s?parseISO(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}):'Sem data fixa';
+ const weekdayForDate=s=>(parseISO(s).getDay()+6)%7;
+ const getToday=()=>iso(new Date());
+ const newTaskDefault=day=>{
+   if(day!==null&&day!==undefined)return addDays(viewed,day);
+   // On the currently visible week, prefer today; on another week, its Monday.
+   const today=getToday();
+   return monday(parseISO(today))===viewed?today:viewed;
+ };
+ function calendarMarkup(){
+   const view=calendarMonth||parseISO(scheduledDate||getToday());
+   const y=view.getFullYear(),m=view.getMonth();
+   const head=new Date(y,m,1,12);
+   const start=(head.getDay()+6)%7;
+   const today=getToday();
+   const label=head.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+   const years=Array.from({length:21},(_,i)=>y-10+i);
+   let days='';
+   for(let i=0;i<42;i++){
+     const d=new Date(y,m,i-start+1,12);
+     const date=iso(d),sameMonth=d.getMonth()===m;
+     const classes=['weekly-cal-day',sameMonth?'':'is-outside',date===today?'is-today':'',date===scheduledDate?'is-selected':''].filter(Boolean).join(' ');
+     days+='<button type="button" class="'+classes+'" data-date="'+date+'" aria-label="'+
+       escapeHTML(d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+
+       '" aria-pressed="'+(date===scheduledDate)+'" onclick="PlanoMedQuest.chooseDate(\''+date+'\')">'+d.getDate()+'</button>';
+   }
+   return '<div class="weekly-cal-heading"><button type="button" class="weekly-cal-prev" onclick="PlanoMedQuest.changeMonth(-1)" aria-label="Mês anterior">‹</button>'+
+     '<strong>'+escapeHTML(label)+'</strong><select class="weekly-cal-year" aria-label="Selecionar ano" onchange="PlanoMedQuest.changeYear(this.value)">'+
+     years.map(v=>'<option value="'+v+'"'+(v===y?' selected':'')+'>'+v+'</option>').join('')+
+     '</select><button type="button" class="weekly-cal-next" onclick="PlanoMedQuest.changeMonth(1)" aria-label="Próximo mês">›</button></div>'+
+     '<div class="weekly-cal-weekdays">'+['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].map(x=>'<span>'+x+'</span>').join('')+'</div>'+
+     '<div class="weekly-cal-days" role="group" aria-label="Dias do mês">'+days+'</div>'+
+     '<div class="weekly-cal-shortcuts">'+
+      '<button type="button" onclick="PlanoMedQuest.dateShortcut(\'today\')">Hoje</button>'+
+      '<button type="button" onclick="PlanoMedQuest.dateShortcut(\'tomorrow\')">Amanhã</button>'+
+      '<button type="button" onclick="PlanoMedQuest.dateShortcut(\'nextWeek\')">Próxima semana</button>'+
+     '</div><button type="button" class="weekly-cal-no-date" onclick="PlanoMedQuest.dateShortcut(\'none\')">Sem data fixa nesta semana</button>';
+ }
+ function renderCalendar(){
+   const el=$('weekly-date-panel');if(el)el.innerHTML=calendarMarkup();
+   const value=$('weekly-date-value');if(value)value.textContent=dateLabel(scheduledDate);
+   const subtitle=$('weekly-date-hint');
+   if(subtitle)subtitle.textContent=scheduledDate?
+     'A atividade será salva na semana correspondente à data escolhida.':
+     'A atividade ficará na semana exibida, sem dia específico.';
+   const trigger=$('weekly-date-trigger');
+   if(trigger)trigger.setAttribute('aria-expanded',String(pickerOpen));
+   if(el)el.hidden=!pickerOpen;
+ }
+ function toggleCalendar(){
+   pickerOpen=!pickerOpen;
+   calendarMonth=parseISO(scheduledDate||getToday());
+   calendarMonth.setDate(1);
+   renderCalendar();
+ }
+ function chooseDate(value){
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(value)||iso(parseISO(value))!==value)return;
+   scheduledDate=value;
+   calendarMonth=parseISO(value);calendarMonth.setDate(1);
+   pickerOpen=false;renderCalendar();
+ }
+ function changeMonth(amount){
+   if(!calendarMonth)calendarMonth=new Date();
+   const d=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+amount,1,12);
+   calendarMonth=d;renderCalendar();
+ }
+ function changeYear(value){
+   const y=Number(value);
+   if(!Number.isInteger(y)||y<1900||y>2200)return;
+   if(!calendarMonth)calendarMonth=new Date();
+   calendarMonth=new Date(y,calendarMonth.getMonth(),1,12);
+   renderCalendar();
+ }
+ function dateShortcut(value){
+   if(value==='none'){scheduledDate=null;pickerOpen=false;renderCalendar();return;}
+   const today=getToday();
+   if(value==='today')chooseDate(today);
+   else if(value==='tomorrow')chooseDate(addDays(today,1));
+   else if(value==='nextWeek')chooseDate(addDays(monday(parseISO(today)),7));
+ }
+
  function editor(row,day){
    editing=row?.id||null;
-   const chosenDay=row?.dia_semana??day;
-   const options='<option value="">Qualquer dia da semana</option>'+days.map((d,i)=>'<option value="'+i+'" '+(chosenDay===i?'selected':'')+'>'+d+' ('+human(addDays(viewed,i))+')</option>').join('');
+   scheduledDate=row?(row.dia_semana===null||row.dia_semana===undefined?null:addDays(row.semana_inicio||viewed,row.dia_semana)):newTaskDefault(day);
+   pickerOpen=false;
+   calendarMonth=parseISO(scheduledDate||getToday());calendarMonth.setDate(1);
    $('weekly-editor-root').innerHTML='<div class="weekly-modal-backdrop" role="presentation" onclick="if(event.target===this)PlanoMedQuest.closeEditor()"><div class="weekly-modal" role="dialog" aria-modal="true" aria-labelledby="weekly-editor-title">'+
      '<div class="weekly-modal-head"><div><span>PLANEJAMENTO INDIVIDUAL</span><h3 id="weekly-editor-title">'+(row?'Editar atividade':'Nova atividade de estudo')+'</h3></div><button type="button" class="weekly-modal-x" onclick="PlanoMedQuest.closeEditor()" aria-label="Fechar">×</button></div>'+
      '<div class="weekly-modal-fields"><label>O que você pretende estudar?<input id="weekly-title" maxlength="180" placeholder="Ex.: Resolver 50 questões de Imunologia" value="'+escapeHTML(row?.titulo||'')+'"></label>'+
-     '<div class="weekly-fields-pair"><label>Área de estudo<select id="weekly-area">'+opts(row?.area_id||'')+'</select></label><label>Dia da semana<select id="weekly-day">'+options+'</select></label></div>'+
+     '<div class="weekly-fields-pair weekly-calendar-fields"><label>Área de estudo<select id="weekly-area">'+opts(row?.area_id||'')+'</select></label><div class="weekly-date-group"><span class="weekly-date-label">Data planejada</span><span class="weekly-date-description" id="weekly-date-hint">Escolha uma data, mesmo que seja daqui a vários meses.</span><div class="weekly-date-anchor"><button type="button" class="weekly-date-trigger" id="weekly-date-trigger" aria-label="Escolher data planejada" aria-expanded="false" aria-controls="weekly-date-panel" onclick="PlanoMedQuest.toggleCalendar()"><span aria-hidden="true" class="weekly-cal-icon">▦</span><span id="weekly-date-value">'+dateLabel(scheduledDate)+'</span><span class="weekly-cal-chevron" aria-hidden="true">⌄</span></button><div class="weekly-date-popover" id="weekly-date-panel" hidden></div></div></div></div>'+
      '<div class="weekly-fields-pair"><label>Meta de realização'+numericControl('weekly-target',row?.meta??1,1,'meta de realização')+'</label>'+
      '<label>Quanto já realizou?'+numericControl('weekly-realized',row?.realizado??0,0,'quantidade realizada')+'</label></div>'+
      '<label>Observações (opcional)<textarea id="weekly-notes" maxlength="500" rows="3" placeholder="Ex.: Revisar TLR, citocinas e interferons">'+escapeHTML(row?.observacoes||'')+'</textarea></label></div>'+
      '<div id="weekly-modal-error" role="alert" class="weekly-modal-error" style="display:none"></div>'+
      '<div class="weekly-modal-actions"><button type="button" onclick="PlanoMedQuest.closeEditor()">Cancelar</button><button type="button" id="weekly-save-btn" class="weekly-save" onclick="PlanoMedQuest.save()">Salvar atividade</button></div></div></div>';
+   renderCalendar();
    $('weekly-title')?.focus();
  }
  function adjustNumber(id,direction){
@@ -132,7 +217,7 @@
    el.value=String(next);
    el.dispatchEvent(new Event('input',{bubbles:true}));
  }
- function closeEditor(){const el=$('weekly-editor-root');if(el)el.innerHTML='';editing=null;}
+ function closeEditor(){const el=$('weekly-editor-root');if(el)el.innerHTML='';editing=null;scheduledDate=null;pickerOpen=false;}
  async function refreshHome(){
    const token=++homeVersion;
    if(!currentUser()||!$('study-home-plan'))return;
@@ -181,23 +266,27 @@
  }
  function modeVisible(){return $('tela-estudo')?.style.display==='block' && $('study-title')?.textContent==='Plano da Semana'}
  async function save(){
-   const title=$('weekly-title')?.value.trim()||'',meta=Number($('weekly-target')?.value),realizado=Number($('weekly-realized')?.value),chosen=$('weekly-day')?.value;
+   const title=$('weekly-title')?.value.trim()||'',meta=Number($('weekly-target')?.value),realizado=Number($('weekly-realized')?.value);
    if(!title)return warn('Informe o nome da atividade.',true);
    if(!Number.isInteger(meta)||meta<1||meta>10000||!Number.isInteger(realizado)||realizado<0||realizado>meta)return warn('Confira a meta e o valor realizado (de 0 até a meta).',true);
-   const day=chosen===''?null:Number(chosen);
-   if(day!==null && (!Number.isInteger(day)||day<0||day>6))return warn('Selecione um dia válido.',true);
-   const row={titulo:title,area_id:$('weekly-area').value,meta,realizado,concluido:realizado>=meta,dia_semana:day,observacoes:$('weekly-notes').value.trim()};
+   if(scheduledDate && (!/^\d{4}-\d{2}-\d{2}$/.test(scheduledDate)||iso(parseISO(scheduledDate))!==scheduledDate))return warn('Escolha uma data válida.',true);
+   const destinationWeek=scheduledDate?monday(parseISO(scheduledDate)):viewed;
+   const destinationDay=scheduledDate?weekdayForDate(scheduledDate):null;
+   const row={titulo:title,area_id:$('weekly-area').value,meta,realizado,concluido:realizado>=meta,semana_inicio:destinationWeek,dia_semana:destinationDay,observacoes:$('weekly-notes').value.trim()};
    const button=$('weekly-save-btn');if(button){button.disabled=true;button.textContent='Salvando...'}
    try{
      const owner=currentUser();if(!owner)throw Error('Sessão encerrada. Entre novamente.');
      let q;
      if(editing)q=await db.from('plano_semana').update(row).eq('id',editing).eq('usuario_id',owner).select('id');
-     else q=await db.from('plano_semana').insert({...row,usuario_id:owner,semana_inicio:viewed}).select('id');
+     else q=await db.from('plano_semana').insert({...row,usuario_id:owner}).select('id');
      if(q.error)throw q.error;
      if(!q.data?.length)throw Error('O banco de dados não confirmou o salvamento.');
+     const savedDate=scheduledDate;
      closeEditor();
+     viewed=destinationWeek;
+     filter='todas';
      await Promise.all([open(),refreshHome()]);
-     warn('Atividade salva no seu planejamento.');
+     warn(savedDate?'Atividade agendada para '+dateLabel(savedDate)+'.':'Atividade salva no planejamento.');
    }catch(e){console.error(e);warn(e.message||'Erro ao salvar atividade.',true)}
    finally{if(button&&document.contains(button)){button.disabled=false;button.textContent='Salvar atividade'}}
  }
@@ -217,7 +306,7 @@
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('weekly-editor-root')?.firstChild)closeEditor()});
  window.PlanoMedQuest={
    open,reload:open,refreshHome,renderHome,
-   move,today,
+   move,today,toggleCalendar,chooseDate,changeMonth,changeYear,dateShortcut,
    filter:v=>{filter=v;render()},
    newTask:d=>editor(null,d),
    edit:id=>{let row=records.find(x=>x.id===id);if(row)editor(row,row.dia_semana)},
