@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="assets/plano-semana.css">
 <link rel="stylesheet" href="assets/catalogo-questoes.css?v=botao-filtrar-20261026">
 <link rel="stylesheet" href="assets/progresso-analytics.css">
-<link rel="stylesheet" href="assets/tempo-estudo.css?v=cronometro-esquerda-compacto-20261026">
+<link rel="stylesheet" href="assets/tempo-estudo.css?v=cronometro-arrastavel-ipad-20261026">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedQuest — Helen Taussig</title>
@@ -1884,6 +1884,8 @@
     justify-content: space-between;
     gap: 12px;
     margin-top: 18px;
+    position: relative;
+    z-index: 130; /* Navegação acima de qualquer widget flutuante */
   }
   .nav-btn {
     padding: 11px 22px;
@@ -2047,16 +2049,6 @@
       pointer-events: none;
       background: linear-gradient(90deg,rgba(0,7,15,.82),rgba(0,7,15,.15) 78%),
                   linear-gradient(0deg,rgba(0,7,15,.72),transparent 75%);
-    }
-    html.mq-ipad-safari #app-layout:has(#tela-dashboard[style*="display: block"])
-      #mq-time-dock:not(.mq-dock-open) { display: none !important; }
-    html.mq-ipad-safari #app-layout:has(#tela-dashboard[style*="display: block"])
-      #mq-time-dock.mq-dock-open {
-        top: calc(66px + env(safe-area-inset-top,0px));
-        bottom: auto;
-        right: calc(12px + env(safe-area-inset-right,0px));
-        max-height: calc(100dvh - 80px);
-        overflow-y: auto;
     }
   }
   /* Paisagem do iPad: três cartões como no desenho desktop aprovado.
@@ -7695,7 +7687,7 @@ iniciarAuth();
 <script src="assets/plano-semana.js"></script>
 <script src="assets/catalogo-questoes.js?v=hotpoints-ordem-condicional-20261026"></script>
 <script src="assets/estudo-controles.js?v=historico-manual-20261026"></script>
-<script src="assets/tempo-estudo.js?v=cronometro-esquerda-compacto-20261026"></script>
+<script src="assets/tempo-estudo.js?v=cronometro-arrastavel-ipad-20261026"></script>
 <script src="assets/historico-estudo.js?v=historico-manual-20261026"></script>
 <script src="assets/progresso-analytics.js?v=historico-manual-20261026"></script>
 </body>
