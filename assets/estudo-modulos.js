@@ -12,7 +12,7 @@
   mode=kind;esconderApp();$('tela-estudo').style.display='block';fecharSidebar();setNavActive(({resumo:'nav-resumo',anotacao:'nav-notas',plano:'nav-plano',progresso:'nav-progresso'})[kind]);
   $('study-title').textContent=({resumo:'Resumos',anotacao:'Anotações',plano:'Plano da Semana',progresso:'Meu progresso'})[kind];
   $('study-msg').textContent='';$('study-content').innerHTML='<p>Carregando…</p>';
-  if(kind==='resumo'||kind==='anotacao')readDocs();else if(kind==='plano')readPlan();else readProgress();
+  if(kind==='resumo')readOfficial();else if(kind==='anotacao')readDocs();else if(kind==='plano')readPlan();else readProgress();
  };
  const docCard=d=>'<article class="study-row"><div><b>'+E(d.titulo)+'</b><p>'+E(area(d.area_id))+' · '+E(d.assunto)+'</p></div><div><button onclick="studyEdit(\''+d.id+'\')">Abrir</button><button onclick="studyDelete(\''+d.id+'\')">Excluir</button></div></article>';
  async function readDocs(){try{docs=await fetch('estudo_documentos',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('tipo',mode).order('atualizado_em',{ascending:false}));paintDocs();if(window.studyPendingDocument){const id=window.studyPendingDocument;window.studyPendingDocument=null;const found=docs.find(d=>d.id===id);if(found)editor(found)}}catch(e){error(e)}}
@@ -26,9 +26,10 @@
   $('study-editor').innerHTML='<div class="study-form"><h3>'+ (doc?'Editar material':'Novo material') +'</h3><label>Título<input id="st-title" maxlength="160" value="'+E(doc?.titulo||'')+'"></label><label>Área<select id="st-area">'+opts(doc?.area_id||'')+'</select></label><label>Assunto<input id="st-topic" value="'+E(doc?.assunto||'')+'"></label><label>Conteúdo<textarea rows="12" id="st-body">'+E(doc?.conteudo||'')+'</textarea></label><div><button onclick="studySave()">Salvar</button><button onclick="studyCancel()">Cancelar</button></div></div>';
   $('study-editor').scrollIntoView({block:'nearest',behavior:'smooth'});
  }
- window.studyNew=()=>editor(null);window.studyEdit=id=>editor(docs.find(d=>d.id===id));
+ window.studyNew=()=>{if(mode!=='anotacao')return error(Error('Somente a administração publica resumos.'));editor(null)};window.studyEdit=id=>{if(mode!=='anotacao')return;const doc=docs.find(d=>d.id===id);if(doc)editor(doc)};
  window.studyCancel=()=>{$('study-editor').innerHTML=''};
  window.studySave=async()=>{
+  if(mode!=='anotacao')return error(Error('Estudantes só podem salvar anotações privadas.'));
   const titulo=$('st-title').value.trim();if(!titulo)return error(Error('Informe um título.'));
   const data={titulo,area_id:$('st-area').value,assunto:$('st-topic').value.trim(),conteudo:$('st-body').value,tipo:mode,atualizado_em:new Date().toISOString()};
   try{
@@ -39,6 +40,89 @@
   }catch(e){error(e)}
  };
  window.studyDelete=async id=>{if(!confirm('Excluir este documento?'))return;try{await fetch('estudo_documentos',t=>t.delete().eq('id',id).eq('usuario_id',usuarioAtual.id));await readDocs();note('Excluído.')}catch(e){error(e)}};
+
+ // Official content is shared and curated by administrators only.
+ // Supabase RLS is the authoritative permission check; UI visibility is supplementary.
+ let officialTexts=[],officialPdfs=[],officialEditing=null;
+ const isEditor=()=>perfilAtual?.admin===true;
+ async function readOfficial(){
+   try{
+     const results=await Promise.all([
+       fetch('conteudos_oficiais',t=>t.select('*').order('atualizado_em',{ascending:false})),
+       fetch('materiais_medquest',t=>t.select('id,tipo,titulo,descricao,disciplina_id,tema_id,arquivo_path').eq('tipo','resumo').order('criado_em',{ascending:false}))
+     ]);
+     officialTexts=results[0]||[];
+     officialPdfs=results[1]||[];
+     paintOfficial();
+     if(window.studyPendingDocument){
+       const id=window.studyPendingDocument;window.studyPendingDocument=null;
+       if(officialTexts.some(x=>x.id===id))window.studyOfficialOpen(id);
+     }
+   }catch(e){error(e)}
+ }
+ function paintOfficial(){
+   $('study-content').innerHTML='<div class="study-toolbar"><p>Resumos oficiais publicados pela administração do MedQuest.</p>'+
+     (isEditor()?'<button onclick="studyOfficialNew()">+ Novo resumo oficial (Admin)</button>':'')+
+     '<select id="study-official-filter" onchange="studyOfficialFilter()">'+opts(filter)+'</select></div><div id="study-list"></div><div id="study-editor"></div>';
+   window.studyOfficialFilter=()=>{
+     const chosen=$('study-official-filter')?.value||'';
+     const filteredTexts=officialTexts.filter(x=>!chosen||x.area_id===chosen);
+     const filteredPdfs=officialPdfs.filter(x=>!chosen||x.disciplina_id===chosen);
+     const items=filteredTexts.map(d=>'<article class="study-row"><div><b>'+E(d.titulo)+'</b><p>'+
+       E(area(d.area_id))+' · '+E(d.assunto||'Resumo oficial')+(d.publicado?'':' · Rascunho não publicado')+
+       '</p></div><div><button onclick="studyOfficialOpen(\''+d.id+'\')">Ler resumo</button>'+
+       (isEditor()?'<button onclick="studyOfficialEdit(\''+d.id+'\')">Editar</button><button onclick="studyOfficialDelete(\''+d.id+'\')">Excluir</button>':'')+
+       '</div></article>').join('');
+     const pdfs=filteredPdfs.map(d=>'<article class="study-row"><div><b>'+E(d.titulo)+'</b><p>'+E(area(d.disciplina_id))+' · Arquivo PDF oficial</p></div><div><button onclick="studyOfficialPdf(\''+d.id+'\')">Abrir PDF</button></div></article>').join('');
+     $('study-list').innerHTML=items+pdfs||'<p class="study-empty">Ainda não há resumos oficiais publicados para esta área.</p>';
+   };
+   studyOfficialFilter();
+ }
+ window.studyOfficialOpen=id=>{
+   const d=officialTexts.find(x=>x.id===id);
+   if(!d)return;
+   $('study-editor').innerHTML='<div class="study-form"><h3>'+E(d.titulo)+'</h3><p>'+E(area(d.area_id))+' · '+E(d.assunto)+'</p><div class="study-official-body">'+E(d.conteudo)+'</div><div><button onclick="studyCancel()">Fechar</button></div></div>';
+   activity({tipo:'resumo',referencia_id:d.id,area_id:d.area_id});
+ };
+ window.studyOfficialPdf=async id=>{
+   const d=officialPdfs.find(x=>x.id===id);if(!d)return;
+   try{
+     const r=await db.storage.from('materiais_medquest').createSignedUrl(d.arquivo_path,120);
+     if(r.error)throw r.error;
+     if(r.data?.signedUrl)window.open(r.data.signedUrl,'_blank','noopener,noreferrer');
+   }catch(e){error(e)}
+ };
+ const editOfficial=d=>{
+   if(!isEditor())return error(Error('Apenas administradores podem publicar materiais oficiais.'));
+   officialEditing=d?.id||null;
+   $('study-editor').innerHTML='<div class="study-form"><h3>'+ (d?'Editar':'Novo')+' resumo oficial</h3>'+
+     '<label>Título<input id="off-title" maxlength="160" value="'+E(d?.titulo||'')+'"></label>'+
+     '<label>Área<select id="off-area">'+opts(d?.area_id||'')+'</select></label>'+
+     '<label>Assunto<input id="off-topic" value="'+E(d?.assunto||'')+'"></label>'+
+     '<label>Conteúdo revisado<textarea id="off-body" rows="15">'+E(d?.conteudo||'')+'</textarea></label>'+
+     '<label><input type="checkbox" id="off-publicado" '+(d?.publicado?'checked':'')+'> Publicar para os alunos (após revisão)</label>'+
+     '<div><button onclick="studyOfficialSave()">Salvar</button><button onclick="studyCancel()">Cancelar</button></div></div>';
+   $('study-editor').scrollIntoView({block:'nearest',behavior:'smooth'});
+ };
+ window.studyOfficialNew=()=>editOfficial(null);
+ window.studyOfficialEdit=id=>editOfficial(officialTexts.find(x=>x.id===id));
+ window.studyOfficialSave=async()=>{
+   if(!isEditor())return error(Error('Somente administradores podem salvar conteúdo oficial.'));
+   const titulo=$('off-title')?.value.trim(),conteudo=$('off-body')?.value||'';
+   if(!titulo)return error(Error('Informe um título.'));
+   try{
+     const data={tipo:'resumo',titulo,conteudo,area_id:$('off-area').value,assunto:$('off-topic').value.trim(),publicado:$('off-publicado').checked,atualizado_em:new Date().toISOString()};
+     if(officialEditing)await fetch('conteudos_oficiais',t=>t.update(data).eq('id',officialEditing));
+     else await fetch('conteudos_oficiais',t=>t.insert({...data,autor_id:usuarioAtual.id}));
+     await readOfficial();note('Resumo oficial salvo.');
+   }catch(e){error(e)}
+ };
+ window.studyOfficialDelete=async id=>{
+   if(!isEditor())return error(Error('Somente administradores podem excluir conteúdo oficial.'));
+   if(!confirm('Excluir definitivamente este resumo oficial?'))return;
+   try{await fetch('conteudos_oficiais',t=>t.delete().eq('id',id));await readOfficial();note('Resumo excluído.')}catch(e){error(e)}
+ };
+
  async function readPlan(){try{plan=await fetch('plano_semana',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('semana_inicio',monday()).order('criado_em'));paintPlan()}catch(e){error(e)}}
  function paintPlan(){
   $('study-content').innerHTML='<div class="study-toolbar"><span>Semana de '+monday().split('-').reverse().join('/')+'</span><button onclick="studyPlanNew()">+ Nova meta</button></div><div id="study-list"></div><div id="study-editor"></div>';
