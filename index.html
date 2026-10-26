@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="assets/estudo-modulos.css">
 <link rel="stylesheet" href="assets/medquest-acervo.css">
 <link rel="stylesheet" href="assets/plano-semana.css">
+<link rel="stylesheet" href="assets/catalogo-questoes.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedQuest — Helen Taussig</title>
@@ -2248,17 +2249,13 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Perfil
       </button>
-      <button id="nav-questoes" onclick="irParaDashboard()">
+      <button id="nav-questoes" onclick="abrirQuestoesGerais()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
         Questões
       </button>
       <button id="nav-resumo" onclick="abrirEstudo('resumo')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         Resumo
-      </button>
-      <button id="nav-biblioteca" onclick="abrirBiblioteca('resumo')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
-        Biblioteca PDF
       </button>
       <button id="nav-plano" onclick="abrirEstudo('plano')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -2445,6 +2442,7 @@
         </div>
       </div>
 
+<div id="mq-questoes-gerais" style="display:none"></div>
 <div id="tela-estudo" class="study-screen" style="display:none"><div class="study-head"><div><h1 id="study-title">Estudos</h1><p id="study-subtitle" style="color:var(--cinza)">Materiais e desempenho personalizados</p></div><button onclick="irParaDashboard()">← Voltar ao início</button></div><div id="study-msg" style="min-height:24px"></div><div id="study-content"></div></div>
 <!-- TELA ADMIN -->
 <div id="tela-admin" style="display:none;">
@@ -3557,7 +3555,7 @@ async function renovarPagamento(id, dias) {
 }
 
 function esconderApp() {
-  ['tela-dashboard','tela-estudo','tela-selecao','tela-temas','tela-questao','tela-resultado','tela-admin','tela-perfil'].forEach(id => {
+  ['tela-dashboard','mq-questoes-gerais','tela-estudo','tela-selecao','tela-temas','tela-questao','tela-resultado','tela-admin','tela-perfil'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -7202,13 +7200,14 @@ function encerrarSessao() {
 
 function reiniciarTema() { iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId); }
 function voltarTemas() { abrirDisciplina(estadoAtual.disciplinaId); window.scrollTo(0, 0); }
-function voltarSelecao() { irParaDashboard(); }
+function voltarSelecao() { abrirQuestoesGerais(); }
 
 function mostrarTela(nome) {
   document.getElementById('tela-dashboard').style.display = 'none';
   document.getElementById('tela-admin').style.display = 'none';
   document.getElementById('tela-perfil').style.display = 'none';
   document.getElementById('tela-selecao').style.display = 'none';
+  document.getElementById('mq-questoes-gerais').style.display = 'none';
   document.getElementById('tela-temas').style.display = nome === 'temas' ? 'block' : 'none';
   document.getElementById('tela-questao').style.display = nome === 'questao' ? 'block' : 'none';
   document.getElementById('tela-resultado').style.display = nome === 'resultado' ? 'flex' : 'none';
@@ -7251,11 +7250,10 @@ function renderSidebarDisciplinas() {
     btn.className = 'sidebar-disc';
     btn.title = d.nome;
     btn.onclick = () => studyArea(d.id);
-    if (ILUSTRACOES.includes(d.id)) {
-      btn.innerHTML = `<img src="assets/disciplinas/${d.id}.png" alt="${d.nome}" style="width:22px;height:22px;object-fit:contain;filter:brightness(0) invert(1);opacity:0.7;">`;
-    } else {
-      btn.textContent = d.icon;
-    }
+    const icon = ILUSTRACOES.includes(d.id)
+      ? `<img src="assets/disciplinas/${d.id}.png" alt="" aria-hidden="true">`
+      : `<span aria-hidden="true">${d.icon}</span>`;
+    btn.innerHTML = `<span class="sidebar-disc-icon">${icon}</span><span class="sidebar-disc-name">${d.nome}</span>`;
     container.appendChild(btn);
   });
 }
@@ -7364,5 +7362,6 @@ iniciarAuth();
 <script src="assets/estudo-modulos.js"></script>
 <script src="assets/medquest-acervo.js"></script>
 <script src="assets/plano-semana.js"></script>
+<script src="assets/catalogo-questoes.js"></script>
 </body>
 </html>
