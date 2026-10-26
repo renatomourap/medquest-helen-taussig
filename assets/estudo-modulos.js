@@ -270,11 +270,16 @@
  async function home(){
   if(!usuarioAtual)return;
   try{
-   const results=await Promise.all([fetch('estudo_documentos',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('tipo','anotacao').order('atualizado_em',{ascending:false}).limit(4)),fetch('plano_semana',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('semana_inicio',monday())),fetch('ultima_atividade',t=>t.select('*').eq('usuario_id',usuarioAtual.id).maybeSingle())]);
-   let [notes,goals,record]=results;last=record;
-   $('study-home-notes').innerHTML=notes.map(n=>'<button class="study-home-link" onclick="studyOpenNote(\''+n.id+'\')">'+E(n.titulo)+'</button>').join('')||'<p>Nenhuma anotação ainda.</p>';
+   const [goals,record]=await Promise.all([
+    fetch('plano_semana',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('semana_inicio',monday())),
+    fetch('ultima_atividade',t=>t.select('*').eq('usuario_id',usuarioAtual.id).maybeSingle())
+   ]);
+   last=record;
    window.PlanoMedQuest.renderHome(goals);
-   $('study-home-last').textContent=record? (record.tipo==='questoes'?'Questões':record.tipo==='resumo'?'Resumo':'Anotações')+' · '+E(area(record.area_id)):'Retome questões, anotações ou resumos.';
+   const lastText=$('study-home-last');
+   if(lastText)lastText.textContent=record
+    ? (record.tipo==='questoes'?'Questões':record.tipo==='resumo'?'Resumo':'Atividade anterior')+' · '+E(area(record.area_id))
+    : 'Retome questões e resumos.';
   }catch(e){console.warn('Dashboard pessoal',e)}
  }
  // A barra lateral abre todos os resumos. Pelo Explorar por área,
