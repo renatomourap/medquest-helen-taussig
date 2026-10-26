@@ -231,94 +231,96 @@
 @media(prefers-reduced-motion:reduce){.mq-history-chevron{transition:none}}
 
 
-/* Cronômetro flutuante: à esquerda do conteúdo, compacto após iniciar.
-   No Safari do iPad, usa a largura real da barra lateral (198px no landscape).
-   Sem bloquear os botões inferiores de navegação das questões. */
+/* Cronômetro arrastável: posição inicial no canto inferior esquerdo da área
+   de conteúdo. A posição exata do usuário é aplicada em JS sobre estas regras. */
 .mq-time-dock{
- position:fixed;
- left:calc(230px + 12px + env(safe-area-inset-left,0px));
- right:auto;
- top:clamp(110px,44dvh,510px);
- bottom:auto;
- width:min(292px,calc(100vw - 265px));
- max-height:calc(100dvh - 116px - env(safe-area-inset-top,0px));
- overflow-y:auto;
- overscroll-behavior:contain;
- -webkit-overflow-scrolling:touch;
- z-index:119;
+  position:fixed;
+  left:calc(230px + 12px + env(safe-area-inset-left,0px));
+  right:auto;
+  top:auto;
+  bottom:calc(18px + env(safe-area-inset-bottom,0px));
+  z-index:119;
+  width:min(292px,calc(100vw - 32px));
+  max-height:calc(100dvh - 84px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
 }
+.mq-time-dock[hidden]{display:none!important}
 .mq-time-compact-trigger{display:none}
 .mq-time-dock.mq-time-compact:not(.mq-dock-open){
- display:flex;
- align-items:center;
- justify-content:center;
- left:calc(230px + 12px + env(safe-area-inset-left,0px));
- right:auto;
- top:clamp(110px,44dvh,510px);
- bottom:auto;
- width:87px;
- max-width:calc(100vw - 24px);
- min-height:48px;
- padding:0;
- border-radius:12px;
- overflow:visible;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  left:calc(230px + 12px + env(safe-area-inset-left,0px));
+  right:auto;
+  top:auto;
+  bottom:calc(18px + env(safe-area-inset-bottom,0px));
+  width:88px;
+  max-width:calc(100vw - 24px);
+  min-height:49px;
+  padding:0;
+  border-radius:12px;
+  overflow:visible;
 }
 .mq-time-dock.mq-time-compact .mq-time-head,
 .mq-time-dock.mq-time-compact .mq-time-controls{display:none!important}
 .mq-time-dock.mq-time-compact .mq-time-compact-trigger{
- display:flex;
- align-items:center;
- justify-content:center;
- width:100%;
- min-height:48px;
- padding:10px 9px;
- border:0;
- border-radius:11px;
- background:transparent;
- color:#f2cf8c;
- font:750 16px/1 Inter,Arial,sans-serif;
- font-variant-numeric:tabular-nums;
- font-feature-settings:"tnum";
- letter-spacing:.01em;
- text-align:center;
- cursor:pointer;
- touch-action:manipulation;
- -webkit-tap-highlight-color:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:49px;
+  padding:9px 6px;
+  border:0;
+  border-radius:11px;
+  background:transparent;
+  color:#f2cf8c;
+  font:750 16px/1 Inter,Arial,sans-serif;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";
+  letter-spacing:.01em;
+  text-align:center;
+  cursor:grab;
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
 }
+.mq-time-dock.mq-time-compact .mq-time-compact-trigger:active{cursor:grabbing}
 .mq-time-compact-trigger:hover{background:rgba(231,188,117,.13)}
-.mq-time-compact-trigger:focus-visible{
- outline:2px solid #f1cd83;
- outline-offset:3px;
+.mq-time-compact-trigger:focus-visible{outline:2px solid #f1cd83;outline-offset:3px}
+.mq-time-dock .mq-time-head{
+  cursor:grab;
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.mq-time-dock .mq-time-head:active{cursor:grabbing}
+.mq-time-dock .mq-time-head>button{
+  cursor:pointer;
+  touch-action:manipulation;
+  min-width:40px;
+  min-height:40px;
 }
 .mq-time-dock.mq-dock-open{padding:12px}
-.mq-time-dock .mq-time-head>button{
- min-width:40px;min-height:40px;
- touch-action:manipulation;
-}
 html.mq-ipad-safari .mq-time-dock,
 html.mq-ipad-safari .mq-time-dock.mq-time-compact:not(.mq-dock-open){
- left:calc(198px + 12px + env(safe-area-inset-left,0px));
+  left:calc(198px + 12px + env(safe-area-inset-left,0px));
 }
 @media(max-width:900px){
- .mq-time-dock,
- .mq-time-dock.mq-time-compact:not(.mq-dock-open),
- html.mq-ipad-safari .mq-time-dock,
- html.mq-ipad-safari .mq-time-dock.mq-time-compact:not(.mq-dock-open){
-  left:calc(10px + env(safe-area-inset-left,0px));
-  right:auto;
-  top:clamp(100px,41dvh,430px);
-  bottom:auto;
- }
- .mq-time-dock{
-  width:min(280px,calc(100vw - 22px));
-  max-height:calc(100dvh - 110px - env(safe-area-inset-top,0px));
- }
- .mq-time-dock.mq-time-compact:not(.mq-dock-open){width:87px}
+  .mq-time-dock,
+  .mq-time-dock.mq-time-compact:not(.mq-dock-open),
+  html.mq-ipad-safari .mq-time-dock,
+  html.mq-ipad-safari .mq-time-dock.mq-time-compact:not(.mq-dock-open){
+    left:calc(12px + env(safe-area-inset-left,0px));
+    right:auto;
+    top:auto;
+    bottom:calc(18px + env(safe-area-inset-bottom,0px));
+  }
+  .mq-time-dock{width:min(280px,calc(100vw - 24px))}
+  .mq-time-dock.mq-time-compact:not(.mq-dock-open){width:88px}
 }
 @media(max-height:490px){
- .mq-time-dock,
- .mq-time-dock.mq-time-compact:not(.mq-dock-open){
-  top:75px;
-  max-height:calc(100dvh - 90px);
- }
+  .mq-time-dock{max-height:calc(100dvh - 76px)}
 }
