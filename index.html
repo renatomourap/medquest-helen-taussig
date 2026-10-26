@@ -7213,14 +7213,52 @@ function iniciarTema(disciplinaId, temaId) {
   mostrarTela('questao');
 }
 
+// Inicia uma sessão com todos os resultados do filtro, inclusive de assuntos diferentes.
+// Cada questão conserva sua origem para o histórico e o progresso individuais.
+function iniciarQuestoesFiltradas(itens) {
+  if (!Array.isArray(itens) || !itens.length) return;
+  const validos = itens.filter(item => item && item.questao && item.areaId && item.temaId);
+  if (!validos.length) return;
+  const primeira = validos[0];
+  estadoAtual = {
+    disciplinaId: primeira.areaId,
+    temaId: primeira.temaId,
+    questaoIndex: 0, respostas: {},
+    filtrada: true,
+    itensFiltrados: validos,
+    questoes: validos.map(item => ({
+      ...item.questao,
+      __mqAreaId: item.areaId,
+      __mqTemaId: item.temaId,
+      __mqAreaNome: item.areaName,
+      __mqTemaNome: item.temaName,
+      __mqHotpointTitulo: item.hotpointTitle || ''
+    }))
+  };
+  window.__mqFromCatalog = true;
+  renderMiniaturas();
+  renderQuestao(0);
+  mostrarTela('questao');
+  window.scrollTo(0, 0);
+}
+
 function renderQuestao(index) {
   const q = estadoAtual.questoes[index];
   const total = estadoAtual.questoes.length;
   estadoAtual.questaoIndex = index;
+  // Nas sessões filtradas por área ou dificuldade, o cabeçalho acompanha
+  // a origem da questão atual, sem perder a referência ao tema.
+  if (estadoAtual.filtrada) {
+    document.getElementById('q-disciplina').textContent =
+      String(q.__mqAreaNome || '').toUpperCase();
+    document.getElementById('q-tema').textContent = q.__mqTemaNome || '';
+  }
   const pct = Math.round(((index + 1) / total) * 100);
   document.getElementById('progresso-txt').textContent = `${index + 1} / ${total}`;
   document.getElementById('progresso-bar').style.width = pct + '%';
-  document.getElementById('q-numero').textContent = `Questão ${index + 1} • ${q.hotpoint}`;
+  document.getElementById('q-numero').textContent =
+    `Questão ${index + 1} • ${q.hotpoint}` +
+    (q.__mqHotpointTitulo ? ` — ${q.__mqHotpointTitulo}` : '');
   document.getElementById('q-enunciado').textContent = q.enunciado;
   const altContainer = document.getElementById('alternativas');
   altContainer.innerHTML = '';
@@ -7297,8 +7335,22 @@ function encerrarSessao() {
   mostrarTela('resultado');
 }
 
-function reiniciarTema() { iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId); }
-function voltarTemas() { abrirDisciplina(estadoAtual.disciplinaId); window.scrollTo(0, 0); }
+function reiniciarTema() {
+  if (estadoAtual.filtrada && estadoAtual.itensFiltrados?.length) {
+    iniciarQuestoesFiltradas(estadoAtual.itensFiltrados);
+    return;
+  }
+  iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId);
+}
+function voltarTemas() {
+  if (estadoAtual.filtrada) {
+    window.__mqFromCatalog = false;
+    abrirQuestoesGerais();
+    return;
+  }
+  abrirDisciplina(estadoAtual.disciplinaId);
+  window.scrollTo(0, 0);
+}
 function voltarSelecao() {
   if (window.__mqFromCatalog) {
     window.__mqFromCatalog = false;
@@ -7453,11 +7505,12 @@ async function salvarProgresso(questaoIndex, letraMarcada, acertou) {
   if (!usuarioAtual) return;
   try {
     const recordedAt = new Date().toISOString();
+    const questao = estadoAtual.questoes[questaoIndex];
     const answer = {
       usuario_id: usuarioAtual.id,
-      disciplina_id: estadoAtual.disciplinaId,
-      tema_id: estadoAtual.temaId,
-      questao_id: estadoAtual.questoes[questaoIndex].id,
+      disciplina_id: questao.__mqAreaId || estadoAtual.disciplinaId,
+      tema_id: questao.__mqTemaId || estadoAtual.temaId,
+      questao_id: questao.id,
       resposta: letraMarcada,
       acertou: acertou,
       respondido_em: recordedAt
