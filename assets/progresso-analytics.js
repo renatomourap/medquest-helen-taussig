@@ -96,7 +96,7 @@ const compare=(value,old,type)=>{
  return (value-old>0?'+':'')+Math.round((value-old)/old*100)+'% vs. período anterior';
 };
 const cl=(v,p)=>p===null||v===null||p===undefined?'mp-muted':v>p?'mp-up':v<p?'mp-down':'mp-muted';
-const card=(ico,title,val,detail,status)=>'<article class="mp-stat"><div class="mp-stat-head"><span class="mp-icon-bubble">'+icon(ico)+'</span><span>'+esc(title)+'</span></div><strong>'+esc(val)+'</strong><small class="'+(status||'mp-muted')+'">'+esc(detail)+'</small>'+(ico==='clock'?'<a class="mp-time-link" href="#mq-study-history">Ver histórico diário</a>':'')+'</article>';
+const card=(ico,title,val,detail,status)=>'<article class="mp-stat"><div class="mp-stat-head"><span class="mp-icon-bubble">'+icon(ico)+'</span><span>'+esc(title)+'</span></div><strong>'+esc(val)+'</strong><small class="'+(status||'mp-muted')+'">'+esc(detail)+'</small>'+(ico==='clock'?'<button type="button" class="mp-time-link" onclick="MedQuestStudyHistory.focus()">Ver histórico diário <span aria-hidden="true">↗</span></button>':'')+'</article>';
 const grouped=rows=>{
  const result=new Map();
  for(const row of rows){
