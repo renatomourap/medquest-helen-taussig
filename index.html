@@ -1986,6 +1986,35 @@
     animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Explorar por área: escolha entre banco de questões e resumos oficiais. */
+  .explorar-modalidades { display: grid; gap: 16px; margin-top: 24px; }
+  .explorar-modalidade {
+    width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+    display: flex; align-items: center; gap: 18px; min-height: 104px;
+    border: 1px solid rgba(213, 176, 99, .27); border-radius: 16px;
+    background: linear-gradient(120deg, rgba(17, 35, 56, .95), rgba(11, 23, 39, .98));
+    padding: 20px 24px; transition: border-color .2s ease, transform .2s ease;
+  }
+  .explorar-modalidade:hover:not(:disabled) { border-color: var(--ouro, #e6be75); transform: translateY(-2px); }
+  .explorar-modalidade:focus-visible { outline: 2px solid var(--ouro, #e6be75); outline-offset: 3px; }
+  .explorar-modalidade:disabled { opacity: .50; cursor: not-allowed; }
+  .explorar-modalidade .tema-info { flex: 1; }
+  .explorar-modalidade .tema-info h3 { margin: 0 0 4px; color: #f0d296; font-size: 20px; }
+  .explorar-modalidade .tema-info span { font-size: 13px; color: #b8c5d1; }
+  .explorar-modalidade-icone {
+    display: inline-flex; justify-content: center; align-items: center;
+    flex: 0 0 52px; width: 52px; height: 52px; border-radius: 12px;
+    background: rgba(207, 166, 87, .10); color: #f0d296;
+    border: 1px solid rgba(207, 166, 87, .20); font-size: 28px;
+  }
+  .explorar-modalidade .seta { color: #f0d296; font-size: 26px; }
+  @media (max-width: 560px) {
+    .explorar-modalidade { padding: 16px; gap: 12px; min-height: 96px; }
+    .explorar-modalidade .tema-info h3 { font-size: 18px; }
+    .explorar-modalidade-icone { flex-basis: 46px; width: 46px; height: 46px; }
+  }
+
 </style>
 </head>
 <body>
@@ -7082,8 +7111,62 @@ function renderDisciplinas() {
   });
 }
 
+// Após selecionar uma área, o aluno escolhe se quer responder questões
+// ou ler resumos oficiais. Os acessos diretos da barra lateral são mantidos.
+let modalidadeExploracao = 'selecao';
+
+function abrirModalidade(disciplinaId) {
+  const disc = BANCO.disciplinas.find(d => d.id === disciplinaId);
+  if (!disc) return;
+  estadoAtual.disciplinaId = disciplinaId;
+  modalidadeExploracao = 'selecao';
+  document.getElementById('temas-titulo').textContent = disc.nome;
+  document.getElementById('temas-subtitulo').textContent = 'O que você deseja estudar nesta área?';
+  const lista = document.getElementById('temas-lista');
+  lista.replaceChildren();
+  lista.classList.add('explorar-modalidades');
+
+  function opcao(icone, titulo, descricao, acao, habilitado) {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'tema-item explorar-modalidade';
+    card.disabled = !habilitado;
+    const simbolo = document.createElement('span');
+    simbolo.className = 'explorar-modalidade-icone';
+    simbolo.textContent = icone;
+    simbolo.setAttribute('aria-hidden', 'true');
+    const info = document.createElement('span');
+    info.className = 'tema-info';
+    const h = document.createElement('h3');
+    h.textContent = titulo;
+    const subtitulo = document.createElement('span');
+    subtitulo.textContent = descricao;
+    info.append(h, subtitulo);
+    const arrow = document.createElement('span');
+    arrow.className = 'seta';
+    arrow.textContent = habilitado ? '›' : '';
+    card.append(simbolo, info, arrow);
+    if (habilitado) card.onclick = acao;
+    lista.append(card);
+  }
+  const quantidade = disc.temas.reduce((total, t) => total + t.questoes.length, 0);
+  opcao('☑', 'Questões', quantidade > 0
+    ? quantidade + (quantidade === 1 ? ' questão para praticar' : ' questões para praticar')
+    : 'Questões ainda não cadastradas',
+    () => abrirDisciplina(disciplinaId), quantidade > 0);
+  opcao('▤', 'Resumos', 'Apostilas e materiais oficiais da disciplina',
+    () => {
+      if (typeof window.abrirEstudoArea === 'function') window.abrirEstudoArea(disciplinaId);
+      else abrirEstudo('resumo');
+    }, true);
+  mostrarTela('temas');
+}
+
 function abrirDisciplina(disciplinaId) {
   const disc = BANCO.disciplinas.find(d => d.id === disciplinaId);
+  if (!disc) return;
+  modalidadeExploracao = 'questoes';
+  document.getElementById('temas-lista').classList.remove('explorar-modalidades');
   estadoAtual.disciplinaId = disciplinaId;
   document.getElementById('temas-titulo').textContent = disc.nome;
   document.getElementById('temas-subtitulo').textContent = 'Escolha o tema';
@@ -7202,7 +7285,13 @@ function encerrarSessao() {
 
 function reiniciarTema() { iniciarTema(estadoAtual.disciplinaId, estadoAtual.temaId); }
 function voltarTemas() { abrirDisciplina(estadoAtual.disciplinaId); window.scrollTo(0, 0); }
-function voltarSelecao() { irParaDashboard(); }
+function voltarSelecao() {
+  if (modalidadeExploracao === 'questoes' && estadoAtual.disciplinaId) {
+    abrirModalidade(estadoAtual.disciplinaId);
+  } else {
+    irParaDashboard();
+  }
+}
 
 function mostrarTela(nome) {
   document.getElementById('tela-dashboard').style.display = 'none';
@@ -7250,7 +7339,7 @@ function renderSidebarDisciplinas() {
     const btn = document.createElement('button');
     btn.className = 'sidebar-disc';
     btn.title = d.nome;
-    btn.onclick = () => studyArea(d.id);
+    btn.onclick = () => abrirModalidade(d.id);
     if (ILUSTRACOES.includes(d.id)) {
       btn.innerHTML = `<img src="assets/disciplinas/${d.id}.png" alt="${d.nome}" style="width:22px;height:22px;object-fit:contain;filter:brightness(0) invert(1);opacity:0.7;">`;
     } else {
@@ -7285,7 +7374,7 @@ async function renderDashboard() {
         </div>
       `;
       card.style.cursor = 'pointer';
-      card.onclick = () => studyArea(d.id);
+      card.onclick = () => abrirModalidade(d.id);
       grid.appendChild(card);
     });
   }
