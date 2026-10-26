@@ -104,3 +104,113 @@
  .mp-insight{flex-wrap:wrap}
  .mp-insight-detail{max-width:none;width:100%;text-align:left;margin-left:44px}
 }
+
+
+/* Compactação adaptativa para notebooks e desktops de altura limitada.
+   Conteúdo nunca é cortado: em visores realmente pequenos, rolagem natural. */
+@media (min-width:1121px) and (max-height:940px) {
+  .study-screen:has(.mp-dashboard){
+    padding:10px clamp(14px,1.8vw,24px) 9px;
+    min-height:0;
+  }
+  .study-screen:has(.mp-dashboard)>.study-head{
+    margin-bottom:10px;
+    align-items:center;
+    gap:12px;
+  }
+  .study-screen:has(.mp-dashboard)>.study-head h1{
+    font-size:clamp(1.45rem,2vw,1.72rem);
+    line-height:1.13;
+    margin:0 0 3px;
+  }
+  .study-screen:has(.mp-dashboard)>.study-head p{
+    font-size:.77rem;
+    margin:0;
+    line-height:1.35;
+  }
+  .study-screen:has(.mp-dashboard)>.study-head button{
+    padding:7px 10px;
+    font-size:.76rem;
+  }
+  .mp-toolbar{
+    gap:9px;
+    padding:5px 9px;
+    margin-bottom:9px;
+    min-height:45px;
+    grid-template-columns:minmax(150px,210px) 1fr auto;
+  }
+  .mp-area-filter{padding:8px 30px 8px 10px;height:36px;font-size:.73rem}
+  .mp-periods,.mp-view-modes{padding:2px;gap:1px}
+  .study-screen .mp-toolbar button{
+    padding:6px clamp(7px,.85vw,12px);
+    min-height:32px;
+    font-size:.69rem;
+  }
+  .mp-stat-grid{gap:9px;margin-bottom:10px}
+  .mp-stat{
+    min-height:96px;
+    padding:9px 10px 8px;
+    gap:2px;
+    border-radius:11px;
+  }
+  .mp-stat-head{gap:7px;min-height:26px;font-size:.68rem;line-height:1.2}
+  .mp-icon-bubble{height:27px;width:27px;flex-basis:27px}
+  .mp-icon-bubble .mp-icon{height:16px;width:16px}
+  .mp-stat>strong{font-size:1.48rem;margin:1px 0;line-height:1.08}
+  .mp-stat>small{min-height:20px;font-size:.625rem;line-height:1.3;margin-top:auto}
+  .mp-panels{gap:10px}
+  .mp-panel{padding:10px 12px 9px;border-radius:12px}
+  .mp-panel-head{margin-bottom:5px}
+  .mp-title{gap:8px}
+  .mp-title>.mp-icon{width:17px;height:17px;flex-basis:17px}
+  .mp-title h2{font-size:.78rem;line-height:1.22;margin:0 0 2px}
+  .mp-title p{font-size:.645rem;line-height:1.3}
+  .mp-chart-selector{padding:6px 25px 6px 8px;font-size:.67rem}
+  .mp-line-plot svg{
+    height:clamp(118px,17dvh,148px);
+    min-height:0;
+  }
+  .mp-data-note{font-size:.59rem;margin:0}
+  .mp-distribution-body{
+    min-height:139px;
+    padding:0;
+    gap:9px;
+  }
+  .mp-donut{flex:0 0 116px;width:116px}
+  .mp-donut-label b{font-size:1.26rem}
+  .mp-donut-label span{font-size:.64rem}
+  .mp-legend{gap:11px;min-width:74px}
+  .mp-legend>div{font-size:.69rem;gap:6px}
+  .mp-legend small{font-size:.68rem;margin-top:2px}
+  .mp-legend-dot{width:9px;height:9px;flex-basis:9px}
+  .mp-bars{min-height:0;gap:8px;padding-top:2px}
+  .mp-bar-row{gap:8px}
+  .mp-bar-track{height:8px}
+  .mp-bar-name{font-size:.68rem}
+  .mp-bar-name small{font-size:.59rem;margin-top:1px}
+  .mp-bar-row b{font-size:.69rem}
+  .mp-bar-row>small{font-size:.63rem}
+  .mp-insights{gap:5px}
+  .mp-insight{min-height:40px;padding:5px 7px;gap:7px;border-radius:8px}
+  .mp-insight-symbol{flex-basis:27px;width:27px;height:27px;border-radius:7px}
+  .mp-insight-symbol .mp-icon{width:16px;height:16px}
+  .mp-insight>div{gap:1px}
+  .mp-insight>div small{font-size:.59rem}
+  .mp-insight>div b{font-size:.65rem}
+  .mp-insight-detail{font-size:.60rem}
+  .mp-disclaimer{font-size:.59rem;line-height:1.4;margin:7px 0 0}
+}
+@media (min-width:1121px) and (max-height:740px) {
+  .study-screen:has(.mp-dashboard){padding-top:6px;padding-bottom:6px}
+  .study-screen:has(.mp-dashboard)>.study-head{margin-bottom:7px}
+  .mp-stat{min-height:87px;padding:7px 9px}
+  .mp-stat>strong{font-size:1.36rem}
+  .mp-toolbar{margin-bottom:6px}
+  .mp-stat-grid{margin-bottom:7px}
+  .mp-panels{gap:8px}
+  .mp-panel{padding:8px 10px}
+  .mp-line-plot svg{height:116px}
+  .mp-distribution-body{min-height:119px}
+  .mp-donut{flex-basis:102px;width:102px}
+  .mp-disclaimer{margin-top:5px}
+}
