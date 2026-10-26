@@ -13,7 +13,7 @@ async function carregarBancoRemoto() {
   let todas = [];
   for (let offset = 0; ; offset += 1000) {
     const resultado = await db.from("questoes_medquest")
-      .select("id,disciplina_id,tema_id,tema_nome,ordem,hotpoint,enunciado,alternativas,correta,comentario")
+      .select("id,disciplina_id,tema_id,tema_nome,ordem,hotpoint,nivel_dificuldade,enunciado,alternativas,correta,comentario")
       .order("id", { ascending: true }).range(offset, offset + 999);
     if (resultado.error) {
       console.warn("Banco de questões adicional indisponível:", resultado.error.message);
@@ -37,6 +37,7 @@ async function carregarBancoRemoto() {
     tema.questoes.push({
       id: item.id,
       hotpoint: item.hotpoint || "Hot Point",
+      nivel_dificuldade: item.nivel_dificuldade || null,
       enunciado: item.enunciado,
       alternativas: alts.map(a => ({ letra: String(a.letra), texto: String(a.texto) })),
       correta: item.correta,
