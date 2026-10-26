@@ -24,10 +24,122 @@ function elapsed(){
  if(!state)return 0;
  return (state.segments||[]).reduce((v,s)=>v+Math.max(0,(Date.parse(s.end)-Date.parse(s.start))/1000),0)+(state.running?Math.max(0,(Date.now()-Date.parse(state.running))/1000):0);
 }
+
+/* Floating placement: normalized coordinates survive rotations and are private to each user. */
+let dockPlacement=null,placementOwner=null,draggingDock=null,suppressCompactClick=false;
+const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+const placementKey=()=> 'mq_timer_dock_position_'+(user()||'guest');
+function readDockPlacement(){
+ try{const p=JSON.parse(localStorage.getItem(placementKey())||'null');
+  if(p&&Number.isFinite(p.x)&&Number.isFinite(p.bottom))
+    return {x:clamp(p.x,0,1),bottom:clamp(p.bottom,0,1)};
+ }catch(err){console.warn('Posição do cronômetro indisponível.',err)}
+ return null;
+}
+function saveDockPlacement(){
+ if(!user()||!dockPlacement)return;
+ try{localStorage.setItem(placementKey(),JSON.stringify(dockPlacement))}
+ catch(err){console.warn('Posição do cronômetro não pôde ser salva.',err)}
+}
+function dockBounds(){
+ return {width:Math.max(160,window.innerWidth||document.documentElement.clientWidth||320),
+  height:Math.max(220,window.innerHeight||document.documentElement.clientHeight||600),
+  margin:8,topMin:62};
+}
+function positionDock(){
+ const dock=$('mq-time-dock');if(!dock||dock.hidden||draggingDock)return;
+ const v=dockBounds(),r=dock.getBoundingClientRect(),w=r.width||87,h=r.height||48;
+ const maxX=Math.max(v.margin,v.width-w-v.margin);
+ const maxY=Math.max(v.topMin,v.height-h-v.margin);
+ let x,y;
+ if(dockPlacement){
+  x=v.margin+dockPlacement.x*Math.max(0,maxX-v.margin);
+  y=maxY-dockPlacement.bottom*Math.max(0,maxY-v.topMin);
+ }else{
+  const mainLeft=document.querySelector('.main-area')?.getBoundingClientRect().left||0;
+  x=Math.max(v.margin,mainLeft+12);
+  y=maxY-10;
+ }
+ dock.style.left=clamp(x,v.margin,maxX)+'px';
+ dock.style.top=clamp(y,v.topMin,maxY)+'px';
+ dock.style.right='auto';dock.style.bottom='auto';
+}
+function scheduleDockPosition(){
+ if(typeof requestAnimationFrame==='function')requestAnimationFrame(positionDock);
+ else positionDock();
+}
+function captureDockPlacement(){
+ const dock=$('mq-time-dock');if(!dock)return;
+ const r=dock.getBoundingClientRect(),v=dockBounds();
+ dockPlacement={
+  x:clamp((r.left-v.margin)/Math.max(1,v.width-r.width-2*v.margin),0,1),
+  bottom:clamp((v.height-r.height-v.margin-r.top)/
+    Math.max(1,v.height-r.height-v.margin-v.topMin),0,1)
+ };
+ saveDockPlacement();
+}
+function dockPointerDown(event){
+ if(event.isPrimary===false||(event.pointerType==='mouse'&&event.button!==0))return;
+ const dock=$('mq-time-dock');if(!dock||dock.hidden)return;
+ const compact=event.target.closest('#mq-time-compact-trigger');
+ const head=event.target.closest('.mq-time-head');
+ if(!compact&&!head)return;
+ if(head&&event.target.closest('button'))return;
+ suppressCompactClick=false;
+ const r=dock.getBoundingClientRect();
+ draggingDock={id:event.pointerId,startX:event.clientX,startY:event.clientY,
+  left:r.left,top:r.top,moved:false,compact:!!compact};
+}
+function dockPointerMove(event){
+ const d=draggingDock;if(!d||event.pointerId!==d.id)return;
+ const dx=event.clientX-d.startX,dy=event.clientY-d.startY;
+ if(!d.moved&&Math.hypot(dx,dy)<7)return;
+ d.moved=true;
+ if(event.cancelable)event.preventDefault();
+ const dock=$('mq-time-dock');if(!dock)return;
+ const v=dockBounds(),r=dock.getBoundingClientRect();
+ const x=clamp(d.left+dx,v.margin,Math.max(v.margin,v.width-r.width-v.margin));
+ const y=clamp(d.top+dy,v.topMin,Math.max(v.topMin,v.height-r.height-v.margin));
+ dock.style.left=x+'px';dock.style.top=y+'px';
+ dock.style.right='auto';dock.style.bottom='auto';
+}
+function dockPointerEnd(event){
+ const d=draggingDock;if(!d||event.pointerId!==d.id)return;
+ draggingDock=null;
+ if(d.moved){
+  if(d.compact){
+   suppressCompactClick=true;
+   setTimeout(()=>{suppressCompactClick=false},650);
+  }
+  captureDockPlacement();
+ }
+}
+function attachDockDragging(dock){
+ dock.addEventListener('pointerdown',dockPointerDown);
+ window.addEventListener('pointermove',dockPointerMove,{passive:false});
+ window.addEventListener('pointerup',dockPointerEnd);
+ window.addEventListener('pointercancel',dockPointerEnd);
+ $('mq-time-compact-trigger').addEventListener('click',event=>{
+  if(!suppressCompactClick)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  suppressCompactClick=false;
+ },true);
+ window.addEventListener('resize',scheduleDockPosition);
+ window.addEventListener('orientationchange',()=>{
+  scheduleDockPosition();setTimeout(scheduleDockPosition,220);
+ });
+ window.visualViewport?.addEventListener('resize',scheduleDockPosition);
+}
+
 function syncDock(){
  const dock=$('mq-time-dock');if(!dock)return;
  const expanded=dock.classList.contains('mq-dock-open');
- dock.classList.toggle('mq-time-compact',Boolean(state)&&!expanded);
+ const shouldCompact=Boolean(state)&&!expanded;
+ const wasCompact=dock.classList.contains('mq-time-compact');
+ const wasExpanded=dock.dataset.mqExpanded==='true';
+ dock.classList.toggle('mq-time-compact',shouldCompact);
+ dock.dataset.mqExpanded=String(expanded);
+ if(wasCompact!==shouldCompact||wasExpanded!==expanded)scheduleDockPosition();
  const top=$('mq-top-timer');if(top)top.setAttribute('aria-expanded',String(expanded));
  const quiz=document.querySelector('.mq-question-timer');
  if(quiz)quiz.setAttribute('aria-expanded',String(expanded));
@@ -47,14 +159,18 @@ function update(){
  const dock=$('mq-time-dock');if(!dock)return;
  if(!user()){dock.hidden=true;state=null;return}
  dock.hidden=false;
- if(!state||state.owner!==user())state=load();
+ const owner=user();
+ if(placementOwner!==owner){
+  placementOwner=owner;dockPlacement=readDockPlacement();scheduleDockPosition();
+ }
+ if(!state||state.owner!==owner)state=load();
  const running=Boolean(state?.running),paused=Boolean(state&&!running);
  const seconds=Math.max(0,elapsed());
  $('mq-time-clock').textContent=fmt(seconds);
  const compact=$('mq-time-compact-trigger');
  if(compact){
   compact.textContent=fmtCompact(seconds);
-  compact.setAttribute('aria-label',(paused?'Cronômetro pausado em ':'Cronômetro em ')+fmtCompact(seconds)+'. Abrir controles.');
+  compact.setAttribute('aria-label',(paused?'Cronômetro pausado em ':'Cronômetro em ')+fmtCompact(seconds)+'. Toque para abrir ou arraste para reposicionar.');
  }
  $('mq-time-state').textContent=running?'Contando':paused?'Pausado':'Pronto para estudar';
  syncDock();
@@ -75,9 +191,10 @@ function attach(){
  document.querySelector('.topbar-right')?.prepend(top);
  const dock=document.createElement('aside');dock.id='mq-time-dock';dock.className='mq-time-dock';dock.hidden=true;dock.setAttribute('aria-label','Cronômetro de estudos');
  dock.innerHTML='<button type="button" id="mq-time-compact-trigger" class="mq-time-compact-trigger" aria-controls="mq-time-dock" aria-expanded="false" aria-label="Abrir controles do cronômetro">00:00</button>'+
- '<div class="mq-time-head"><div><small id="mq-time-state">Pronto</small><strong id="mq-time-clock">00:00:00</strong><span id="mq-time-label">Seu estudo</span></div><button type="button" onclick="MedQuestStudyTime.toggle()" aria-label="Recolher cronômetro">⌄</button></div>'+
+ '<div class="mq-time-head" title="Arraste para mover o cronômetro"><div><small id="mq-time-state">Pronto</small><strong id="mq-time-clock">00:00:00</strong><span id="mq-time-label">Seu estudo</span></div><button type="button" onclick="MedQuestStudyTime.toggle()" aria-label="Recolher cronômetro">⌄</button></div>'+
  '<div class="mq-time-controls"><button type="button" id="mq-time-play">Iniciar</button><button type="button" id="mq-time-end" onclick="MedQuestStudyTime.finish()">Encerrar</button><button type="button" onclick="MedQuestStudyTime.manual()">+ Manual</button></div>';
  root.append(dock);
+ attachDockDragging(dock);
  $('mq-time-compact-trigger').onclick=toggleDock;
  const header=document.querySelector('.questao-header');
  if(header){
