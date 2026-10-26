@@ -2230,6 +2230,116 @@
     .explorar-modalidade-icone { flex-basis: 46px; width: 46px; height: 46px; }
   }
 
+
+  /* iPad Safari (desktop website mode): restore MedQuest cards without zoomed/cropped graphics.
+     Keep the approved navy/gold desktop language, with a naturally scrolling dashboard. */
+  @media (min-width: 901px) and (max-width: 1440px) and (hover: none) and (pointer: coarse) {
+    #tela-dashboard {
+      height: auto !important;
+      min-height: 0;
+      overflow: visible !important;
+    }
+    #tela-dashboard .dash-wrapper {
+      height: auto !important;
+      min-height: calc(100dvh - 58px);
+      display: block;
+    }
+    #tela-dashboard .dash-center {
+      min-width: 0;
+      height: auto;
+      overflow: visible !important;
+      padding: 18px 20px 26px;
+    }
+    #tela-dashboard .dash-right {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 14px;
+      border-left: none;
+      border-top: 1px solid var(--borda);
+      overflow: visible !important;
+      padding: 18px 20px;
+      background: transparent;
+    }
+    #tela-dashboard .dash-right .right-panel {
+      min-width: 0;
+      margin: 0;
+    }
+    #tela-dashboard .dash-right .right-panel:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+    #tela-dashboard .dash-hero {
+      min-height: 136px;
+      padding: 22px 24px;
+      margin-bottom: 18px;
+    }
+    #tela-dashboard .dash-hero h1 {
+      font-size: clamp(1.45rem,2.6vw,2rem);
+    }
+    #tela-dashboard .dash-actions {
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    #tela-dashboard .action-card {
+      min-height: 92px;
+      padding: 16px;
+    }
+    #tela-dashboard .dash-disc-grid {
+      display: grid;
+      grid-template-columns: repeat(3,minmax(0,1fr));
+      grid-template-rows: none;
+      grid-auto-rows: minmax(166px,auto);
+      gap: 13px;
+      min-height: 0;
+      margin-bottom: 22px;
+    }
+    #tela-dashboard .dash-disc-card {
+      height: auto;
+      min-height: 166px;
+      background-size: auto 92% !important;
+      background-position: right center !important;
+      background-repeat: no-repeat !important;
+      background-color: #0a1421;
+      border-radius: 14px;
+      isolation: isolate;
+    }
+    #tela-dashboard .dash-disc-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(90deg,rgba(5,12,22,.85),rgba(5,12,22,.32) 70%,rgba(5,12,22,.1)),
+                  linear-gradient(0deg,rgba(5,12,22,.68),transparent 66%);
+      pointer-events: none;
+    }
+    #tela-dashboard .ddc-overlay {
+      position: relative;
+      z-index: 1;
+      padding: 15px;
+      min-width: 0;
+      text-shadow: 0 1px 3px #0009;
+    }
+    #tela-dashboard .ddc-nome { font-size: .98rem; color: #fff; }
+    #tela-dashboard .ddc-info { font-size: .82rem; color: #f0cb80; }
+  }
+  @media (min-width: 901px) and (max-width: 1099px) and (hover: none) and (pointer: coarse) {
+    #tela-dashboard .dash-disc-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  }
+  /* On tablets the floating timer stays off the dashboard until intentionally opened
+     through the topbar; it must not obscure the cards or the bottom edge of Safari. */
+  @media (min-width: 700px) and (max-width: 1440px) and (hover: none) and (pointer: coarse) {
+    #app-layout:has(#tela-dashboard[style*="display: block"]) #mq-time-dock:not(.mq-dock-open) {
+      display: none !important;
+    }
+    #app-layout:has(#tela-dashboard[style*="display: block"]) #mq-time-dock.mq-dock-open {
+      top: calc(68px + env(safe-area-inset-top, 0px));
+      bottom: auto !important;
+      right: calc(16px + env(safe-area-inset-right, 0px));
+      max-height: min(420px, calc(100dvh - 86px));
+      overflow-y: auto;
+    }
+  }
+
 </style>
 </head>
 <body>
