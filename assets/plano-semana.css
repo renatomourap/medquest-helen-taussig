@@ -369,3 +369,28 @@ input.weekly-checkbox:disabled{
     z-index:500;
   }
 }
+
+
+/* Altura compacta: seis linhas de datas cabem sem empurrar o calendário
+   para além da janela na resolução desktop (inclusive 710 px de altura). */
+.weekly-date-popover{padding:8px}
+.weekly-cal-heading{margin-bottom:5px}
+.weekly-cal-weekdays{margin-bottom:4px}
+.weekly-cal-weekdays span{padding:2px 0}
+.weekly-cal-days{grid-auto-rows:30px}
+.study-screen .weekly-cal-day{
+  aspect-ratio:auto;
+  height:30px;
+  min-height:30px;
+}
+.weekly-cal-shortcuts{margin-top:6px;padding-top:7px}
+.study-screen .weekly-cal-shortcuts button{padding:5px 2px}
+.study-screen .weekly-cal-no-date{padding:6px 3px;margin-top:4px}
+@media(max-height:700px){
+  .weekly-cal-days{grid-auto-rows:26px}
+  .study-screen .weekly-cal-day{height:26px;min-height:26px}
+}
+@media(max-width:450px){
+  .weekly-cal-days{grid-auto-rows:28px}
+  .study-screen .weekly-cal-day{height:28px;min-height:28px}
+}
