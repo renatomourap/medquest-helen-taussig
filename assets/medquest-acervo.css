@@ -34,3 +34,15 @@
 .mq-library-form .wide{grid-column:1/-1}
 .mq-library-box [role=status],.mq-library-box>p[id$=status]{font-size:14px;margin-top:12px;min-height:16px}
 @media(max-width:680px){.mq-library{padding:16px 0 50px}.mq-library-head{flex-direction:column;gap:14px}.mq-library-filter,.mq-library-form{grid-template-columns:1fr}.mq-library-grid{grid-template-columns:1fr}.mq-library-box{padding:18px}}
+
+
+/* Publicação sequencial de resumos pelo administrador */
+.mq-bulk-rows{margin-top:18px;display:grid;gap:12px}
+.mq-bulk-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
+  padding:16px;background:rgba(6,18,31,.45);border:1px solid rgba(255,255,255,.13);
+  border-radius:12px}
+.mq-bulk-filename{grid-column:1/-1;font-size:14px;color:var(--ouro,#e4ba72);
+  overflow-wrap:anywhere;font-weight:600}
+.mq-bulk-row label{display:block;font-size:12px;color:var(--cinza,#9aa7b5)}
+.mq-bulk-row input,.mq-bulk-row select{display:block;margin-top:5px;width:100%}
+@media(max-width:680px){.mq-bulk-row{grid-template-columns:1fr}}
