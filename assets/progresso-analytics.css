@@ -214,3 +214,24 @@
   .mp-donut{flex-basis:102px;width:102px}
   .mp-disclaimer{margin-top:5px}
 }
+
+
+/* Evolução da taxa de acerto — expansão proporcional de 10%.
+   Amplia a área do gráfico sem alterar o painel de indicadores nem os dados.
+   1.64/(1+1.64) = 62,12%; 2.16/(1+2.16) = 68,35% (~+10%). */
+@media (min-width:1121px) {
+  .mp-panels {grid-template-columns:minmax(0,2.16fr) minmax(0,1fr)}
+  .mp-panel-line {min-width:0}
+}
+@media (min-width:1121px) and (max-height:940px) {
+  .mp-line-plot svg {height:clamp(130px,18.7dvh,163px)}
+}
+@media (min-width:1121px) and (max-height:740px) {
+  .mp-line-plot svg {height:128px}
+}
+@media (max-width:1120px) {
+  .mp-line-plot svg {min-height:198px}
+}
+@media (max-width:680px) {
+  .mp-line-plot svg {min-height:0}
+}
