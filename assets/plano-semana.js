@@ -281,11 +281,12 @@
      else q=await db.from('plano_semana').insert({...row,usuario_id:owner}).select('id');
      if(q.error)throw q.error;
      if(!q.data?.length)throw Error('O banco de dados não confirmou o salvamento.');
+     const savedDate=scheduledDate;
      closeEditor();
      viewed=destinationWeek;
      filter='todas';
      await Promise.all([open(),refreshHome()]);
-     warn(scheduledDate?'Atividade agendada para '+dateLabel(scheduledDate)+'.':'Atividade salva no planejamento.');
+     warn(savedDate?'Atividade agendada para '+dateLabel(savedDate)+'.':'Atividade salva no planejamento.');
    }catch(e){console.error(e);warn(e.message||'Erro ao salvar atividade.',true)}
    finally{if(button&&document.contains(button)){button.disabled=false;button.textContent='Salvar atividade'}}
  }
