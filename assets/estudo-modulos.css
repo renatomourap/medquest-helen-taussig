@@ -1,0 +1,25 @@
+
+.study-screen{padding:clamp(18px,3vw,42px);max-width:1120px;margin:auto;min-height:calc(100dvh - 58px)}
+.study-screen h1{font:500 2rem 'Playfair Display',serif;color:white;margin-bottom:8px}
+.study-screen h3{font:500 1.25rem 'Playfair Display',serif;margin-bottom:12px}
+.study-screen .study-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:25px}
+.study-screen button{background:transparent;border:1px solid var(--ouro-borda);color:var(--ouro);padding:9px 12px;border-radius:8px;cursor:pointer;font:500 .83rem Inter,sans-serif}
+.study-screen button:hover{background:var(--ouro-fraco)}
+.study-toolbar{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:18px}
+.study-toolbar select,.study-form input,.study-form select,.study-form textarea{border:1px solid var(--borda);border-radius:8px;background:#111a25;color:white;padding:12px;font:inherit;width:100%}
+.study-toolbar select{width:auto;min-width:180px}
+.study-row,.study-form{background:var(--branco);border:1px solid var(--borda);border-radius:13px;padding:18px;margin-bottom:12px}
+.study-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.study-row b{color:white}.study-row p{color:var(--cinza);font-size:.8rem;margin-top:7px}
+.study-row button{margin:4px}
+.study-form{display:grid;gap:14px;margin-top:22px}
+.study-form label{display:flex;flex-direction:column;gap:7px;color:var(--cinza);font-size:.81rem}
+.study-form textarea{resize:vertical;line-height:1.55}
+.study-empty{padding:22px;color:var(--cinza);background:rgba(255,255,255,.025);border:1px dashed var(--borda);border-radius:10px}
+.study-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.study-stats article{display:flex;flex-direction:column;gap:8px;border:1px solid var(--borda);padding:24px;background:var(--branco);border-radius:12px;color:var(--cinza);font-size:.83rem}
+.study-stats strong{color:var(--ouro);font-size:2rem}
+.study-home-link{display:block;background:transparent;color:var(--texto);border:0;padding:7px 0;text-align:left;font-size:.8rem;cursor:pointer;border-bottom:1px solid var(--borda);width:100%}
+.study-home-box{font-size:.8rem;color:var(--cinza);line-height:1.6}
+.study-home-box p{padding:4px 0}.study-home-box small{float:right;color:var(--ouro)}
+@media(max-width:700px){.study-row,.study-screen .study-head{align-items:flex-start;flex-direction:column}.study-stats{grid-template-columns:1fr}.study-screen{padding:20px 14px}}
