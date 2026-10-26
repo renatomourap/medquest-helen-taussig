@@ -19,7 +19,7 @@ const icons={
  idea:'<path d="M9 18h6M10 21h4M8 15a7 7 0 1 1 8 0l-1 3H9l-1-3Z"/>'
 };
 const icon=n=>'<svg viewBox="0 0 24 24" class="mp-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(icons[n]||icons.book)+'</svg>';
-let range=15,mode='geral',area='',metric='taxa',history=[],sessions=[],loadedUser='',request=0;
+let range=15,mode='geral',area='',metric='taxa',history=[],sessions=[],studySessions=[],loadedUser='',request=0;
 async function readTable(table,columns,dateColumn,start,user){
  let all=[];
  for(let offset=0;offset<15000;offset+=1000){
@@ -39,7 +39,8 @@ async function open(){
  const earliest=add(today(),-60).toISOString();
  const results=await Promise.allSettled([
   readTable('historico_respostas','disciplina_id,tema_id,acertou,respondido_em','respondido_em',earliest,user),
-  readTable('tempo_estudo_eventos','segundos,registrado_em','registrado_em',earliest,user)
+  readTable('tempo_estudo_eventos','segundos,registrado_em','registrado_em',earliest,user),
+  readTable('estudo_sessoes','id,atividade,area_id,dia,segundos,segmentos,fonte,titulo,inicio_em,fim_em','dia',(()=>{let d=add(today(),-62);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})(),user)
  ]);
  if(token!==request)return;
  if(results[0].status==='rejected'){
@@ -49,7 +50,9 @@ async function open(){
  }
  history=results[0].value||[];
  sessions=results[1].status==='fulfilled'?results[1].value||[]:[];
- if(results[1].status==='rejected')console.warn('Contagem de tempo indisponível:',results[1].reason);
+ studySessions=results[2].status==='fulfilled'?results[2].value||[]:[];
+ if(results[1].status==='rejected')console.warn('Tempo anterior indisponível:',results[1].reason);
+ if(results[2].status==='rejected')console.warn('Sessões de estudo indisponíveis:',results[2].reason);
  loadedUser=user;
  render();
 }
@@ -63,11 +66,22 @@ const pct=s=>s.n?Math.round(100*s.good/s.n):null;
 const pp=n=>n===null?'—':n+'%';
 const secFor=(n,prev=false)=>{
  const from=start(n)-(prev?n*86400000:0),to=prev?start(n):Infinity;
- return sessions.filter(x=>{let t=new Date(x.registrado_em).getTime();return t>=from&&t<to}).reduce((v,x)=>v+Number(x.segundos||0),0);
+ // Legacy automatic time has no reliable area field. Include only in all-area view.
+ const oldTime=area?0:sessions.filter(x=>{let t=new Date(x.registrado_em).getTime();return t>=from&&t<to}).reduce((v,x)=>v+Number(x.segundos||0),0);
+ const newTime=studySessions.filter(x=>!area||x.area_id===area).reduce((sum,item)=>{
+  const parts=window.MedQuestStudyHistory?.split?.(item)||[{date:item.dia,seconds:item.segundos}];
+  return sum+parts.filter(p=>{let t=new Date(p.date+'T12:00:00').getTime();return t>=from&&t<to})
+    .reduce((v,p)=>v+Number(p.seconds||0),0);
+ },0);
+ return Math.round(oldTime+newTime);
 };
 const humanTime=n=>n<60?'0min':n>=3600?Math.floor(n/3600)+'h '+Math.floor((n%3600)/60)+'min':Math.floor(n/60)+'min';
 const streak=rows=>{
  const dates=new Set(rows.map(x=>key(new Date(x.respondido_em))));
+ for(const session of studySessions.filter(x=>!area||x.area_id===area)){
+  const parts=window.MedQuestStudyHistory?.split?.(session)||[{date:session.dia}];
+  parts.forEach(x=>dates.add(x.date));
+ }
  let d=today();
  if(!dates.has(key(d)))d=add(d,-1);
  let count=0;
@@ -82,7 +96,7 @@ const compare=(value,old,type)=>{
  return (value-old>0?'+':'')+Math.round((value-old)/old*100)+'% vs. período anterior';
 };
 const cl=(v,p)=>p===null||v===null||p===undefined?'mp-muted':v>p?'mp-up':v<p?'mp-down':'mp-muted';
-const card=(ico,title,val,detail,status)=>'<article class="mp-stat"><div class="mp-stat-head"><span class="mp-icon-bubble">'+icon(ico)+'</span><span>'+esc(title)+'</span></div><strong>'+esc(val)+'</strong><small class="'+(status||'mp-muted')+'">'+esc(detail)+'</small></article>';
+const card=(ico,title,val,detail,status)=>'<article class="mp-stat"><div class="mp-stat-head"><span class="mp-icon-bubble">'+icon(ico)+'</span><span>'+esc(title)+'</span></div><strong>'+esc(val)+'</strong><small class="'+(status||'mp-muted')+'">'+esc(detail)+'</small>'+(ico==='clock'?'<a class="mp-time-link" href="#mq-study-history">Ver histórico diário</a>':'')+'</article>';
 const grouped=rows=>{
  const result=new Map();
  for(const row of rows){
@@ -155,8 +169,8 @@ function render(){
   card('questions','Questões respondidas',fnum(s.n),compare(s.n,p.n),cl(s.n,p.n)),
   card('target','Taxa de acerto',pp(pNow),compare(pNow,pOld,'pp'),cl(pNow,pOld)),
   card('book','Assuntos praticados',fnum(s.topics),s.topics?'Conteúdos diferentes':'Nenhum assunto praticado','mp-muted'),
-  card('clock','Tempo de estudo',humanTime(seconds),'Questões · aba ativa e interação recente','mp-muted'),
-  card('flame','Sequência de estudos',streak(rows)+' '+(streak(rows)===1?'dia':'dias'),'Dias consecutivos de questões','mp-muted')
+  card('clock','Tempo de estudo',humanTime(seconds),'Cronômetro e registros manuais','mp-muted'),
+  card('flame','Sequência de estudos',streak(rows)+' '+(streak(rows)===1?'dia':'dias'),'Dias consecutivos com estudo','mp-muted')
  ].join('');
  const dPct=pNow??0,wrong=s.n-s.good;
  const options='<option value="">Todas as áreas</option>'+BANCO.disciplinas.map(d=>'<option value="'+esc(d.id)+'"'+(area===d.id?' selected':'')+'>'+esc(d.nome)+'</option>').join('');
@@ -175,7 +189,9 @@ function render(){
   '<div><i class="mp-legend-dot wrong"></i><span>Incorretas<small>'+wrong+' ('+(s.n?100-dPct:0)+'%)</small></span></div></div></div></section>'+
   '<section class="mp-panel mp-panel-areas"><div class="mp-panel-head">'+header('book','Desempenho por '+(mode==='geral'?'área':'assunto'),'Sua taxa de acerto em cada conteúdo.')+'</div><div class="mp-bars">'+bars(rows)+'</div></section>'+
   '<section class="mp-panel mp-panel-insights"><div class="mp-panel-head">'+header('idea','Insights do seu desempenho','Análises baseadas no desempenho recente.')+'</div><div class="mp-insights">'+insights(rows,prior)+'</div></section></div>'+
-  '<p class="mp-disclaimer">Resultados reais das tentativas registradas. O histórico anterior à atualização contém a última resposta salva por questão. O tempo de estudo contabiliza apenas os minutos ativos em questões após a atualização.</p></div>';
+  '<section id="mq-study-history" class="mq-history-panel"></section>'+
+  '<p class="mp-disclaimer">Resultados reais das tentativas registradas. O tempo de estudo reúne sessões iniciadas pelo estudante, registros manuais e períodos automáticos da versão anterior. Não é necessário clicar continuamente durante uma sessão.</p></div>';
+ window.MedQuestStudyHistory?.read(range,area,sessions);
 }
 const configure=(what,value)=>{
  if(what==='range')range=[7,15,30].includes(value)?value:15;
@@ -185,15 +201,5 @@ const configure=(what,value)=>{
  render();
 };
 window.MedQuestProgress={open,reload:()=>{loadedUser='';open()},range:v=>configure('range',v),area:v=>configure('area',v),mode:v=>configure('mode',v),chart:v=>configure('chart',v)};
-let lastUserAction=Date.now();
-['pointerdown','keydown','wheel','touchstart'].forEach(name=>document.addEventListener(name,()=>{lastUserAction=Date.now()},{passive:true}));
-let activeSeconds=0;
-setInterval(async()=>{
- if(!usuarioAtual?.id||document.visibilityState!=='visible'||!document.hasFocus()||$('tela-questao')?.style.display!=='block'||Date.now()-lastUserAction>240000)return;
- activeSeconds+=10;
- if(activeSeconds<60)return;
- activeSeconds-=60;
- try{let r=await db.from('tempo_estudo_eventos').insert({usuario_id:usuarioAtual.id,origem:'questoes',segundos:60});if(r.error)console.warn('Tempo de estudo:',r.error.message)}
- catch(e){console.warn('Registro de tempo:',e)}
-},10000);
+// Contagem automática antiga desativada: cronômetro e registros manuais são opt-in.
 })();
