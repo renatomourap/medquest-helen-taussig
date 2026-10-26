@@ -2961,6 +2961,9 @@ function limparMsgPerfil() {
 }
 
 function mostrarPerfil(opcoes = {}) {
+  // Uma autenticação válida pode levar ao primeiro preenchimento do perfil.
+  // Não deixe o modal de login cobrindo essa tela.
+  fecharModalLogin();
   perfilObrigatorio = !!opcoes.obrigatorio;
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('tela-login').classList.remove('visivel');
@@ -3275,6 +3278,8 @@ function mostrarTelaLogin() {
 }
 
 function mostrarTelaAguardando() {
+  // Conta autenticada aguardando aprovação: encerra o modal de acesso.
+  fecharModalLogin();
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('tela-login').classList.remove('visivel');
   document.getElementById('tela-aguardando').style.display = 'flex';
@@ -3282,6 +3287,8 @@ function mostrarTelaAguardando() {
 }
 
 function mostrarApp() {
+  // O login já foi validado: libera o dashboard e a rolagem da página.
+  fecharModalLogin();
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('tela-login').classList.remove('visivel', 'logado');
   document.getElementById('tela-aguardando').style.display = 'none';
