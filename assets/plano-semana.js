@@ -29,8 +29,10 @@
    return (response.data||[]).sort(sortEntries);
  }
  const warn=(s,fail=false)=>{
-   const target=$('study-msg');if(!target)return;
-   target.textContent=s;target.style.color=fail?'#f38c93':'#71dbac';
+   const target=$('study-msg');
+   if(target){target.textContent=s;target.style.color=fail?'#f38c93':'#71dbac';}
+   const modal=$('weekly-modal-error');
+   if(modal){modal.textContent=fail?s:'';modal.style.display=fail?'block':'none';}
  };
  function summary(rows){
    const done=rows.filter(completed).length;
@@ -106,6 +108,7 @@
      '<div class="weekly-fields-pair"><label>Meta de realização<input id="weekly-target" type="number" min="1" max="10000" step="1" value="'+(row?.meta||1)+'"></label>'+
      '<label>Quanto já realizou?<input id="weekly-realized" type="number" min="0" max="10000" step="1" value="'+(row?.realizado||0)+'"></label></div>'+
      '<label>Observações (opcional)<textarea id="weekly-notes" maxlength="500" rows="3" placeholder="Ex.: Revisar TLR, citocinas e interferons">'+escapeHTML(row?.observacoes||'')+'</textarea></label></div>'+
+     '<div id="weekly-modal-error" role="alert" class="weekly-modal-error" style="display:none"></div>'+
      '<div class="weekly-modal-actions"><button type="button" onclick="PlanoMedQuest.closeEditor()">Cancelar</button><button type="button" id="weekly-save-btn" class="weekly-save" onclick="PlanoMedQuest.save()">Salvar atividade</button></div></div></div>';
    $('weekly-title')?.focus();
  }
@@ -191,6 +194,7 @@
  }
  function move(weeks){viewed=addDays(viewed,weeks*7);filter='todas';open()}
  function today(){viewed=monday(new Date());filter='todas';open()}
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('weekly-editor-root')?.firstChild)closeEditor()});
  window.PlanoMedQuest={
    open,reload:open,refreshHome,renderHome,
    move,today,
