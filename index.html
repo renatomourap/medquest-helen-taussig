@@ -7087,10 +7087,23 @@ function icone(d) {
   return d.icon;
 }
 
+// Ordena a exibição sem alterar as posições armazenadas no BANCO.
+function compararEntidadesPorNome(a, b) {
+  return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR', {
+    sensitivity: 'base', numeric: true
+  });
+}
+function disciplinasAlfabeticas() {
+  return [...BANCO.disciplinas].sort(compararEntidadesPorNome);
+}
+function temasAlfabeticos(disciplina) {
+  return [...disciplina.temas].sort(compararEntidadesPorNome);
+}
+
 function renderDisciplinas() {
   const grid = document.getElementById('disciplinas-grid');
   grid.innerHTML = '';
-  BANCO.disciplinas.forEach(d => {
+  disciplinasAlfabeticas().forEach(d => {
     const totalQuestoes = d.temas.reduce((s, t) => s + t.questoes.length, 0);
     const temTemas = d.temas.length > 0;
     const card = document.createElement('div');
@@ -7173,7 +7186,7 @@ function abrirDisciplina(disciplinaId) {
   document.getElementById('temas-subtitulo').textContent = 'Escolha o tema';
   const lista = document.getElementById('temas-lista');
   lista.innerHTML = '';
-  disc.temas.forEach(t => {
+  temasAlfabeticos(disc).forEach(t => {
     const item = document.createElement('div');
     item.className = 'tema-item';
     item.innerHTML = `
@@ -7340,7 +7353,7 @@ function fecharSidebar() {
 function renderSidebarDisciplinas() {
   const container = document.getElementById('sidebar-disciplinas');
   container.innerHTML = '';
-  BANCO.disciplinas.forEach(d => {
+  disciplinasAlfabeticas().forEach(d => {
     const btn = document.createElement('button');
     btn.className = 'sidebar-disc';
     btn.title = d.nome;
@@ -7363,7 +7376,7 @@ async function renderDashboard() {
   const grid = document.getElementById('dash-disc-grid');
   if (grid) {
     grid.innerHTML = '';
-    BANCO.disciplinas.forEach(d => {
+    disciplinasAlfabeticas().forEach(d => {
       const totalQ = d.temas.reduce((s, t) => s + t.questoes.length, 0);
       const temTemas = d.temas.length > 0;
       const card = document.createElement('div');
@@ -7470,7 +7483,7 @@ iniciarAuth();
 <script src="assets/estudo-modulos.js?v=pdf-original-20261026"></script>
 <script src="assets/medquest-acervo.js?v=cronometro-pdf-20261026"></script>
 <script src="assets/plano-semana.js"></script>
-<script src="assets/catalogo-questoes.js?v=hotpoints-menus-20261026-02"></script>
+<script src="assets/catalogo-questoes.js?v=ordem-alfabetica-20261026"></script>
 <script src="assets/tempo-estudo.js"></script>
 <script src="assets/historico-estudo.js"></script>
 <script src="assets/progresso-analytics.js?v=tempo-hibrido-20261026"></script>
