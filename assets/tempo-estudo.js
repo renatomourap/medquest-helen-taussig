@@ -117,11 +117,12 @@ async function manualSave(values,common){
  const h=Number(values.horas),m=Number(values.minutos),secs=h*3600+m*60,day=String(values.dia||'');
  if(!Number.isInteger(h)||!Number.isInteger(m)||h<0||h>24||m<0||m>59||secs<60||secs>86400)throw Error('Informe uma duração válida de 1 minuto a 24 horas.');
  const date=new Date(day+'T12:00:00');if(!/^\d{4}-\d\d-\d\d$/.test(day)||Number.isNaN(date.getTime())||localDay(date)!==day)throw Error('Informe uma data válida.');
+ if(day>localDay(new Date()))throw Error('Não é possível registrar um estudo em uma data futura.');
  let first=null,last=null,segments=[];
  if(values.hora){const when=new Date(day+'T'+values.hora+':00');if(Number.isNaN(when.getTime()))throw Error('Horário inválido.');
   first=when.toISOString();last=new Date(when.getTime()+secs*1000).toISOString();segments=[{inicio:first,fim:last}];
  }
- const obj={usuario_id:user(),fonte:editRecord?.fonte||'manual',...common,dia:day,segundos:secs,inicio_em:first,fim_em:last,segmentos:segments,observacoes:String(values.observacoes||'').trim()};
+ const obj={usuario_id:user(),fonte:'manual',...common,dia:day,segundos:secs,inicio_em:first,fim_em:last,segmentos:segments,observacoes:String(values.observacoes||'').trim()};
  const r=editRecord?await db.from('estudo_sessoes').update(obj).eq('id',editRecord.id).eq('usuario_id',user()).select('id'):
  await db.from('estudo_sessoes').insert(obj).select('id');
  if(r.error)throw r.error;if(!r.data?.length)throw Error('Banco não confirmou a gravação.');
