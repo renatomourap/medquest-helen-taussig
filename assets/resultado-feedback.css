@@ -1,0 +1,17 @@
+#tela-resultado .resultado-card{max-width:680px}
+#resultado-feedback{text-align:left;margin:0 0 25px;padding:22px;background:linear-gradient(130deg,#101f30,#0b1724);border:1px solid #3c4350;border-radius:13px;line-height:1.6}
+#resultado-feedback header small{font:700 10px Inter,system-ui;letter-spacing:.14em;color:#e9c67d}
+#resultado-feedback h2{font:500 23px/1.35 'Playfair Display',Georgia,serif;color:#f3eadb;margin:7px 0 10px}
+#resultado-feedback>p{font-size:12px;color:#acbdd1;margin:0 0 15px}
+.mq-feedback-topics{display:grid;gap:11px}
+.mq-feedback-topic{padding:16px;background:#132337;border:1px solid #34465b;border-radius:10px}
+.mq-feedback-topic>small{font-size:10px;color:#9eafc3;display:block;overflow-wrap:anywhere}
+.mq-feedback-topic h3{font-size:14px;font-weight:650;color:#edcc89;margin:6px 0;line-height:1.5;overflow-wrap:anywhere}
+.mq-feedback-topic .mq-feedback-count{font-size:11px;color:#e7a39f;margin:0 0 12px}
+.mq-feedback-questions{display:flex;gap:7px;flex-wrap:wrap}
+.mq-feedback-questions button{border:1px solid #7c6845;border-radius:7px;background:transparent;color:#edcc89;font:600 11px Inter,system-ui;padding:9px 11px;cursor:pointer}
+.mq-feedback-questions button:hover{background:#e8c47a18}
+.mq-feedback-questions button:focus-visible{outline:2px solid #edcc89;outline-offset:2px}
+#resultado-feedback .mq-feedback-pending{color:#d9c697;border-left:2px solid #b79859;padding-left:10px}
+#resultado-feedback .mq-feedback-note{font-size:10px;color:#8fa2b8;margin:14px 0 0}
+@media(max-width:600px){#tela-resultado{padding:24px 10px}.resultado-card{padding:23px 17px}#resultado-feedback{padding:16px}.mq-feedback-topic{padding:13px}#resultado-feedback h2{font-size:21px}.mq-feedback-questions button{min-height:40px}}

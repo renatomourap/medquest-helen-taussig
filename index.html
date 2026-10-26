@@ -2244,6 +2244,7 @@
 <link rel="apple-touch-icon" href="/assets/icons/medquest-180.png">
 <link rel="icon" type="image/png" href="/assets/icons/medquest-192.png">
 <link rel="stylesheet" href="/assets/instalar-app.css?v=1">
+<link rel="stylesheet" href="assets/resultado-feedback.css?v=1">
 </head>
 <body>
 
@@ -2862,6 +2863,7 @@
         <div class="stat-label">Erros</div>
       </div>
     </div>
+    <section id="resultado-feedback" aria-label="Orientação de revisão do bloco"></section>
     <div class="resultado-btns">
       <button class="btn-resultado btn-reiniciar" onclick="reiniciarTema()">Refazer</button>
       <button class="btn-resultado btn-menu" onclick="voltarSelecao()">Menu Principal</button>
@@ -7540,6 +7542,10 @@ function atualizarMiniaturas() {
 }
 
 function encerrarSessao() {
+  if (estadoAtual.carregandoRespostas || estadoAtual.erroRespostas) {
+    alert('Suas respostas salvas ainda não foram recuperadas. Aguarde o carregamento ou tente novamente antes de encerrar.');
+    return;
+  }
   const total = estadoAtual.questoes.length;
   const respondidas = Object.keys(estadoAtual.respostas).length;
   const acertos = Object.values(estadoAtual.respostas).filter(r => r.acertou).length;
@@ -7551,6 +7557,7 @@ function encerrarSessao() {
   let emoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : pct >= 40 ? '📚' : '💪';
   document.getElementById('resultado-emoji').textContent = emoji;
   document.getElementById('resultado-sub').textContent = `Você respondeu ${respondidas} de ${total} questões. Aproveitamento: ${pct}%`;
+  window.MedQuestFeedback.render(estadoAtual, BANCO.disciplinas);
   mostrarTela('resultado');
 }
 
@@ -7755,11 +7762,12 @@ iniciarAuth();
 <script src="assets/estudo-modulos.js?v=restaurar-respostas-20261026"></script>
 <script src="assets/medquest-acervo.js?v=cronometro-pdf-20261026"></script>
 <script src="assets/plano-semana.js"></script>
-<script src="assets/catalogo-questoes.js?v=hotpoints-ordem-condicional-20261026"></script>
+<script src="assets/catalogo-questoes.js?v=feedback-hotpoints-20261026"></script>
 <script src="assets/estudo-controles.js?v=historico-manual-20261026"></script>
 <script src="assets/tempo-estudo.js?v=cronometro-arrastavel-ipad-20261026"></script>
 <script src="assets/historico-estudo.js?v=historico-manual-20261026"></script>
 <script src="assets/progresso-analytics.js?v=historico-manual-20261026"></script>
 <script src="/assets/instalar-app.js?v=1"></script>
+<script src="assets/resultado-feedback.js?v=1"></script>
 </body>
 </html>

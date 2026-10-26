@@ -85,6 +85,7 @@
     const i=Number(String(hp).match(/\d+/)?.[0]||0)-1;
     return hpTitles[topic]?.[i]||'';
   };
+  window.MedQuestHotPoints={titulo:hpTitle};
   const normalizeHP=q=>{
     const m=String(q.hotpoint||'').match(/(?:hot\s*point|hp)[\s.:#-]*0?([1-9]\d*)/i);
     return m?'Hot Point '+Number(m[1]):String(q.hotpoint||'').trim()||'Não definido';
