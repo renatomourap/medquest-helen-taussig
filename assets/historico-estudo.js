@@ -4,7 +4,7 @@
 const $=id=>document.getElementById(id);
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;', '"':'&quot;',"'":'&#39;'}[c]));
 const user=()=>typeof usuarioAtual==='undefined'?null:usuarioAtual?.id||null;
-const categoryLabels={questoes:'Questões',pdf:'Leitura de PDF',resumos:'Resumos',anotacoes:'Anotações',outros:'Outros estudos'};
+const categoryLabels={questoes:'Questões',pdf:'Leitura de PDF',resumos:'Resumos',outros:'Outros estudos'};
 const dayKey=date=>{let d=new Date(date);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const timeLabel=s=>{let h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+'h '+m+'min':m+'min'};
 const prettyDay=date=>new Date(date+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
@@ -69,7 +69,7 @@ function draw(){
   const detail=[...bySession.values()].map(v=>{
    if(v.legacy)return '<div class="mq-history-line"><div><b>Prática de questões (registro anterior)</b><small>Contagem automática da versão antiga</small></div><strong>'+timeLabel(v.seconds)+'</strong></div>';
    const x=v.session;
-   return '<div class="mq-history-line"><div><b>'+E(x.titulo)+'</b><small>'+E(categoryLabels[x.atividade]||x.atividade)+' · '+E(x.fonte==='manual'?'Registro manual':'Cronômetro')+
+   return '<div class="mq-history-line"><div><b>'+E(x.titulo)+'</b><small>'+E(categoryLabels[x.atividade]||(x.atividade==='anotacoes'?'Estudo anterior':x.atividade))+' · '+E(x.fonte==='manual'?'Registro manual':'Cronômetro')+
    (x.inicio_em?' · '+E(new Date(x.inicio_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})):'')+
    (x.assunto?' · '+E(x.assunto):'')+'</small></div><div class="mq-history-line-actions"><strong>'+timeLabel(v.seconds)+'</strong>'+
    '<button type="button" onclick="MedQuestStudyHistory.edit(\''+x.id+'\')">Editar</button><button type="button" onclick="MedQuestStudyHistory.remove(\''+x.id+'\')">Excluir</button></div></div>';
