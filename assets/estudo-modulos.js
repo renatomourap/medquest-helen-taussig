@@ -2,7 +2,7 @@
 (() => {
  const $=id=>document.getElementById(id), E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const monday=()=>{let d=new Date();d.setDate(d.getDate()-(d.getDay()+6)%7);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
- const opts=v=>'<option value="">Todas as áreas</option>'+BANCO.disciplinas.map(a=>'<option value="'+E(a.id)+'" '+(v===a.id?'selected':'')+'>'+E(a.nome)+'</option>').join('');
+ const opts=v=>'<option value="">Todas as áreas</option>'+BANCO.disciplinas.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(a=>'<option value="'+E(a.id)+'" '+(v===a.id?'selected':'')+'>'+E(a.nome)+'</option>').join('');
  const area=id=>BANCO.disciplinas.find(d=>d.id===id)?.nome||'Geral';
  let mode='',docs=[],plan=[],progress=[],selected=null,last=null,filter='',view='geral';
  const fetch=async(table,handler)=>{if(!usuarioAtual)throw Error('Faça login para continuar');let r=await handler(db.from(table));if(r.error)throw r.error;return r.data};
@@ -93,18 +93,25 @@
      (isEditor()?'<button onclick="studyOfficialBatch()">Publicar PDFs originais</button>'+
        '<input id="study-pdf-upload" type="file" accept=".pdf,application/pdf" multiple hidden>':'')+
      '<select id="study-official-filter" aria-label="Filtrar por disciplina" onchange="studyOfficialFilter()">'+opts(filter)+'</select></div>'+
+     '<select id="study-official-topic" aria-label="Filtrar por assunto" onchange="studyOfficialFilter(true)"><option value="">Todos os assuntos</option></select>'+
      '<p id="study-pdf-feedback" role="status" aria-live="polite"></p>'+
      '<div id="study-list" class="study-pdf-grid"></div><div id="study-editor"></div>';
    const picker=$('study-pdf-upload');
    if(picker)picker.onchange=ev=>window.studyOfficialBatchFiles(Array.from(ev.target.files||[]));
-   window.studyOfficialFilter=()=>{
+   window.studyOfficialFilter=keepTopic=>{
      const chosen=$('study-official-filter')?.value||'';
-     const summaries=officialTexts.filter(d=>(d.publicado||isEditor())&&(!chosen||d.area_id===chosen));
+     const topicSelect=$('study-official-topic');
+     const previous=keepTopic?topicSelect.value:'';
+     const topics=[...new Set([...officialTexts.filter(d=>(d.publicado||isEditor())&&(!chosen||d.area_id===chosen)).map(d=>d.assunto),...officialPdfs.filter(p=>!chosen||p.disciplina_id===chosen).map(p=>p.tema_id)])].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+     topicSelect.innerHTML='<option value="">Todos os assuntos</option>'+topics.map(t=>'<option value="'+E(t)+'">'+E(t)+'</option>').join('');
+     topicSelect.value=topics.includes(previous)?previous:'';
+     const topic=topicSelect.value;
+     const summaries=officialTexts.filter(d=>(d.publicado||isEditor())&&(!chosen||d.area_id===chosen)&&(!topic||d.assunto===topic)).sort((a,b)=>area(a.area_id).localeCompare(area(b.area_id),'pt-BR')||a.titulo.localeCompare(b.titulo,'pt-BR'));
      const accounted=new Set(summaries.map(d=>pdfFor(d)?.id).filter(Boolean));
-     const additional=officialPdfs.filter(p=>(!chosen||p.disciplina_id===chosen)&&!accounted.has(p.id));
+     const additional=officialPdfs.filter(p=>(!chosen||p.disciplina_id===chosen)&&(!topic||p.tema_id===topic)&&!accounted.has(p.id));
      let cards=summaries.map(d=>{
        const pdf=pdfFor(d);
-       const action=pdf?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+pdf.id+'\')">Ler resumo <span aria-hidden="true">↗</span></button>':
+       const action=pdf?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+pdf.id+'\')">Ler resumo <span aria-hidden="true">↗</span></button><button onclick="studyOfficialDownload(\''+pdf.id+'\')">↓ Baixar PDF</button>':
          isEditor()?'<button onclick="studyOfficialAttach(\''+d.id+'\')">Publicar PDF original</button>':
          '<span class="study-pdf-await">PDF original aguardando publicação</span>';
        return '<article class="study-pdf-card"><div class="study-pdf-symbol" aria-hidden="true">▤</div>'+
@@ -116,40 +123,43 @@
      cards+=additional.map(p=>'<article class="study-pdf-card"><div class="study-pdf-symbol" aria-hidden="true">▤</div>'+
        '<div class="study-pdf-meta"><h3>'+E(p.titulo)+'</h3><p>'+E(area(p.disciplina_id))+' · '+E(p.tema_id)+'</p>'+
        '<small class="study-pdf-ready">PDF original disponível</small></div><div class="study-pdf-buttons">'+
-       '<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">Ler resumo ↗</button></div></article>').join('');
+       '<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">Ler resumo ↗</button><button onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button></div></article>').join('');
      $('study-list').innerHTML=cards||'<p class="study-empty">Nenhum resumo cadastrado para esta área.</p>';
    };
    studyOfficialFilter();
  }
- function pdfViewer(doc,url){
-   document.getElementById('study-pdf-dialog')?.remove();
-   const dialog=document.createElement('div');dialog.id='study-pdf-dialog';
-   dialog.className='study-pdf-dialog';dialog.setAttribute('role','dialog');
-   dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-label','PDF original: '+doc.titulo);
-   const top=document.createElement('header');top.className='study-pdf-dialog-head';
-   const heading=document.createElement('div');heading.className='study-pdf-dialog-title';
-   const h=document.createElement('strong');h.textContent=doc.titulo;
-   const meta=document.createElement('small');meta.textContent=area(doc.disciplina_id)+' · PDF original';
-   heading.append(h,meta);
-   const controls=document.createElement('div');controls.className='study-pdf-dialog-actions';
-   const link=document.createElement('a');link.href=url;link.target='_blank';
-   link.rel='noopener noreferrer';link.textContent='Abrir em nova aba';
-   const exit=document.createElement('button');exit.type='button';exit.textContent='Fechar ×';
-   exit.onclick=()=>{dialog.remove();document.removeEventListener('keydown',escape)};
-   const timerButton=document.createElement('button');timerButton.type='button';
-   timerButton.textContent='◷ Iniciar cronômetro';
-   timerButton.onclick=()=>window.MedQuestStudyTime?.openStart({
-     atividade:'pdf',titulo:doc.titulo,area_id:doc.disciplina_id,assunto:doc.tema_id
-   });
-   controls.append(timerButton,link,exit);top.append(heading,controls);
-   window.MedQuestStudyTime?.setContext({atividade:'pdf',titulo:doc.titulo,area_id:doc.disciplina_id,assunto:doc.tema_id});
-   const frame=document.createElement('iframe');frame.className='study-pdf-iframe';
-   frame.title='PDF original - '+doc.titulo;
-   frame.src=url+'#toolbar=1&navpanes=0&view=FitH';
-   dialog.append(top,frame);document.body.append(dialog);exit.focus();
-   function escape(e){if(e.key==='Escape')exit.click()}
-   document.addEventListener('keydown',escape);
+ async function pdfViewer(doc,url){
+   const {openPdfReader}=await import('./pdf-reader.mjs?v=1');
+   await openPdfReader({doc,url,area:area(doc.disciplina_id),download:()=>window.studyOfficialDownload(doc.id)});
  }
+ const originalName=doc=>doc.descricao?.startsWith('PDF original — ')
+   ?doc.descricao.slice('PDF original — '.length):doc.arquivo_path.split('/').pop();
+ async function signedPdf(doc,download=false){
+   const user=await db.auth.getUser();
+   if(user.error||!user.data.user)throw Error('Faça login para acessar o PDF.');
+   const access=await db.from('usuarios').select('aprovado').eq('id',user.data.user.id).single();
+   if(access.error||!access.data?.aprovado)throw Error('Acesso disponível somente para estudantes aprovados.');
+   const result=await db.storage.from('materiais_medquest').createSignedUrl(doc.arquivo_path,download?120:3600,
+     download?{download:originalName(doc)}:{});
+   if(result.error)throw result.error;
+   if(!result.data?.signedUrl)throw Error('Arquivo indisponível.');
+   return result.data.signedUrl;
+ }
+ window.studyOfficialDownload=async id=>{
+   const doc=officialPdfs.find(x=>x.id===id);if(!doc)return;
+   try{
+     feedback('Preparando download do PDF original…');
+     const url=await signedPdf(doc,true);
+     const response=await window.fetch(url);
+     if(!response.ok)throw Error('Não foi possível recuperar o PDF ('+response.status+').');
+     const blob=await response.blob();
+     if(!blob.size)throw Error('O arquivo recebido está vazio.');
+     const objectUrl=URL.createObjectURL(blob),link=document.createElement('a');
+     link.href=objectUrl;link.download=originalName(doc);document.body.append(link);link.click();link.remove();
+     setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
+     feedback('Download iniciado: '+originalName(doc));
+   }catch(e){feedback('Erro no download: '+e.message,true);if(document.getElementById('study-pdf-dialog'))alert('Erro no download: '+e.message)}
+ };
  window.studyOfficialOpen=id=>{
    const doc=officialTexts.find(x=>x.id===id);if(!doc)return;
    const pdf=pdfFor(doc);
@@ -160,10 +170,8 @@
    const doc=officialPdfs.find(x=>x.id===id);if(!doc)return;
    try{
      feedback('Abrindo o PDF original…');
-     const result=await db.storage.from('materiais_medquest').createSignedUrl(doc.arquivo_path,7200);
-     if(result.error)throw result.error;
-     if(!result.data?.signedUrl)throw Error('Arquivo indisponível.');
-     feedback('');pdfViewer(doc,result.data.signedUrl);
+     const url=await signedPdf(doc);
+     feedback('');await pdfViewer(doc,url);
      activity({tipo:'resumo',area_id:doc.disciplina_id});
    }catch(e){feedback('Erro ao abrir documento: '+e.message,true)}
  };
