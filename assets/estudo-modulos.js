@@ -12,7 +12,7 @@
   mode=kind;esconderApp();$('tela-estudo').style.display='block';fecharSidebar();setNavActive(({resumo:'nav-resumo',anotacao:'nav-notas',plano:'nav-plano',progresso:'nav-progresso'})[kind]);
   $('study-title').textContent=({resumo:'Resumos',anotacao:'Anotações',plano:'Plano da Semana',progresso:'Meu progresso'})[kind];
   $('study-msg').textContent='';$('study-content').innerHTML='<p>Carregando…</p>';
-  if(kind==='resumo')readOfficial();else if(kind==='anotacao')readDocs();else if(kind==='plano')readPlan();else readProgress();
+  if(kind==='resumo')readOfficial();else if(kind==='anotacao')readDocs();else if(kind==='plano')window.PlanoMedQuest.open();else readProgress();
  };
  const docCard=d=>'<article class="study-row"><div><b>'+E(d.titulo)+'</b><p>'+E(area(d.area_id))+' · '+E(d.assunto)+'</p></div><div><button onclick="studyEdit(\''+d.id+'\')">Abrir</button><button onclick="studyDelete(\''+d.id+'\')">Excluir</button></div></article>';
  async function readDocs(){try{docs=await fetch('estudo_documentos',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('tipo',mode).order('atualizado_em',{ascending:false}));paintDocs();if(window.studyPendingDocument){const id=window.studyPendingDocument;window.studyPendingDocument=null;const found=docs.find(d=>d.id===id);if(found)editor(found)}}catch(e){error(e)}}
@@ -123,24 +123,7 @@
    try{await fetch('conteudos_oficiais',t=>t.delete().eq('id',id));await readOfficial();note('Resumo excluído.')}catch(e){error(e)}
  };
 
- async function readPlan(){try{plan=await fetch('plano_semana',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('semana_inicio',monday()).order('criado_em'));paintPlan()}catch(e){error(e)}}
- function paintPlan(){
-  $('study-content').innerHTML='<div class="study-toolbar"><span>Semana de '+monday().split('-').reverse().join('/')+'</span><button onclick="studyPlanNew()">+ Nova meta</button></div><div id="study-list"></div><div id="study-editor"></div>';
-  $('study-list').innerHTML=plan.map(p=>'<article class="study-row"><div><label><input type="checkbox" '+(p.concluido?'checked':'')+' onchange="studyDone(\''+p.id+'\',this.checked)"> <b>'+E(p.titulo)+'</b></label><p>'+E(area(p.area_id))+' · '+p.realizado+'/'+p.meta+'</p></div><div><button onclick="studyPlanEdit(\''+p.id+'\')">Editar</button><button onclick="studyPlanDelete(\''+p.id+'\')">Excluir</button></div></article>').join('')||'<p class="study-empty">Você ainda não criou metas para esta semana.</p>';
- }
- function planEditor(p){
-  selected=p?.id||null;
-  $('study-editor').innerHTML='<div class="study-form"><h3>Meta semanal</h3><label>Atividade<input id="st-title" maxlength="180" value="'+E(p?.titulo||'')+'"></label><label>Área<select id="st-area">'+opts(p?.area_id||'')+'</select></label><label>Meta<input id="st-meta" type="number" min="1" max="10000" value="'+(p?.meta||1)+'"></label><label>Realizado<input id="st-done" type="number" min="0" max="10000" value="'+(p?.realizado||0)+'"></label><div><button onclick="studyPlanSave()">Salvar</button><button onclick="studyCancel()">Cancelar</button></div></div>';
- }
- window.studyPlanNew=()=>planEditor(null);window.studyPlanEdit=id=>planEditor(plan.find(x=>x.id===id));
- window.studyPlanSave=async()=>{
-  let titulo=$('st-title').value.trim(),meta=Number($('st-meta').value),realizado=Number($('st-done').value);
-  if(!titulo||!Number.isInteger(meta)||meta<1||meta>10000||!Number.isInteger(realizado)||realizado<0||realizado>10000)return error(Error('Confira o título e os valores.'));
-  let data={titulo,area_id:$('st-area').value,meta,realizado,concluido:realizado>=meta};
-  try{if(selected)await fetch('plano_semana',t=>t.update(data).eq('id',selected).eq('usuario_id',usuarioAtual.id));else await fetch('plano_semana',t=>t.insert({...data,usuario_id:usuarioAtual.id,semana_inicio:monday()}));await readPlan();home();note('Meta salva.')}catch(e){error(e)}
- };
- window.studyDone=async(id,v)=>{let p=plan.find(x=>x.id===id);if(!p)return;try{await fetch('plano_semana',t=>t.update({concluido:v,realizado:v?p.meta:0}).eq('id',id).eq('usuario_id',usuarioAtual.id));await readPlan();home()}catch(e){error(e)}};
- window.studyPlanDelete=async id=>{if(!confirm('Excluir meta?'))return;try{await fetch('plano_semana',t=>t.delete().eq('id',id).eq('usuario_id',usuarioAtual.id));await readPlan();home()}catch(e){error(e)}};
+ // O plano semanal usa o módulo visual dedicado assets/plano-semana.js.
  async function readProgress(){try{progress=await fetch('progresso',t=>t.select('*').eq('usuario_id',usuarioAtual.id).order('respondido_em',{ascending:false}));paintProgress()}catch(e){error(e)}}
  function paintProgress(){
   const rows=progress.filter(x=>!filter||x.disciplina_id===filter),hits=rows.filter(x=>x.acertou).length;
@@ -160,7 +143,7 @@
    const results=await Promise.all([fetch('estudo_documentos',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('tipo','anotacao').order('atualizado_em',{ascending:false}).limit(4)),fetch('plano_semana',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('semana_inicio',monday())),fetch('ultima_atividade',t=>t.select('*').eq('usuario_id',usuarioAtual.id).maybeSingle())]);
    let [notes,goals,record]=results;last=record;
    $('study-home-notes').innerHTML=notes.map(n=>'<button class="study-home-link" onclick="studyOpenNote(\''+n.id+'\')">'+E(n.titulo)+'</button>').join('')||'<p>Nenhuma anotação ainda.</p>';
-   $('study-home-plan').innerHTML=goals.map(p=>'<p>'+(p.concluido?'✓':'○')+' '+E(p.titulo)+' <small>'+p.realizado+'/'+p.meta+'</small></p>').join('')||'<p>Você ainda não criou metas para esta semana.</p>';
+   window.PlanoMedQuest.renderHome(goals);
    $('study-home-last').textContent=record? (record.tipo==='questoes'?'Questões':record.tipo==='resumo'?'Resumo':'Anotações')+' · '+E(area(record.area_id)):'Retome questões, anotações ou resumos.';
   }catch(e){console.warn('Dashboard pessoal',e)}
  }
