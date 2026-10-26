@@ -1,0 +1,89 @@
+
+/* Plano da Semana — tema MedQuest, separado dos conteudos academicos oficiais */
+.weekly-planner{color:var(--texto);max-width:1120px;margin:auto}
+.weekly-intro{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:20px 0 24px}
+.weekly-eyebrow,.weekly-modal-head span{color:var(--ouro);font-size:.65rem;letter-spacing:.18em;font-weight:800;margin-bottom:8px}
+.weekly-intro h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.5rem,2.35vw,2rem);font-weight:500;color:#fff;margin-bottom:8px}
+.weekly-intro p{color:var(--cinza);font-size:.86rem;line-height:1.5;max-width:510px}
+.weekly-nav{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.weekly-nav>span{white-space:nowrap;text-align:center;font-size:.9rem;color:#fff;font-weight:600;margin:0 5px}
+.study-screen .weekly-nav button{border:1px solid var(--borda);width:33px;height:33px;padding:0;display:inline-grid;place-items:center;font-size:1.4rem;color:var(--ouro);border-radius:8px}
+.study-screen .weekly-nav .weekly-today{font-size:.73rem;width:auto;padding:0 11px;border-color:var(--ouro-borda)}
+.weekly-overview{display:grid;grid-template-columns:1fr 1fr 1.45fr;gap:12px;margin-bottom:25px}
+.weekly-metric{background:linear-gradient(120deg,rgba(17,31,45,.92),rgba(9,17,27,.97));border:1px solid var(--borda);border-radius:13px;padding:15px 19px;min-height:105px}
+.weekly-metric>span{color:var(--cinza);font-size:.75rem;display:block;margin-bottom:8px}
+.weekly-metric strong{font-size:1.85rem;font-weight:700;color:var(--ouro)}
+.weekly-metric small{color:var(--cinza);font-size:.85rem;font-weight:400}
+.weekly-meter{background:rgba(255,255,255,.10);width:100%;height:6px;border-radius:99px;overflow:hidden}
+.weekly-meter>span{height:100%;display:block;border-radius:99px;background:linear-gradient(90deg,#b98d35,#f4ce73);transition:width .25s ease}
+.weekly-metric .weekly-meter{margin-top:8px}
+.weekly-controls{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:19px}
+.weekly-tabs{display:flex;gap:2px;padding:4px;border:1px solid var(--borda);border-radius:10px;background:rgba(11,20,32,.8)}
+.study-screen .weekly-tabs button{border:0;background:transparent;color:var(--cinza);padding:8px 12px;font-size:.8rem}
+.study-screen .weekly-tabs button.active{background:var(--ouro);color:#13151a;font-weight:700}
+.study-screen .weekly-create,.study-screen .weekly-empty button,.study-screen .weekly-save{background:var(--ouro);border-color:var(--ouro);color:#0c141f;font-weight:800;padding:11px 17px}
+.weekly-days{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.weekly-day-card{background:rgba(9,19,30,.96);border:1px solid rgba(230,188,97,.16);border-radius:14px;min-width:0;overflow:hidden}
+.weekly-day-head{padding:14px 17px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--borda);background:linear-gradient(90deg,rgba(212,162,57,.055),transparent)}
+.weekly-day-head>div{display:flex;flex-direction:column;gap:3px}
+.weekly-day-label{color:#fff;font-weight:700;font-size:.91rem}
+.weekly-day-date{color:var(--cinza);font-size:.7rem}
+.study-screen .weekly-day-add{font-size:.77rem;padding:7px 10px;border:1px solid var(--ouro-borda);color:var(--ouro)}
+.weekly-day-list{padding:12px;display:flex;flex-direction:column;gap:10px}
+.weekly-day-empty{color:#708093;font-size:.76rem;padding:6px 5px 10px}
+.weekly-task{border:1px solid #263646;background:linear-gradient(140deg,rgba(16,30,44,.9),rgba(9,17,29,.96));padding:13px 14px;border-radius:11px;min-width:0}
+.weekly-task.is-done{border-color:rgba(227,184,86,.3)}
+.weekly-task-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.weekly-task-check{min-width:0;flex:1;display:flex;align-items:center;gap:10px;cursor:pointer}
+.weekly-checkbox{width:19px;height:19px;min-width:19px;margin:0;accent-color:#e8bf69;cursor:pointer}
+.weekly-task-title{font-weight:600;color:#fff;font-size:.82rem;line-height:1.35;overflow-wrap:anywhere}
+.weekly-task.is-done .weekly-task-title{text-decoration:line-through;color:#b1b7be}
+.weekly-task-counter{color:var(--ouro);font-size:.78rem;white-space:nowrap}
+.weekly-task-sub{color:var(--cinza);font-size:.7rem;line-height:1.5;margin:8px 0 9px;overflow-wrap:anywhere}
+.weekly-area{color:#d7bc83}
+.weekly-task-actions{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:12px}
+.weekly-quantity{display:flex;align-items:center;gap:8px;color:#a6b3bf;font-size:.7rem}
+.study-screen .weekly-quantity button{border:1px solid #394450;color:var(--ouro);border-radius:7px;height:25px;min-width:25px;padding:0;font-size:1rem}
+.weekly-modify{display:flex;gap:6px}
+.study-screen .weekly-modify button{border-color:#3d4c59;padding:5px 8px;font-size:.7rem}
+.study-screen .weekly-modify .weekly-delete{color:#ec9ba0;border-color:rgba(236,155,160,.24)}
+.weekly-empty{background:radial-gradient(circle at 50% 10%,rgba(226,189,110,.07),transparent 65%),#0a1621;border:1px dashed #3a3b39;border-radius:15px;text-align:center;padding:28px 20px;margin-bottom:20px}
+.weekly-empty-icon{color:var(--ouro);font-size:1.7rem}
+.weekly-empty strong{display:block;color:#fff;font-size:1.13rem;margin:5px 0}
+.weekly-empty p{font-size:.81rem;color:var(--cinza);line-height:1.55;max-width:400px;margin:0 auto 15px}
+.weekly-loading{padding:40px 20px;color:var(--cinza);text-align:center}
+.weekly-modal-backdrop{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;background:rgba(0,6,12,.78);backdrop-filter:blur(5px);padding:18px;overflow-y:auto}
+.weekly-modal{background:#0c1621;border:1px solid rgba(230,191,107,.36);border-radius:17px;max-width:570px;width:100%;padding:25px;box-shadow:0 25px 90px rgba(0,0,0,.6);max-height:calc(100dvh - 35px);overflow-y:auto}
+.weekly-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:22px}
+.weekly-modal-head h3{font-family:'Playfair Display',Georgia,serif;color:#fff;font-size:1.5rem;font-weight:500;margin:0}
+.study-screen .weekly-modal-x{font-size:1.65rem;color:var(--cinza);border:0;padding:0 7px}
+.weekly-modal-fields{display:grid;gap:14px}
+.weekly-modal-fields label{display:flex;flex-direction:column;gap:7px;color:#b8c1cc;font-size:.78rem;font-weight:600}
+.weekly-modal-fields input,.weekly-modal-fields select,.weekly-modal-fields textarea{width:100%;border:1px solid #334356;border-radius:8px;background:#141e2b;color:#fff;padding:11px 12px;font-size:.86rem;font-family:inherit;outline:none;min-width:0}
+.weekly-modal-fields input:focus,.weekly-modal-fields select:focus,.weekly-modal-fields textarea:focus{border-color:var(--ouro)}
+.weekly-modal-fields textarea{resize:vertical;min-height:75px}
+.weekly-fields-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.weekly-modal-actions{display:flex;justify-content:flex-end;gap:11px;margin-top:23px;flex-wrap:wrap}
+.study-screen .weekly-modal-actions button{padding:11px 17px}
+.study-screen .weekly-save:disabled{opacity:.5;cursor:wait}
+.weekly-mini-summary{display:flex;justify-content:space-between;align-items:center;color:#b8c6d3;font-size:.69rem;padding:0 0 7px;margin-bottom:5px;border-bottom:1px solid var(--borda)}
+.weekly-mini-summary span{color:var(--ouro);font-weight:700}
+.weekly-mini-task{display:flex;gap:9px;align-items:start;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.weekly-mini-check{padding-top:2px;display:flex}
+.weekly-mini-check .weekly-checkbox{width:17px;height:17px;min-width:17px}
+.weekly-mini-info{flex:1;min-width:0}
+.weekly-mini-title{font-size:.72rem;line-height:1.35;color:#dde3e7;overflow-wrap:anywhere}
+.weekly-mini-task.is-done .weekly-mini-title{text-decoration:line-through;color:#a4b0bc}
+.weekly-mini-line{display:flex;align-items:center;gap:8px;margin-top:6px}
+.weekly-mini-line .weekly-meter{height:4px;flex:1}
+.weekly-mini-line>span{min-width:35px;text-align:right;font-size:.66rem;color:#d1b879}
+.weekly-mini-empty p{color:var(--cinza);font-size:.75rem;line-height:1.5;margin-bottom:8px}
+.weekly-mini-empty button,.weekly-see-more{color:var(--ouro);border:1px solid var(--ouro-borda);border-radius:8px;background:transparent;cursor:pointer;padding:7px 10px;font-size:.73rem}
+.weekly-see-more{display:block;width:100%;text-align:center;margin-top:8px}
+.weekly-mini-error{color:#eea2a5;font-size:.7rem}
+#tela-dashboard .dash-right .weekly-home-panel{max-height:250px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#5d5133 transparent}
+#tela-dashboard .dash-right .rp-head .weekly-open-all{border:0;background:transparent;color:var(--ouro);font-size:.68rem;white-space:nowrap;cursor:pointer;padding:3px 0 3px 6px}
+#tela-dashboard .dash-right .rp-head{display:flex;justify-content:space-between;align-items:center;gap:6px}
+@media(max-width:950px){.weekly-intro{flex-direction:column;align-items:flex-start}.weekly-overview{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:710px){.weekly-days{grid-template-columns:1fr}.weekly-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.weekly-metric-wide{grid-column:span 2}.weekly-nav{width:100%;justify-content:flex-start}.weekly-controls{align-items:stretch}.weekly-controls>.weekly-create{width:100%}}
+@media(max-width:450px){.weekly-fields-pair{grid-template-columns:1fr}.weekly-modal{padding:20px 15px}.weekly-overview{grid-template-columns:1fr}.weekly-metric-wide{grid-column:auto}.weekly-tabs{width:100%}.study-screen .weekly-tabs button{flex:1}.weekly-task-actions{align-items:flex-start;flex-direction:column}}
