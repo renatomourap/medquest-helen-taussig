@@ -1,0 +1,32 @@
+
+/* Catalogo geral de questoes MedQuest */
+#mq-questoes-gerais{padding:clamp(16px,2.5vw,38px);min-height:calc(100dvh - 58px);max-width:1390px;margin:0 auto}
+.mq-q-head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 26px}
+.mq-q-eyebrow{display:block;color:var(--ouro);font-size:.69rem;letter-spacing:.14em;font-weight:700;margin-bottom:8px}
+.mq-q-head h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.55rem,2.7vw,2.4rem);color:#fff;font-weight:500}
+.mq-q-head p{color:var(--cinza);font-size:.84rem;line-height:1.55;margin-top:8px}
+.mq-q-summary{display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:3px;min-width:130px;text-align:center;background:#0c1826;border:1px solid var(--borda);border-radius:12px;padding:14px}
+.mq-q-summary b{color:var(--ouro);font-size:1.4rem;font-variant-numeric:tabular-nums}
+.mq-q-summary small{color:var(--cinza);font-size:.7rem}
+.mq-q-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.mq-q-area{background:#0a1623;border:1px solid #253342;border-radius:14px;overflow:hidden;min-width:0}
+.mq-q-area-head{padding:17px 18px;background:linear-gradient(100deg,rgba(212,167,78,.09),rgba(16,28,41,.15));border-bottom:1px solid #293946}
+.mq-q-area-head h2{font-family:'Playfair Display',Georgia,serif;font-size:1.17rem;font-weight:600;color:#f5f5f6;margin-bottom:5px}
+.mq-q-area-head span{color:var(--cinza);font-size:.75rem}
+.mq-q-topics{padding:5px 13px}
+.mq-q-topic{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 7px;border-bottom:1px solid rgba(199,211,222,.10)}
+.mq-q-topic:last-child{border-bottom:0}
+.mq-q-topic h3{font-size:.86rem;line-height:1.4;color:#e8eaf0;overflow-wrap:anywhere}
+.mq-q-topic>div span{font-size:.73rem;color:#ceb06e;display:block;margin-top:4px}
+.mq-q-topic.mq-q-inactive{opacity:.65}
+.mq-q-open{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:8px 11px;border-radius:8px;border:1px solid #5a4b35;background:rgba(205,164,80,.07);color:#ebc476;cursor:pointer;font-size:.77rem}
+.mq-q-open:hover,.mq-q-open:focus-visible{background:rgba(220,178,90,.17);border-color:#f0cb76}
+.mq-q-open span{font-size:1.1rem}
+.mq-q-no-questions{font-size:.68rem;color:#99a5b2;white-space:nowrap}
+.mq-q-empty{padding:20px 8px;color:#8494a4;font-size:.83rem}
+#sidebar .sidebar-disc-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sidebar .sidebar-disc{gap:11px}
+#sidebar .sidebar-disc .sidebar-disc-icon{width:22px;height:22px;flex:0 0 22px;display:flex;align-items:center;justify-content:center}
+#sidebar .sidebar-disc-icon img{width:22px;height:22px;object-fit:contain;filter:brightness(0) invert(1);opacity:.72}
+@media(max-width:840px){.mq-q-groups{grid-template-columns:1fr}.mq-q-head{align-items:flex-start}}
+@media(max-width:490px){.mq-q-head{flex-direction:column}.mq-q-no-questions{white-space:normal}.mq-q-topic{align-items:flex-start}.mq-q-summary{width:100%;grid-template-columns:1fr 1fr}}
