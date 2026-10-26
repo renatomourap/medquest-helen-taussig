@@ -136,7 +136,13 @@
    link.rel='noopener noreferrer';link.textContent='Abrir em nova aba';
    const exit=document.createElement('button');exit.type='button';exit.textContent='Fechar ×';
    exit.onclick=()=>{dialog.remove();document.removeEventListener('keydown',escape)};
-   controls.append(link,exit);top.append(heading,controls);
+   const timerButton=document.createElement('button');timerButton.type='button';
+   timerButton.textContent='◷ Iniciar cronômetro';
+   timerButton.onclick=()=>window.MedQuestStudyTime?.openStart({
+     atividade:'pdf',titulo:doc.titulo,area_id:doc.disciplina_id,assunto:doc.tema_id
+   });
+   controls.append(timerButton,link,exit);top.append(heading,controls);
+   window.MedQuestStudyTime?.setContext({atividade:'pdf',titulo:doc.titulo,area_id:doc.disciplina_id,assunto:doc.tema_id});
    const frame=document.createElement('iframe');frame.className='study-pdf-iframe';
    frame.title='PDF original - '+doc.titulo;
    frame.src=url+'#toolbar=1&navpanes=0&view=FitH';
