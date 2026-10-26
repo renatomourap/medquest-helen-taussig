@@ -20,8 +20,7 @@
   const ua = navigator.userAgent || '';
   const isIPad = /iPad/i.test(ua) ||
     (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
-  const isSafari = /Safari/i.test(ua) &&
-    /Apple/i.test(navigator.vendor || '') &&
+  const isSafari = /AppleWebKit/i.test(ua) &&
     !/(CriOS|FxiOS|EdgiOS|OPiOS|Chrome|Chromium)/i.test(ua);
   if (isIPad && isSafari) document.documentElement.classList.add('mq-ipad-safari');
 })();
@@ -2126,7 +2125,7 @@
 
   /* iPad em paisagem: 3 cartões equilibrados, como na grade principal
      do MedQuest, em vez dos 2 cartões excessivamente ampliados. */
-  @media (min-width: 820px) and (max-width: 1199px) and (orientation: landscape) {
+  @media (min-width: 901px) and (max-width: 1199px) and (orientation: landscape) {
     html.mq-ipad-safari .sidebar { width: 198px; }
     html.mq-ipad-safari .main-area { margin-left: 198px; }
     html.mq-ipad-safari .sidebar-logo { padding: 16px 12px 12px; gap: 8px; }
@@ -2211,7 +2210,7 @@
   }
 
   /* iPad retrato: grade de duas colunas sem cortar títulos ou imagens. */
-  @media (min-width: 700px) and (max-width: 959px) and (orientation: portrait) {
+  @media (min-width: 700px) and (max-width: 1199px) and (orientation: portrait) {
     html.mq-ipad-safari #tela-dashboard .dash-center { padding: 14px 18px 20px; }
     html.mq-ipad-safari #tela-dashboard .dash-disc-grid {
       grid-template-columns: repeat(2,minmax(0,1fr));
