@@ -56,8 +56,8 @@
    const map={'1':'microbiota-humana','2':'infeccao-hospitalar','3':'biofilmes-bacterianos',
      '4':'staphylococcus-sp','5':'disturbios-de-hipersensibilidade',
      '6':'imunodeficiencias-primarias','7':'antibioticos-i-beta-lactamicos',
-     '8':'antibioticos-ii-sintese-proteica','9':'antibioticos-iii-sulfonamidas-e-quinolonas'};
-   const prefix=n.match(/^([1-9])-/)?.[1];
+     '8':'antibioticos-ii-sintese-proteica','9':'antibioticos-iii-sulfonamidas-e-quinolonas','10':'introducao-a-parasitologia','11':'artropodes-vetores-e-parasitas'};
+   const prefix=n.match(/^(10|11|[1-9])-/)?.[1];
    if(prefix&&map[prefix]){
      const matched=officialTexts.find(d=>norm(d.assunto)===map[prefix]);
      if(matched)return matched;
