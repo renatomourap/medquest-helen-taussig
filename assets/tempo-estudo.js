@@ -3,7 +3,7 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const types=[['questoes','Questões'],['pdf','Leitura de PDF'],['resumos','Resumos'],['anotacoes','Anotações'],['outros','Outros estudos']];
+const types=[['questoes','Questões'],['pdf','Leitura de PDF'],['resumos','Resumos'],['outros','Outros estudos']];
 const activityName=s=>types.find(x=>x[0]===s)?.[1]||'Outros estudos';
 const localDay=date=>{const d=new Date(date);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const user=()=>typeof usuarioAtual==='undefined'?null:usuarioAtual?.id||null;
