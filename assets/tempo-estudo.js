@@ -62,9 +62,9 @@ function update(){
  const start=$('mq-time-play');start.textContent=running?'Pausar':paused?'Continuar':'Iniciar';
  start.onclick=running?pause:paused?resume:()=>dialog('start',context);
  $('mq-time-end').disabled=!state;
- const top=$('mq-top-timer');if(top)top.textContent=state?'◷ '+fmt(elapsed()):'◷ Cronômetro';
+ const top=$('mq-top-timer');if(top)top.textContent=state?'◷ '+fmtCompact(seconds):'◷ Cronômetro';
  const quiz=document.querySelector('.mq-question-timer');
- if(quiz)quiz.textContent=state?'◷ '+fmt(elapsed()):'◷ Cronômetro';
+ if(quiz)quiz.textContent=state?'◷ '+fmtCompact(seconds):'◷ Cronômetro';
 }
 function attach(){
  if($('mq-time-dock'))return;
