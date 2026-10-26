@@ -148,7 +148,16 @@
    $('study-home-last').textContent=record? (record.tipo==='questoes'?'Questões':record.tipo==='resumo'?'Resumo':'Anotações')+' · '+E(area(record.area_id)):'Retome questões, anotações ou resumos.';
   }catch(e){console.warn('Dashboard pessoal',e)}
  }
- window.abrirEstudo=show;
+ // A barra lateral abre todos os resumos. Pelo Explorar por área,
+ // a lista já chega filtrada pela disciplina selecionada.
+ window.abrirEstudo=kind=>{ if(kind==='resumo')filter='';show(kind) };
+ window.abrirEstudoArea=id=>{
+  filter=id;
+  show('resumo');
+  $('study-title').textContent='Resumos · '+area(id);
+  const subtitle=$('study-subtitle');
+  if(subtitle)subtitle.textContent='Materiais oficiais de '+area(id);
+ };
  window.studyOpenNote=id=>{window.studyPendingDocument=id;show('anotacao')};
  window.studyContinue=async()=>{
   if(!last)try{last=await fetch('ultima_atividade',t=>t.select('*').eq('usuario_id',usuarioAtual.id).maybeSingle())}catch(e){error(e)}
@@ -160,7 +169,7 @@
   show(last?.tipo==='resumo'?'resumo':last?.tipo==='anotacao'?'anotacao':'progresso');
  };
  window.studyPractice=()=>{let d=BANCO.disciplinas.find(x=>x.temas.length);if(d)abrirDisciplina(d.id)};
- window.studyArea=id=>{let d=BANCO.disciplinas.find(x=>x.id===id);if(d?.temas.length)abrirDisciplina(id);else {filter=id;show('resumo')}};
+ window.studyArea=id=>abrirModalidade(id);
  let hide=window.esconderApp;window.esconderApp=function(){hide();$('tela-estudo').style.display='none'};
  let screen=window.mostrarTela;window.mostrarTela=function(n){screen(n);$('tela-estudo').style.display='none'};
  let dash=window.irParaDashboard;window.irParaDashboard=function(){dash();home()};
