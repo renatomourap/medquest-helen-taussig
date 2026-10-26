@@ -12,7 +12,70 @@
   const levels=[['facil','Fácil'],['intermediario','Intermediário'],['dificil','Difícil'],
     ['muito_dificil','Muito difícil'],['nao_classificada','Não classificada']];
   const filters={area:'',assunto:'',hotpoint:'',dificuldade:''};
-  let active=false,filteredSession=null;
+  let active=false,filteredSession=null,openDropdown='';
+  // Títulos conferidos nos oito cadernos PDF originais.
+  const hpTitles={
+  "antibioticos-i-beta-lactamicos": [
+    "Parede celular: estrutura, função e alvos",
+    "Mecanismo de ação dos β-lactâmicos",
+    "Classes de antimicrobianos",
+    "Mecanismos de resistência bacteriana",
+    "Aplicações clínicas e uso racional"
+  ],
+  "antibioticos-ii-sintese-proteica": [
+    "Ribossomo bacteriano",
+    "Mecanismos por classe",
+    "Bactericida e bacteriostático",
+    "Resistência bacteriana",
+    "Aplicações e limitações"
+  ],
+  "antibioticos-iii-sulfonamidas-e-quinolonas": [
+    "Vias metabólicas",
+    "Sulfonamidas e trimetoprima",
+    "Quinolonas e fluoroquinolonas",
+    "Resistência aos antimicrobianos",
+    "Clínica, distribuição e segurança"
+  ],
+  "imunodeficiencias-primarias": [
+    "Tipos e investigação das imunodeficiências",
+    "Imunidade inata e fagócitos",
+    "Disfunções de células NK, B e T",
+    "Imunodeficiência combinada grave",
+    "Bases genéticas e distúrbios multissistêmicos"
+  ],
+  "biofilmes-bacterianos": [
+    "Fundamentos, superfícies e impacto clínico",
+    "Adesão, microcolônias e ciclo de formação",
+    "Matriz extracelular, EPS e DNA extracelular",
+    "Tolerância antimicrobiana e recidiva",
+    "Quorum sensing, AHL e estratégias de bloqueio"
+  ],
+  "staphylococcus-sp": [
+    "Fisiologia e estrutura",
+    "Patogênese e imunidade",
+    "Epidemiologia",
+    "Doenças clínicas",
+    "Diagnóstico, terapia e controle"
+  ],
+  "artropodes-vetores-e-parasitas": [
+    "Transmissão e ciclos vetoriais",
+    "Capacidade vetorial e hematofagismo",
+    "Moscas, miíases e terapia larval",
+    "Pulgas, piolhos e percevejos",
+    "Carrapatos e ácaros de importância médica"
+  ],
+  "introducao-a-parasitologia": [
+    "Parasitismo e expressão clínica",
+    "Habitat, hospedeiros e especificidade",
+    "Ecologia de populações parasitárias",
+    "Classificação de protozoários",
+    "Classificação de helmintos"
+  ]
+};
+  const hpTitle=(topic,hp)=>{
+    const i=Number(String(hp).match(/\d+/)?.[0]||0)-1;
+    return hpTitles[topic]?.[i]||'';
+  };
   const normalizeHP=q=>{
     const m=String(q.hotpoint||'').match(/(?:hot\s*point|hp)[\s.:#-]*0?([1-9]\d*)/i);
     return m?'Hot Point '+Number(m[1]):String(q.hotpoint||'').trim()||'Não definido';
@@ -32,15 +95,19 @@
   function flatten(){
     const rows=[];
     for(const d of BANCO.disciplinas||[])for(const t of d.temas||[])
-      for(const q of t.questoes||[])rows.push({areaId:d.id,areaName:d.nome,
-        temaId:t.id,temaName:t.nome,hotpoint:normalizeHP(q),
-        dificuldade:normalizeLevel(q),questao:q});
+      for(const q of t.questoes||[]){
+        const hp=normalizeHP(q);
+        rows.push({areaId:d.id,areaName:d.nome,
+          temaId:t.id,temaName:t.nome,hotpoint:hp,hotpointKey:t.id+'|'+hp,
+          hotpointTitle:hpTitle(t.id,hp),
+          dificuldade:normalizeLevel(q),questao:q});
+      }
     return rows;
   }
   function matches(row,skip){
     if(skip!=='area'&&filters.area&&row.areaId!==filters.area)return false;
     if(skip!=='assunto'&&filters.assunto&&row.temaId!==filters.assunto)return false;
-    if(skip!=='hotpoint'&&filters.hotpoint&&row.hotpoint!==filters.hotpoint)return false;
+    if(skip!=='hotpoint'&&filters.hotpoint&&row.hotpointKey!==filters.hotpoint)return false;
     if(skip!=='dificuldade'&&filters.dificuldade&&row.dificuldade!==filters.dificuldade)return false;
     return true;
   }
@@ -60,28 +127,51 @@
       return [...ids.entries()].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'))
         .map(([k,v])=>[k,v,true]);
     }
-    if(field==='hotpoint')return [...new Set(prior.map(r=>r.hotpoint))].sort(sortHP)
-      .map(v=>[v,v,true]);
+    if(field==='hotpoint'){
+      const unique=new Map(prior.map(r=>[r.hotpointKey,r]));
+      return [...unique.values()].sort((a,b)=>
+        a.temaName.localeCompare(b.temaName,'pt-BR')||sortHP(a.hotpoint,b.hotpoint))
+        .map(r=>[r.hotpointKey,
+          (filters.assunto?'':r.temaName+' · ')+r.hotpoint+
+          (r.hotpointTitle?' — '+r.hotpointTitle:''),
+          true]);
+    }
     const counts=Object.fromEntries(levels.map(([k])=>[k,prior.filter(r=>r.dificuldade===k).length]));
     return levels.map(([k,v])=>[k,v,counts[k]>0,counts[k]]);
   }
   function fieldMarkup(field,rows){
     const value=filters[field.key],opts=selectOptions(field.key,rows);
-    return '<label class="mq-q-filter" for="mq-q-filter-'+field.key+'">'+
-      '<span class="mq-q-filter-label"><span aria-hidden="true" class="mq-q-filter-icon">'+field.icon+
-      '</span>'+field.label+'</span><span class="mq-q-filter-selectwrap">'+
-      '<select id="mq-q-filter-'+field.key+'" data-mq-filter="'+field.key+'">'+
-      '<option value="">'+field.placeholder+'</option>'+
-      opts.map(([k,name,enabled,n])=>'<option value="'+E(k)+'"'+(value===k?' selected':'')+
-        (!enabled?' disabled':'')+'>'+E(name)+
-        (n!==undefined?' ('+n+')':'')+'</option>').join('')+
-      '</select><span class="mq-q-chevron" aria-hidden="true">⌄</span></span></label>';
+    const activeLabel=value?opts.find(([key])=>key===value)?.[1]||field.placeholder:field.placeholder;
+    const open=openDropdown===field.key;
+    const entries=[['',field.placeholder,true],...opts];
+    const options=entries.filter(([, ,enabled])=>enabled).map(([key,label,,count])=>
+      '<button type="button" class="mq-q-filter-option'+(value===key?' is-selected':'')+
+      '" role="option" tabindex="'+(value===key?'0':'-1')+
+      '" aria-selected="'+(value===key)+'" data-mq-choice="'+field.key+
+      '" data-mq-value="'+E(key)+'"><span class="mq-q-option-tick" aria-hidden="true">'+
+      (value===key?'✓':'')+'</span><span class="mq-q-option-label">'+E(label)+
+      (count===undefined?'':' <small>('+count+')</small>')+'</span></button>').join('');
+    return '<div class="mq-q-filter" data-mq-filter-wrap="'+field.key+'">'+
+      '<span id="mq-q-label-'+field.key+'" class="mq-q-filter-label">'+
+      '<span aria-hidden="true" class="mq-q-filter-icon">'+field.icon+'</span>'+field.label+'</span>'+
+      '<button id="mq-q-filter-'+field.key+'" type="button" class="mq-q-filter-trigger'+
+      (value?' has-value':'')+(open?' is-open':'')+
+      '" aria-labelledby="mq-q-label-'+field.key+' mq-q-value-'+field.key+
+      '" aria-haspopup="listbox" aria-expanded="'+open+
+      '" aria-controls="mq-q-options-'+field.key+
+      '" data-mq-trigger="'+field.key+'"><span id="mq-q-value-'+field.key+
+      '" class="mq-q-trigger-text" title="'+E(activeLabel)+'">'+E(activeLabel)+
+      '</span><span class="mq-q-filter-chevron" aria-hidden="true">⌄</span></button>'+
+      (open?'<div id="mq-q-options-'+field.key+'" class="mq-q-filter-menu" role="listbox" aria-labelledby="mq-q-label-'+field.key+'">'+
+        options+'</div>':'')+'</div>';
   }
   function chips(rows){
     const names={
       area:(BANCO.disciplinas||[]).find(d=>d.id===filters.area)?.nome||filters.area,
       assunto:rows.find(r=>r.temaId===filters.assunto)?.temaName||filters.assunto,
-      hotpoint:filters.hotpoint,
+      hotpoint:rows.find(r=>r.hotpointKey===filters.hotpoint)?.hotpointTitle ?
+        rows.find(r=>r.hotpointKey===filters.hotpoint).hotpoint+' — '+
+        rows.find(r=>r.hotpointKey===filters.hotpoint).hotpointTitle : filters.hotpoint,
       dificuldade:levels.find(([k])=>k===filters.dificuldade)?.[1]||filters.dificuldade
     };
     return fields.filter(f=>filters[f.key]).map(f=>'<button type="button" class="mq-q-chip" data-mq-remove="'+f.key+
@@ -134,13 +224,49 @@
         '<div class="mq-q-no-results"><div class="mq-q-no-results-icon" aria-hidden="true">⌕</div>'+
         '<h3>Nenhuma questão corresponde aos filtros</h3><p>Tente outra combinação de área, assunto, Hot Point ou dificuldade.</p>'+
         '<button type="button" id="mq-q-reset-empty">Limpar filtros</button></div>');
-    el.querySelectorAll('[data-mq-filter]').forEach(sel=>sel.addEventListener('change',e=>{
-      const key=e.currentTarget.dataset.mqFilter;
-      filters[key]=e.currentTarget.value;
-      if(key==='area'){filters.assunto='';filters.hotpoint='';}
-      if(key==='assunto')filters.hotpoint='';
-      render();
-    }));
+    el.querySelectorAll('[data-mq-trigger]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const key=button.dataset.mqTrigger;
+        openDropdown=openDropdown===key?'':key;
+        render();
+        if(openDropdown)focusSelected(key);
+        else $('mq-q-filter-'+key)?.focus();
+      });
+      button.addEventListener('keydown',e=>{
+        if(['ArrowDown','ArrowUp','Enter',' '].includes(e.key)){
+          e.preventDefault();openDropdown=button.dataset.mqTrigger;
+          render();focusSelected(openDropdown,e.key==='ArrowUp');
+        } else if(e.key==='Escape'&&openDropdown){
+          e.preventDefault();openDropdown='';render();$('mq-q-filter-'+button.dataset.mqTrigger)?.focus();
+        }
+      });
+    });
+    el.querySelectorAll('[data-mq-choice]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const key=button.dataset.mqChoice;
+        filters[key]=button.dataset.mqValue;
+        openDropdown='';
+        if(key==='area'){filters.assunto='';filters.hotpoint='';}
+        if(key==='assunto')filters.hotpoint='';
+        render();
+        $('mq-q-filter-'+key)?.focus();
+      });
+      button.addEventListener('keydown',e=>{
+        const key=button.dataset.mqChoice;
+        const nodes=[...el.querySelectorAll('[data-mq-choice="'+key+'"]')];
+        const index=nodes.indexOf(button);
+        if(e.key==='ArrowDown'||e.key==='ArrowUp'||e.key==='Home'||e.key==='End'){
+          e.preventDefault();
+          const next=e.key==='Home'?0:e.key==='End'?nodes.length-1:
+            (index+(e.key==='ArrowDown'?1:-1)+nodes.length)%nodes.length;
+          nodes.forEach((item,i)=>item.tabIndex=i===next?0:-1);
+          nodes[next]?.focus();
+        }
+        if(e.key==='Escape'){
+          e.preventDefault();openDropdown='';render();$('mq-q-filter-'+key)?.focus();
+        }
+      });
+    });
     el.querySelector('#mq-q-clear')?.addEventListener('click',()=>clearFilters());
     el.querySelector('#mq-q-reset-empty')?.addEventListener('click',()=>clearFilters());
     el.querySelectorAll('[data-mq-remove]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -162,7 +288,17 @@
       }
     }));
   }
-  function clearFilters(){for(const field of fields)filters[field.key]='';render();}
+  function focusSelected(key,reverse=false){
+    const nodes=[...document.querySelectorAll('[data-mq-choice="'+key+'"]')];
+    const selected=nodes.find(x=>x.getAttribute('aria-selected')==='true');
+    const focus=reverse?nodes.at(-1):(selected||nodes[0]);
+    if(focus){nodes.forEach(x=>x.tabIndex=x===focus?0:-1);focus.focus();}
+  }
+  document.addEventListener('pointerdown',e=>{
+    if(!openDropdown||e.target.closest?.('[data-mq-filter-wrap]'))return;
+    openDropdown='';if(active&&$('mq-questoes-gerais')?.style.display==='block')render();
+  });
+  function clearFilters(){for(const field of fields)filters[field.key]='';openDropdown='';render();}
   function applyQuestions(list){
     if(!list.length || typeof estadoAtual==='undefined')return;
     estadoAtual.questoes=list;
