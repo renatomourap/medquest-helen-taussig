@@ -9,6 +9,11 @@ const localDay=date=>{const d=new Date(date);return d.getFullYear()+'-'+String(d
 const user=()=>typeof usuarioAtual==='undefined'?null:usuarioAtual?.id||null;
 const key=()=> 'mq_timer_'+user();
 const fmt=secs=>[Math.floor(secs/3600),Math.floor(secs%3600/60),Math.floor(secs%60)].map(x=>String(x).padStart(2,'0')).join(':');
+// Na versão recolhida, minutos acumulados: 01:05, 59:59, 60:00...
+const fmtCompact=secs=>{
+ const n=Math.max(0,Math.floor(secs));
+ return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+};
 const options=(items,current)=>items.map(pair=>'<option value="'+esc(pair[0])+'"'+(pair[0]===current?' selected':'')+'>'+esc(pair[1])+'</option>').join('');
 const areas=selected=>options([['','Geral / livre'],...(typeof BANCO!=='undefined'?BANCO.disciplinas:[]).map(d=>[d.id,d.nome]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'))],selected||'');
 let releaseDialog=null,dialogSaving=false;
@@ -19,12 +24,24 @@ function elapsed(){
  if(!state)return 0;
  return (state.segments||[]).reduce((v,s)=>v+Math.max(0,(Date.parse(s.end)-Date.parse(s.start))/1000),0)+(state.running?Math.max(0,(Date.now()-Date.parse(state.running))/1000):0);
 }
-function toggleDock(){
+function syncDock(){
  const dock=$('mq-time-dock');if(!dock)return;
- const expanded=dock.classList.toggle('mq-dock-open');
+ const expanded=dock.classList.contains('mq-dock-open');
+ dock.classList.toggle('mq-time-compact',Boolean(state)&&!expanded);
  const top=$('mq-top-timer');if(top)top.setAttribute('aria-expanded',String(expanded));
  const quiz=document.querySelector('.mq-question-timer');
  if(quiz)quiz.setAttribute('aria-expanded',String(expanded));
+ const compact=$('mq-time-compact-trigger');
+ if(compact)compact.setAttribute('aria-expanded',String(expanded));
+}
+function collapseDock(){
+ $('mq-time-dock')?.classList.remove('mq-dock-open');
+ syncDock();
+}
+function toggleDock(){
+ const dock=$('mq-time-dock');if(!dock)return;
+ dock.classList.toggle('mq-dock-open');
+ syncDock();
 }
 function update(){
  const dock=$('mq-time-dock');if(!dock)return;
@@ -32,8 +49,15 @@ function update(){
  dock.hidden=false;
  if(!state||state.owner!==user())state=load();
  const running=Boolean(state?.running),paused=Boolean(state&&!running);
- $('mq-time-clock').textContent=fmt(Math.max(0,elapsed()));
+ const seconds=Math.max(0,elapsed());
+ $('mq-time-clock').textContent=fmt(seconds);
+ const compact=$('mq-time-compact-trigger');
+ if(compact){
+  compact.textContent=fmtCompact(seconds);
+  compact.setAttribute('aria-label',(paused?'Cronômetro pausado em ':'Cronômetro em ')+fmtCompact(seconds)+'. Abrir controles.');
+ }
  $('mq-time-state').textContent=running?'Contando':paused?'Pausado':'Pronto para estudar';
+ syncDock();
  $('mq-time-label').textContent=state?activityName(state.atividade)+' · '+state.titulo:'Questões, PDFs ou estudo livre';
  const start=$('mq-time-play');start.textContent=running?'Pausar':paused?'Continuar':'Iniciar';
  start.onclick=running?pause:paused?resume:()=>dialog('start',context);
@@ -50,9 +74,11 @@ function attach(){
  top.onclick=()=>{if(!state)dialog('start',context);else toggleDock()};
  document.querySelector('.topbar-right')?.prepend(top);
  const dock=document.createElement('aside');dock.id='mq-time-dock';dock.className='mq-time-dock';dock.hidden=true;dock.setAttribute('aria-label','Cronômetro de estudos');
- dock.innerHTML='<div class="mq-time-head"><div><small id="mq-time-state">Pronto</small><strong id="mq-time-clock">00:00:00</strong><span id="mq-time-label">Seu estudo</span></div><button type="button" onclick="MedQuestStudyTime.toggle()" aria-label="Expandir ou recolher controles">⌄</button></div>'+
+ dock.innerHTML='<button type="button" id="mq-time-compact-trigger" class="mq-time-compact-trigger" aria-controls="mq-time-dock" aria-expanded="false" aria-label="Abrir controles do cronômetro">00:00</button>'+
+ '<div class="mq-time-head"><div><small id="mq-time-state">Pronto</small><strong id="mq-time-clock">00:00:00</strong><span id="mq-time-label">Seu estudo</span></div><button type="button" onclick="MedQuestStudyTime.toggle()" aria-label="Recolher cronômetro">⌄</button></div>'+
  '<div class="mq-time-controls"><button type="button" id="mq-time-play">Iniciar</button><button type="button" id="mq-time-end" onclick="MedQuestStudyTime.finish()">Encerrar</button><button type="button" onclick="MedQuestStudyTime.manual()">+ Manual</button></div>';
  root.append(dock);
+ $('mq-time-compact-trigger').onclick=toggleDock;
  const header=document.querySelector('.questao-header');
  if(header){
   const btn=document.createElement('button');
@@ -64,7 +90,9 @@ function attach(){
   };
   header.append(btn);
  }
- state=load();update();
+ state=load();
+ if(!state)dock.classList.add('mq-dock-open');
+ update();
 }
 function error(msg){const el=$('mq-time-error');if(el)el.textContent=msg}
 function closeDialog(){if(dialogSaving)return;releaseDialog?.();releaseDialog=null;let el=$('mq-study-dialog');if(el){el.hidden=true;el.replaceChildren()}}
@@ -112,15 +140,19 @@ function start(common){
  if(state)throw Error('Termine a sessão atual antes de iniciar outra.');
  const iso=new Date().toISOString();
  state={id:crypto.randomUUID(),owner:user(),...common,first:iso,running:iso,segments:[]};
- persist();update();
+ persist();collapseDock();update();
 }
 function pause(){
  if(!state?.running)return;
  const end=new Date().toISOString();if(Date.parse(end)>Date.parse(state.running))state.segments.push({start:state.running,end});
- state.running=null;persist();update();
+ state.running=null;persist();collapseDock();update();
 }
-function resume(){if(state&&!state.running){state.running=new Date().toISOString();persist();update()}}
-function clear(){state=null;persist();update()}
+function resume(){if(state&&!state.running){state.running=new Date().toISOString();persist();collapseDock();update()}}
+function clear(){
+ state=null;persist();
+ $('mq-time-dock')?.classList.add('mq-dock-open');
+ update();
+}
 async function finish(){
  if(!state||busy)return;
  if(state.running)pause();
