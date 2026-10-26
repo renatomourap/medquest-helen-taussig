@@ -15,7 +15,7 @@
   if(kind==='resumo'||kind==='anotacao')readDocs();else if(kind==='plano')readPlan();else readProgress();
  };
  const docCard=d=>'<article class="study-row"><div><b>'+E(d.titulo)+'</b><p>'+E(area(d.area_id))+' · '+E(d.assunto)+'</p></div><div><button onclick="studyEdit(\''+d.id+'\')">Abrir</button><button onclick="studyDelete(\''+d.id+'\')">Excluir</button></div></article>';
- async function readDocs(){try{docs=await fetch('estudo_documentos',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('tipo',mode).order('atualizado_em',{ascending:false}));paintDocs()}catch(e){error(e)}}
+ async function readDocs(){try{docs=await fetch('estudo_documentos',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('tipo',mode).order('atualizado_em',{ascending:false}));paintDocs();if(window.studyPendingDocument){const id=window.studyPendingDocument;window.studyPendingDocument=null;const found=docs.find(d=>d.id===id);if(found)editor(found)}}catch(e){error(e)}}
  function paintDocs(){
   $('study-content').innerHTML='<div class="study-toolbar"><button onclick="studyNew()">+ Novo</button><select id="study-filter" onchange="studyDocsFilter()">'+opts(filter)+'</select></div><div id="study-list"></div><div id="study-editor"></div>';
   window.studyDocsFilter=()=>{$('study-list').innerHTML=(docs.filter(x=>!$('study-filter').value||x.area_id===$('study-filter').value).map(docCard).join('')||'<p class="study-empty">Nenhum documento salvo. Crie seu primeiro material.</p>')};
@@ -75,14 +75,16 @@
   try{
    const results=await Promise.all([fetch('estudo_documentos',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('tipo','anotacao').order('atualizado_em',{ascending:false}).limit(4)),fetch('plano_semana',t=>t.select('*').eq('usuario_id',usuarioAtual.id).eq('semana_inicio',monday())),fetch('ultima_atividade',t=>t.select('*').eq('usuario_id',usuarioAtual.id).maybeSingle())]);
    let [notes,goals,record]=results;last=record;
-   $('study-home-notes').innerHTML=notes.map(n=>'<button class="study-home-link" onclick="abrirEstudo(\'anotacao\');studyEdit(\''+n.id+'\')">'+E(n.titulo)+'</button>').join('')||'<p>Nenhuma anotação ainda.</p>';
+   $('study-home-notes').innerHTML=notes.map(n=>'<button class="study-home-link" onclick="studyOpenNote(\''+n.id+'\')">'+E(n.titulo)+'</button>').join('')||'<p>Nenhuma anotação ainda.</p>';
    $('study-home-plan').innerHTML=goals.map(p=>'<p>'+(p.concluido?'✓':'○')+' '+E(p.titulo)+' <small>'+p.realizado+'/'+p.meta+'</small></p>').join('')||'<p>Você ainda não criou metas para esta semana.</p>';
    $('study-home-last').textContent=record? (record.tipo==='questoes'?'Questões':record.tipo==='resumo'?'Resumo':'Anotações')+' · '+E(area(record.area_id)):'Retome questões, anotações ou resumos.';
   }catch(e){console.warn('Dashboard pessoal',e)}
  }
  window.abrirEstudo=show;
+ window.studyOpenNote=id=>{window.studyPendingDocument=id;show('anotacao')};
  window.studyContinue=async()=>{
   if(!last)try{last=await fetch('ultima_atividade',t=>t.select('*').eq('usuario_id',usuarioAtual.id).maybeSingle())}catch(e){error(e)}
+  if(last?.tipo==='resumo'||last?.tipo==='anotacao'){window.studyPendingDocument=last.referencia_id||null;show(last.tipo);return}
   if(last?.tipo==='questoes'){
    const d=BANCO.disciplinas.find(x=>x.id===last.area_id),t=d?.temas.find(x=>x.id===last.tema_id);
    if(t?.questoes.length){iniciarTema(d.id,t.id);renderQuestao(Math.min(last.questao_index||0,t.questoes.length-1));return}
@@ -90,7 +92,7 @@
   show(last?.tipo==='resumo'?'resumo':last?.tipo==='anotacao'?'anotacao':'progresso');
  };
  window.studyPractice=()=>{let d=BANCO.disciplinas.find(x=>x.temas.length);if(d)abrirDisciplina(d.id)};
- window.studyArea=id=>{let d=BANCO.disciplinas.find(x=>x.id===id);if(d?.temas.length)abrirDisciplina(id);else show('resumo')};
+ window.studyArea=id=>{let d=BANCO.disciplinas.find(x=>x.id===id);if(d?.temas.length)abrirDisciplina(id);else {filter=id;show('resumo')}};
  let hide=window.esconderApp;window.esconderApp=function(){hide();$('tela-estudo').style.display='none'};
  let screen=window.mostrarTela;window.mostrarTela=function(n){screen(n);$('tela-estudo').style.display='none'};
  let dash=window.irParaDashboard;window.irParaDashboard=function(){dash();home()};
