@@ -230,35 +230,95 @@
 @media(max-width:380px){.mq-study-cols{grid-template-columns:1fr}.mq-history-filterfields{grid-template-columns:1fr}.mq-history-overview{grid-template-columns:1fr}.mq-history-overview article{display:grid;grid-template-columns:1fr auto;align-items:center}.mq-history-overview article>span{min-height:0}.mq-history-overview small{grid-column:1/-1}.mq-history-day-total small{display:none}}
 @media(prefers-reduced-motion:reduce){.mq-history-chevron{transition:none}}
 
-/* FIX: no quiz o painel do cronômetro não pode interceptar Anterior/Encerrar/Próxima.
-   Permanecem disponíveis o contador na topbar e o botão dentro do cabeçalho.
-   Ao clicar nesses botões, o painel é aberto acima do conteúdo, abaixo da topbar. */
-#app-layout:has(#tela-questao[style*="display: block"]) #mq-time-dock:not(.mq-dock-open),
-#app-layout:has(#tela-resultado[style*="display: flex"]) #mq-time-dock:not(.mq-dock-open){
-  display:none!important;
+
+/* Cronômetro flutuante: à esquerda do conteúdo, compacto após iniciar.
+   No Safari do iPad, usa a largura real da barra lateral (198px no landscape).
+   Sem bloquear os botões inferiores de navegação das questões. */
+.mq-time-dock{
+ position:fixed;
+ left:calc(230px + 12px + env(safe-area-inset-left,0px));
+ right:auto;
+ top:clamp(110px,44dvh,510px);
+ bottom:auto;
+ width:min(292px,calc(100vw - 265px));
+ max-height:calc(100dvh - 116px - env(safe-area-inset-top,0px));
+ overflow-y:auto;
+ overscroll-behavior:contain;
+ -webkit-overflow-scrolling:touch;
+ z-index:119;
 }
-#app-layout:has(#tela-questao[style*="display: block"]) #mq-time-dock.mq-dock-open,
-#app-layout:has(#tela-resultado[style*="display: flex"]) #mq-time-dock.mq-dock-open{
-  position:fixed;
-  top:calc(66px + env(safe-area-inset-top, 0px));
+.mq-time-compact-trigger{display:none}
+.mq-time-dock.mq-time-compact:not(.mq-dock-open){
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ left:calc(230px + 12px + env(safe-area-inset-left,0px));
+ right:auto;
+ top:clamp(110px,44dvh,510px);
+ bottom:auto;
+ width:87px;
+ max-width:calc(100vw - 24px);
+ min-height:48px;
+ padding:0;
+ border-radius:12px;
+ overflow:visible;
+}
+.mq-time-dock.mq-time-compact .mq-time-head,
+.mq-time-dock.mq-time-compact .mq-time-controls{display:none!important}
+.mq-time-dock.mq-time-compact .mq-time-compact-trigger{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ width:100%;
+ min-height:48px;
+ padding:10px 9px;
+ border:0;
+ border-radius:11px;
+ background:transparent;
+ color:#f2cf8c;
+ font:750 16px/1 Inter,Arial,sans-serif;
+ font-variant-numeric:tabular-nums;
+ font-feature-settings:"tnum";
+ letter-spacing:.01em;
+ text-align:center;
+ cursor:pointer;
+ touch-action:manipulation;
+ -webkit-tap-highlight-color:transparent;
+}
+.mq-time-compact-trigger:hover{background:rgba(231,188,117,.13)}
+.mq-time-compact-trigger:focus-visible{
+ outline:2px solid #f1cd83;
+ outline-offset:3px;
+}
+.mq-time-dock.mq-dock-open{padding:12px}
+.mq-time-dock .mq-time-head>button{
+ min-width:40px;min-height:40px;
+ touch-action:manipulation;
+}
+html.mq-ipad-safari .mq-time-dock,
+html.mq-ipad-safari .mq-time-dock.mq-time-compact:not(.mq-dock-open){
+ left:calc(198px + 12px + env(safe-area-inset-left,0px));
+}
+@media(max-width:900px){
+ .mq-time-dock,
+ .mq-time-dock.mq-time-compact:not(.mq-dock-open),
+ html.mq-ipad-safari .mq-time-dock,
+ html.mq-ipad-safari .mq-time-dock.mq-time-compact:not(.mq-dock-open){
+  left:calc(10px + env(safe-area-inset-left,0px));
+  right:auto;
+  top:clamp(100px,41dvh,430px);
   bottom:auto;
-  right:calc(12px + env(safe-area-inset-right, 0px));
-  width:min(292px,calc(100vw - 24px));
-  max-height:calc(100dvh - 80px - env(safe-area-inset-top, 0px));
-  overflow-y:auto;
-  z-index:119;
+ }
+ .mq-time-dock{
+  width:min(280px,calc(100vw - 22px));
+  max-height:calc(100dvh - 110px - env(safe-area-inset-top,0px));
+ }
+ .mq-time-dock.mq-time-compact:not(.mq-dock-open){width:87px}
 }
-@media(max-width:680px){
-  #app-layout:has(#tela-questao[style*="display: block"]) #mq-time-dock.mq-dock-open,
-  #app-layout:has(#tela-resultado[style*="display: flex"]) #mq-time-dock.mq-dock-open{
-    top:calc(62px + env(safe-area-inset-top, 0px));
-    right:calc(8px + env(safe-area-inset-right, 0px));
-    width:min(270px,calc(100vw - 16px));
-    max-height:calc(100dvh - 76px - env(safe-area-inset-top, 0px));
-  }
-  #app-layout:has(#tela-questao[style*="display: block"]) .mq-time-head>button,
-  #app-layout:has(#tela-resultado[style*="display: flex"]) .mq-time-head>button{
-    min-height:40px;
-    min-width:40px;
-  }
+@media(max-height:490px){
+ .mq-time-dock,
+ .mq-time-dock.mq-time-compact:not(.mq-dock-open){
+  top:75px;
+  max-height:calc(100dvh - 90px);
+ }
 }
