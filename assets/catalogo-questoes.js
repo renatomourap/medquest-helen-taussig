@@ -324,10 +324,9 @@
       const unique=new Map(prior.map(r=>[r.hotpointKey,r]));
       return [...unique.values()].sort((a,b)=>
         compararNomes(a.temaName,b.temaName)||sortHP(a.hotpoint,b.hotpoint))
-        .map(r=>[r.hotpointKey,
-          (filters.assunto?'':r.temaName+' · ')+r.hotpoint+
-          (r.hotpointTitle?' — '+r.hotpointTitle:''),
-          true]);
+        // Exiba só o nome do Hot Point; o ID (temaId|Hot Point N)
+        // permanece associado ao assunto de origem para filtrar sem ambiguidades.
+        .map(r=>[r.hotpointKey, r.hotpointTitle||r.hotpoint, true]);
     }
     const counts=Object.fromEntries(levels.map(([k])=>[k,prior.filter(r=>r.dificuldade===k).length]));
     return levels.map(([k,v])=>[k,v,counts[k]>0,counts[k]]);
@@ -362,9 +361,8 @@
     const names={
       area:(BANCO.disciplinas||[]).find(d=>d.id===filters.area)?.nome||filters.area,
       assunto:rows.find(r=>r.temaId===filters.assunto)?.temaName||filters.assunto,
-      hotpoint:rows.find(r=>r.hotpointKey===filters.hotpoint)?.hotpointTitle ?
-        rows.find(r=>r.hotpointKey===filters.hotpoint).hotpoint+' — '+
-        rows.find(r=>r.hotpointKey===filters.hotpoint).hotpointTitle : filters.hotpoint,
+      hotpoint:rows.find(r=>r.hotpointKey===filters.hotpoint)?.hotpointTitle||
+        rows.find(r=>r.hotpointKey===filters.hotpoint)?.hotpoint||filters.hotpoint,
       dificuldade:levels.find(([k])=>k===filters.dificuldade)?.[1]||filters.dificuldade
     };
     return fields.filter(f=>filters[f.key]).map(f=>'<button type="button" class="mq-q-chip" data-mq-remove="'+f.key+
