@@ -44,5 +44,29 @@ async function open({id,officialId=null,onSaved}={}){
   };
  }catch(error){if(request===version)alert(error.message||'Não foi possível abrir a edição.');}
 }
-window.MedQuestMaterialEditor={open,close};
+const deleting=new Set();
+async function remove({id,officialId=null,onSaved}={}){
+ if(!admin()||deleting.has(id))return;
+ deleting.add(id);let fileRemoved=false;
+ try{
+  const result=await db.from('materiais_medquest').select('*').eq('id',id).single();
+  if(result.error)throw result.error;
+  const item=result.data;if(!item?.arquivo_path)throw Error('Arquivo não encontrado.');
+  if(!officialId&&item.tipo==='resumo'){
+   const linked=await db.from('conteudos_oficiais').select('id,titulo,assunto').eq('area_id',item.disciplina_id);if(linked.error)throw linked.error;
+   const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+   officialId=linked.data?.find(d=>norm(d.assunto)===norm(item.tema_id)||norm(d.titulo)===norm(item.titulo))?.id||null;
+  }
+  const confirmed=await window.MedQuestStudyUI.confirm({title:'Excluir arquivo?',message:'Excluir permanentemente “'+item.titulo+'” e seu cartão da biblioteca? Esta ação não pode ser desfeita. As questões e o histórico de estudos serão preservados.',confirm:'Excluir arquivo',danger:true});
+  if(!confirmed||!admin())return;
+  const removed=await db.storage.from('materiais_medquest').remove([item.arquivo_path]);
+  if(removed.error)throw removed.error;
+  fileRemoved=true;
+  const record=await db.rpc('excluir_registro_material',{p_material_id:id,p_arquivo_path:item.arquivo_path,p_conteudo_id:officialId});
+  if(record.error)throw record.error;if(!record.data)throw Error('O banco não confirmou a exclusão.');
+  await onSaved?.();window.MedQuestStudyUI.toast('Arquivo excluído.');
+ }catch(error){alert((fileRemoved?'O arquivo foi removido, mas o cadastro não pôde ser concluído. Tente excluir novamente. ':'Não foi possível excluir o arquivo. ')+(error.message||''));}
+ finally{deleting.delete(id)}
+}
+window.MedQuestMaterialEditor={open,close,remove};
 })();

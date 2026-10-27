@@ -73,7 +73,7 @@ function render(){
   const controls=document.createElement("div");controls.className="mq-actions";
   const open=document.createElement("button");open.textContent="Ler PDF";open.onclick=()=>openPDF(item);controls.append(open);
   const download=document.createElement("button");download.textContent="Baixar PDF";download.className="outline";download.onclick=()=>downloadPDF(item,controls);controls.append(download);
-  if(admin()){const edit=document.createElement("button");edit.className="outline";edit.textContent="Editar identificação";edit.onclick=()=>window.MedQuestMaterialEditor.open({id:item.id,onSaved:fetchList});controls.append(edit);const del=document.createElement("button");del.className="outline";del.textContent="Excluir";del.onclick=()=>removePDF(item);controls.append(del)}
+  if(admin()){const edit=document.createElement("button");edit.className="outline";edit.textContent="Editar identificação";edit.onclick=()=>window.MedQuestMaterialEditor.open({id:item.id,onSaved:fetchList});controls.append(edit);const del=document.createElement("button");del.className="outline mq-material-delete";del.textContent="Excluir arquivo";del.onclick=()=>removePDF(item);controls.append(del)}
   card.append(k,h,p,controls);container.append(card);
  }
 }
@@ -104,13 +104,10 @@ async function downloadPDF(item,controls){
 }
 
 async function removePDF(item){
- if(!admin()||!confirm("Excluir este arquivo permanentemente?"))return;
- const r=await db.from("materiais_medquest").delete().eq("id",item.id);
- if(r.error){alert(r.error.message);return}
- const d=await db.storage.from("materiais_medquest").remove([item.arquivo_path]);
- if(d.error)alert("Registro excluído, mas o arquivo não foi removido: "+d.error.message);
- await fetchList();
+ if(!admin())return;
+ await window.MedQuestMaterialEditor.remove({id:item.id,onSaved:fetchList});
 }
+
 function tab(name){
  if(name==="admin"&&!admin())return;
  document.querySelectorAll("[data-mq-tab]").forEach(b=>b.classList.toggle("active",b.dataset.mqTab===name));
