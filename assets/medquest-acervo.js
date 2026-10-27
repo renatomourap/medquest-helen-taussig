@@ -9,10 +9,12 @@ const names=()=>Object.entries(areas).map(([id,label])=>[id,label]);
 const section=document.createElement("section");
 section.id="tela-biblioteca";section.className="mq-library";section.style.display="none";
 section.innerHTML=`
-<div class="mq-library-head"><div><small>ACERVO ACADÊMICO</small><h1>Biblioteca MedQuest</h1><p>Resumos e cadernos de questões do MDA II.</p></div><button type="button" id="mq-back">← Voltar ao início</button></div>
+<div class="mq-library-head"><div><small>ACERVO ACADÊMICO</small><h1 id="mq-library-title">Biblioteca MedQuest</h1><p id="mq-library-description">Resumos e cadernos de questões do MDA II.</p></div><button type="button" id="mq-back">← Voltar ao início</button></div>
 <div class="mq-library-tabs">
 <button type="button" class="active" data-mq-tab="resumo">Resumos em PDF</button>
 <button type="button" data-mq-tab="questoes_pdf">Cadernos de questões</button>
+<button type="button" data-mq-tab="artigo" hidden>Artigos</button>
+<button type="button" data-mq-tab="resumo_aim" hidden>Resumos gerais para AIM</button>
 <button type="button" data-mq-tab="admin" id="mq-admin-tab" hidden>Gerenciar conteúdo</button>
 </div>
 <div id="mq-list-panel">
@@ -22,7 +24,7 @@ section.innerHTML=`
 <div id="mq-editor" hidden>
 <div class="mq-library-box"><h2>Publicar PDF</h2><p>Somente administradores. Arquivo privado para alunos aprovados (até 35 MB).</p>
 <form id="mq-pdf-form" class="mq-library-form">
-<label>Tipo<select id="mq-pdf-type"><option value="resumo">Resumo</option><option value="questoes_pdf">Caderno de questões</option></select></label>
+<label>Tipo<select id="mq-pdf-type"><option value="resumo">Resumo</option><option value="questoes_pdf">Caderno de questões</option><option value="artigo">Artigo</option><option value="resumo_aim">Resumo geral para AIM</option></select></label>
 <label>Disciplina<select id="mq-pdf-area"></select></label><label>Assunto<input id="mq-pdf-topic" maxlength="160" required></label>
 <label>Título<input id="mq-pdf-title" maxlength="160" required></label>
 <label class="wide">Arquivo PDF<input type="file" id="mq-pdf-file" accept=".pdf,application/pdf" required></label>
@@ -50,9 +52,9 @@ section.innerHTML=`
 const root=$("main-content");if(!root)return;
 root.append(section);
 for(const id of ["mq-filter-area","mq-pdf-area","mq-q-area","mq-json-area"]){
- for(const [value,label] of names())$(id).add(new Option(label,value));
+ for(const [value,label] of [...names(),...(["mq-filter-area","mq-pdf-area"].includes(id)?[["geral","Geral / interdisciplinar"]]:[])])$(id).add(new Option(label,value));
 }
-let list=[],kind="resumo";
+let list=[],kind="resumo",otherMode=false;
 function status(id,message,failed=false){const node=$(id);node.textContent=message;node.style.color=failed?"#f08a8a":"#65d2a1"}
 async function fetchList(){
  const r=await db.from("materiais_medquest").select("id,tipo,disciplina_id,tema_id,titulo,descricao,arquivo_path,criado_em").order("criado_em",{ascending:false});
@@ -65,11 +67,12 @@ function render(){
  $("mq-count").textContent=filtered.length+" materiais encontrados";$("mq-empty").hidden=filtered.length!==0;
  for(const item of filtered){
   const card=document.createElement("article");card.className="mq-library-card";
-  const k=document.createElement("small");k.textContent=(areas[item.disciplina_id]||item.disciplina_id)+" · "+item.tema_id;
+  const k=document.createElement("small");k.textContent=(areas[item.disciplina_id]||(item.disciplina_id==="geral"?"Geral / interdisciplinar":item.disciplina_id))+" · "+item.tema_id;
   const h=document.createElement("h3");h.textContent=item.titulo;
   const p=document.createElement("p");p.textContent=item.descricao||"Material acadêmico em PDF";
   const controls=document.createElement("div");controls.className="mq-actions";
   const open=document.createElement("button");open.textContent="Ler PDF";open.onclick=()=>openPDF(item);controls.append(open);
+  const download=document.createElement("button");download.textContent="Baixar PDF";download.className="outline";download.onclick=()=>downloadPDF(item,controls);controls.append(download);
   if(admin()){const del=document.createElement("button");del.className="outline";del.textContent="Excluir";del.onclick=()=>removePDF(item);controls.append(del)}
   card.append(k,h,p,controls);container.append(card);
  }
@@ -88,6 +91,18 @@ async function openPDF(item){
  }catch{alert('Não foi possível carregar o leitor. Abra o resumo novamente.');}
 }
 
+async function downloadPDF(item,controls){
+ if(typeof usuarioAtual==="undefined"||!usuarioAtual||!perfilAtual?.aprovado)return;
+ const child=window.open('about:blank','_blank');if(child){child.opener=null;child.document.title='Preparando download';}
+ try{
+  const {pdfFilename}=await import('./pdf-reader.mjs?v=safari-pages-1');
+  const r=await db.storage.from("materiais_medquest").createSignedUrl(item.arquivo_path,300,{download:pdfFilename(item)});
+  if(r.error||!r.data?.signedUrl)throw r.error||Error('Arquivo indisponível');
+  if(child&&!child.closed)child.location.replace(r.data.signedUrl);
+  else{controls.querySelector('[data-download-link]')?.remove();const link=document.createElement('a');link.dataset.downloadLink='true';link.href=r.data.signedUrl;link.textContent='Toque para baixar o PDF';link.target='_blank';link.rel='noopener';controls.append(link);}
+ }catch(error){if(child&&!child.closed)child.close();alert('Não foi possível baixar o PDF: '+error.message);}
+}
+
 async function removePDF(item){
  if(!admin()||!confirm("Excluir este arquivo permanentemente?"))return;
  const r=await db.from("materiais_medquest").delete().eq("id",item.id);
@@ -104,8 +119,14 @@ function tab(name){
 }
 async function show(requested="resumo"){
  if(typeof usuarioAtual==="undefined"||!usuarioAtual||!perfilAtual?.aprovado)return;
- esconderApp();section.style.display="block";fecharSidebar();setNavActive(requested==="admin"?null:"nav-resumo");
- $("mq-admin-tab").hidden=!admin();tab(requested==="admin"&&admin()?"admin":requested==="questoes_pdf"?"questoes_pdf":"resumo");
+ otherMode=["outros","artigo","resumo_aim"].includes(requested);
+ esconderApp();section.style.display="block";fecharSidebar();setNavActive(requested==="admin"?null:otherMode?"nav-outros":"nav-resumo");
+ $("mq-library-title").textContent=otherMode?"Outros Materiais":"Biblioteca MedQuest";
+ $("mq-library-description").textContent=otherMode?"Artigos e resumos gerais para as AIM, publicados pela administração.":"Resumos e cadernos de questões do MDA II.";
+ for(const button of document.querySelectorAll('[data-mq-tab]')){const type=button.dataset.mqTab;button.hidden=type==='admin'?!admin():otherMode?!['artigo','resumo_aim'].includes(type):['artigo','resumo_aim'].includes(type);}
+ $("mq-filter-area").value="";$("mq-filter-text").value="";
+ $("mq-admin-tab").hidden=!admin();tab(requested==="admin"&&admin()?"admin":otherMode?(requested==="resumo_aim"?"resumo_aim":"artigo"):requested==="questoes_pdf"?"questoes_pdf":"resumo");
+ if(otherMode)$("mq-pdf-type").value=requested==="resumo_aim"?"resumo_aim":"artigo";
  try{await fetchList()}catch(e){$("mq-count").textContent="Falha ao carregar biblioteca: "+e.message}
 }
 function valid(q,n){
@@ -154,7 +175,7 @@ $("mq-pdf-form").onsubmit=async e=>{
  try{
   const upload=await db.storage.from("materiais_medquest").upload(path,f,{contentType:"application/pdf",upsert:false});
   if(upload.error)throw upload.error;
-  const save=await db.from("materiais_medquest").insert({tipo:$("mq-pdf-type").value,disciplina_id:disc,tema_id:topic,titulo:title,arquivo_path:path});
+  const save=await db.from("materiais_medquest").insert({tipo:$("mq-pdf-type").value,disciplina_id:disc,tema_id:topic,titulo:title,descricao:"PDF original — "+f.name,arquivo_path:path});
   if(save.error){await db.storage.from("materiais_medquest").remove([path]);throw save.error}
   e.target.reset();status("mq-pdf-status","PDF publicado com sucesso");await fetchList();
  }catch(error){status("mq-pdf-status",error.message,true)}
