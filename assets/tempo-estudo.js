@@ -17,6 +17,8 @@ const fmtCompact=secs=>{
 const options=(items,current)=>items.map(pair=>'<option value="'+esc(pair[0])+'"'+(pair[0]===current?' selected':'')+'>'+esc(pair[1])+'</option>').join('');
 const areas=selected=>options([['','Geral / livre'],...(typeof BANCO!=='undefined'?BANCO.disciplinas:[]).map(d=>[d.id,d.nome]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'))],selected||'');
 let releaseDialog=null,dialogSaving=false;
+let dismissedInQuestions=false,dismissOwner=null;
+const inQuestions=()=>Boolean($('tela-questao')&&$('tela-questao').style.display==='block');
 let state=null, busy=false, context={atividade:'outros',titulo:'Sessão de estudo',area_id:'',assunto:''},editRecord=null;
 const load=()=>{try{let s=localStorage.getItem(key()),x=s?JSON.parse(s):null;return x?.owner===user()?x:null}catch(e){return null}};
 const persist=()=>{try{if(state)localStorage.setItem(key(),JSON.stringify(state));else localStorage.removeItem(key())}catch(e){console.warn('Não foi possível manter cronômetro neste navegador.',e)}};
@@ -152,14 +154,17 @@ function collapseDock(){
 }
 function toggleDock(){
  const dock=$('mq-time-dock');if(!dock)return;
+ dismissedInQuestions=false;dock.hidden=false;
  dock.classList.toggle('mq-dock-open');
  syncDock();
 }
 function update(){
  const dock=$('mq-time-dock');if(!dock)return;
  if(!user()){dock.hidden=true;state=null;return}
- dock.hidden=false;
  const owner=user();
+ if(dismissOwner!==owner){dismissOwner=owner;dismissedInQuestions=false}
+ if(!inQuestions())dismissedInQuestions=false;
+ dock.hidden=dismissedInQuestions;
  if(placementOwner!==owner){
   placementOwner=owner;dockPlacement=readDockPlacement();scheduleDockPosition();
  }
@@ -174,6 +179,7 @@ function update(){
  }
  $('mq-time-state').textContent=running?'Contando':paused?'Pausado':'Pronto para estudar';
  syncDock();
+ const dismiss=dock.querySelector('.mq-time-dismiss');if(dismiss)dismiss.hidden=!inQuestions();
  $('mq-time-label').textContent=state?activityName(state.atividade)+' · '+state.titulo:'Questões, PDFs ou estudo livre';
  const start=$('mq-time-play');start.textContent=running?'Pausar':paused?'Continuar':'Iniciar';
  start.onclick=running?pause:paused?resume:()=>dialog('start',context);
@@ -190,7 +196,7 @@ function attach(){
  top.onclick=()=>{if(!state)dialog('start',context);else toggleDock()};
  document.querySelector('.topbar-right')?.prepend(top);
  const dock=document.createElement('aside');dock.id='mq-time-dock';dock.className='mq-time-dock';dock.hidden=true;dock.setAttribute('aria-label','Cronômetro de estudos');
- dock.innerHTML='<button type="button" id="mq-time-compact-trigger" class="mq-time-compact-trigger" aria-controls="mq-time-dock" aria-expanded="false" aria-label="Abrir controles do cronômetro">00:00</button>'+
+ dock.innerHTML='<button type="button" class="mq-time-dismiss" onclick="MedQuestStudyTime.dismiss()" aria-label="Ocultar cronômetro sem pausar" title="Ocultar sem pausar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><button type="button" id="mq-time-compact-trigger" class="mq-time-compact-trigger" aria-controls="mq-time-dock" aria-expanded="false" aria-label="Abrir controles do cronômetro">00:00</button>'+
  '<div class="mq-time-head" title="Arraste para mover o cronômetro"><div><small id="mq-time-state">Pronto</small><strong id="mq-time-clock">00:00:00</strong><span id="mq-time-label">Seu estudo</span></div><button type="button" onclick="MedQuestStudyTime.toggle()" aria-label="Recolher cronômetro">⌄</button></div>'+
  '<div class="mq-time-controls"><button type="button" id="mq-time-play">Iniciar</button><button type="button" id="mq-time-end" onclick="MedQuestStudyTime.finish()">Encerrar</button><button type="button" onclick="MedQuestStudyTime.manual()">+ Manual</button></div>';
  root.append(dock);
@@ -312,9 +318,13 @@ const logout=window.fazerLogout;
 if(typeof logout==='function')window.fazerLogout=async(...a)=>{pause();return await logout(...a)};
 window.MedQuestStudyTime={openStart:obj=>dialog('start',obj||context),manual:()=>dialog('manual',{atividade:'outros',titulo:'',area_id:'',assunto:''}),
  edit:item=>dialog('edit',item),close:closeDialog,start,pause,resume,finish,
+ dismiss:()=>{if(!inQuestions())return;dismissedInQuestions=true;update();document.querySelector('.mq-question-timer')?.focus()},
  toggle:toggleDock,setContext:x=>{context={...context,...x};update()},
  seconds:elapsed,refresh:update};
 window.addEventListener('storage',event=>{if(event.key===key()){state=load();update()}});
 
-attach();setInterval(update,1000);
+attach();
+const questionScreen=$('tela-questao');
+if(questionScreen)new MutationObserver(update).observe(questionScreen,{attributes:true,attributeFilter:['style']});
+setInterval(update,1000);
 })();

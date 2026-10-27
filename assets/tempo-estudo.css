@@ -324,3 +324,11 @@ html.mq-ipad-safari .mq-time-dock.mq-time-compact:not(.mq-dock-open){
 @media(max-height:490px){
   .mq-time-dock{max-height:calc(100dvh - 76px)}
 }
+
+/* Hide the floating display without affecting the active study session. */
+.mq-time-dismiss{position:absolute;right:2px;top:2px;z-index:2;display:grid;place-items:center;width:32px;height:32px;padding:7px;background:#0d1825;border:0;border-radius:8px;color:var(--ouro,#f5cf72);cursor:pointer;touch-action:manipulation}
+.mq-time-dismiss[hidden]{display:none!important}
+.mq-time-dismiss svg{width:18px;height:18px}
+.mq-time-dismiss:focus-visible{outline:2px solid var(--ouro,#f5cf72);outline-offset:2px}
+.mq-time-dock:has(.mq-time-dismiss:not([hidden])) .mq-time-head{padding-right:28px}
+.mq-time-dock.mq-time-compact:has(.mq-time-dismiss:not([hidden])){width:124px;padding-right:30px;box-sizing:border-box}

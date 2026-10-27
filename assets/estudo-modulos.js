@@ -104,7 +104,7 @@
      const additional=officialPdfs.filter(p=>(!chosen||p.disciplina_id===chosen)&&!accounted.has(p.id));
      let cards=summaries.map(d=>{
        const pdf=pdfFor(d);
-       const action=pdf?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+pdf.id+'\')">Ler resumo <span aria-hidden="true">↗</span></button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+pdf.id+'\')">↓ Baixar PDF</button>':
+       const action=pdf?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+pdf.id+'\')">Ler resumo <svg class="study-read-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v15M12 5C8 3 4 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-2-1-6-1-10 1Z"/></svg></button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+pdf.id+'\')">↓ Baixar PDF</button>':
          isEditor()?'<button onclick="studyOfficialAttach(\''+d.id+'\')">Publicar PDF original</button>':
          '<span class="study-pdf-await">PDF original aguardando publicação</span>';
        return '<article class="study-pdf-card"><div class="study-pdf-symbol" aria-hidden="true">▤</div>'+
@@ -116,7 +116,7 @@
      cards+=additional.map(p=>'<article class="study-pdf-card"><div class="study-pdf-symbol" aria-hidden="true">▤</div>'+
        '<div class="study-pdf-meta"><h3>'+E(p.titulo)+'</h3><p>'+E(area(p.disciplina_id))+' · '+E(p.tema_id)+'</p>'+
        '<small class="study-pdf-ready">PDF original disponível</small></div><div class="study-pdf-buttons">'+
-       '<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">Ler resumo ↗</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button></div></article>').join('');
+       '<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">Ler resumo <svg class="study-read-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v15M12 5C8 3 4 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-2-1-6-1-10 1Z"/></svg></button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button></div></article>').join('');
      $('study-list').innerHTML=cards||'<p class="study-empty">Nenhum resumo cadastrado para esta área.</p>';
    };
    studyOfficialFilter();

@@ -99,3 +99,5 @@
  .study-pdf-dialog-title strong{font-size:15px}
  .study-pdf-dialog-actions :is(button,a){padding:8px 10px;font-size:12px}
 }
+
+.study-pdf-read{display:inline-flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none;appearance:none}.study-read-icon{width:18px;height:18px;flex-shrink:0;color:inherit;vertical-align:middle}
