@@ -1,5 +1,5 @@
 /* Apenas os três blocos pedidos; mantém a estrutura responsiva e o Plano da Semana. */
-#tela-dashboard #dash-disc-grid.mq-area-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+#tela-dashboard #dash-disc-grid.mq-area-grid{grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:auto;gap:12px;flex:0 0 auto;min-height:0;height:auto;align-items:stretch}
 #tela-dashboard .mq-area-card{grid-column:span 2;position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;min-height:205px;padding:0;border:1px solid color-mix(in srgb,var(--mq-area) 55%,#14263b);border-radius:12px;background-color:#0b1829;background-size:auto 100%;background-position:right center;background-repeat:no-repeat;text-align:left;cursor:pointer;color:#eaf0f7;transition:border-color .18s,transform .18s;font:inherit}
 #tela-dashboard .mq-area-card:nth-last-child(-n+2){grid-column:span 3;min-height:160px}
 #tela-dashboard .mq-area-card:before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#071422f2,#071422a6 65%,#07142235),linear-gradient(0deg,#071422d9,transparent)}
@@ -49,3 +49,10 @@
 @media(max-width:420px){#tela-dashboard #dash-disc-grid.mq-area-grid{grid-template-columns:1fr}#tela-dashboard .mq-area-card,#tela-dashboard .mq-area-card:nth-last-child(-n+2),#tela-dashboard .mq-area-card:last-child{grid-column:auto;min-height:155px}.mq-area-card-body{padding:17px}.mq-area-card-body>strong{font-size:19px}.mq-area-description{max-width:230px;min-height:0;font-size:11px}.mq-area-symbol{width:28px;height:28px}.mq-area-progress-row{grid-template-columns:102px minmax(35px,1fr) 70px;gap:6px}}
 @media(prefers-reduced-motion:reduce){#tela-dashboard .mq-area-card{transition:none}}
 .mq-dashboard-section-note{font-size:11px;line-height:1.6;color:#9daec2;margin:-3px 0 14px}
+/* The original viewport-fit rules use fixed fractional rows. Content-sized
+   cards must not overflow those rows or shrink the progress panel beneath them. */
+@media(min-width:1200px) and (min-height:670px){
+ #tela-dashboard .dash-center{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding-bottom:20px}
+ #tela-dashboard .mq-dashboard-section-note{flex:0 0 auto}
+ #tela-dashboard #dash-progress.mq-progress-overview{height:auto;min-height:0;flex:0 0 auto;margin-bottom:0}
+}
