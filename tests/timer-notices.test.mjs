@@ -18,6 +18,10 @@ test('dismiss keeps counting, survives updates, reappears on leaving questions a
  get('tela-questao').style.display='none';timer.refresh();assert.equal(get('mq-time-dock').hidden,false);
  get('tela-questao').style.display='block';timer.refresh();assert.equal(get('mq-time-dock').hidden,false);
  timer.dismiss();timer.toggle();assert.equal(get('mq-time-dock').hidden,false);assert.equal(timer.seconds()>=45,true);
+ get('tela-questao').style.display='none';timer.refresh();timer.dismiss();timer.refresh();assert.equal(get('mq-time-dock').hidden,true);
+ now.value+=15000;timer.refresh();assert.equal(timer.seconds()>=60,true);assert.equal(get('mq-time-dock').hidden,true);
+ get('tela-estudo').style.display='block';timer.refresh();assert.equal(get('mq-time-dock').hidden,false);
+ timer.dismiss();timer.refresh();assert.equal(get('mq-time-dock').hidden,true);timer.toggle();assert.equal(get('mq-time-dock').hidden,false);
 });
 
 async function noticeFixture(){

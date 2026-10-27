@@ -17,8 +17,8 @@ const fmtCompact=secs=>{
 const options=(items,current)=>items.map(pair=>'<option value="'+esc(pair[0])+'"'+(pair[0]===current?' selected':'')+'>'+esc(pair[1])+'</option>').join('');
 const areas=selected=>options([['','Geral / livre'],...(typeof BANCO!=='undefined'?BANCO.disciplinas:[]).map(d=>[d.id,d.nome]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'))],selected||'');
 let releaseDialog=null,dialogSaving=false;
-let dismissedInQuestions=false,dismissOwner=null;
-const inQuestions=()=>Boolean($('tela-questao')&&$('tela-questao').style.display==='block');
+let dismissedScreen=null,dismissOwner=null;
+const currentScreen=()=>['tela-questao','tela-resultado','tela-estudo','tela-biblioteca','tela-temas','tela-selecao','mq-questoes-gerais','tela-admin','tela-perfil'].find(id=>['block','flex'].includes($(id)?.style.display))||'tela-dashboard';
 let state=null, busy=false, context={atividade:'outros',titulo:'Sessão de estudo',area_id:'',assunto:''},editRecord=null;
 const load=()=>{try{let s=localStorage.getItem(key()),x=s?JSON.parse(s):null;return x?.owner===user()?x:null}catch(e){return null}};
 const persist=()=>{try{if(state)localStorage.setItem(key(),JSON.stringify(state));else localStorage.removeItem(key())}catch(e){console.warn('Não foi possível manter cronômetro neste navegador.',e)}};
@@ -154,7 +154,7 @@ function collapseDock(){
 }
 function toggleDock(){
  const dock=$('mq-time-dock');if(!dock)return;
- dismissedInQuestions=false;dock.hidden=false;
+ dismissedScreen=null;dock.hidden=false;
  dock.classList.toggle('mq-dock-open');
  syncDock();
 }
@@ -162,9 +162,9 @@ function update(){
  const dock=$('mq-time-dock');if(!dock)return;
  if(!user()){dock.hidden=true;state=null;return}
  const owner=user();
- if(dismissOwner!==owner){dismissOwner=owner;dismissedInQuestions=false}
- if(!inQuestions())dismissedInQuestions=false;
- dock.hidden=dismissedInQuestions;
+ if(dismissOwner!==owner){dismissOwner=owner;dismissedScreen=null}
+ if(dismissedScreen!==currentScreen())dismissedScreen=null;
+ dock.hidden=dismissedScreen!==null;
  if(placementOwner!==owner){
   placementOwner=owner;dockPlacement=readDockPlacement();scheduleDockPosition();
  }
@@ -179,7 +179,7 @@ function update(){
  }
  $('mq-time-state').textContent=running?'Contando':paused?'Pausado':'Pronto para estudar';
  syncDock();
- const dismiss=dock.querySelector('.mq-time-dismiss');if(dismiss)dismiss.hidden=!inQuestions();
+ const dismiss=dock.querySelector('.mq-time-dismiss');if(dismiss)dismiss.hidden=false;
  $('mq-time-label').textContent=state?activityName(state.atividade)+' · '+state.titulo:'Questões, PDFs ou estudo livre';
  const start=$('mq-time-play');start.textContent=running?'Pausar':paused?'Continuar':'Iniciar';
  start.onclick=running?pause:paused?resume:()=>dialog('start',context);
@@ -318,7 +318,7 @@ const logout=window.fazerLogout;
 if(typeof logout==='function')window.fazerLogout=async(...a)=>{pause();return await logout(...a)};
 window.MedQuestStudyTime={openStart:obj=>dialog('start',obj||context),manual:()=>dialog('manual',{atividade:'outros',titulo:'',area_id:'',assunto:''}),
  edit:item=>dialog('edit',item),close:closeDialog,start,pause,resume,finish,
- dismiss:()=>{if(!inQuestions())return;dismissedInQuestions=true;update();document.querySelector('.mq-question-timer')?.focus()},
+ dismiss:()=>{dismissedScreen=currentScreen();update();$('mq-top-timer')?.focus()},
  toggle:toggleDock,setContext:x=>{context={...context,...x};update()},
  seconds:elapsed,refresh:update};
 window.addEventListener('storage',event=>{if(event.key===key()){state=load();update()}});
