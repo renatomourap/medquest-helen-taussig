@@ -19,8 +19,15 @@
     ['muito_dificil','Muito difícil'],['nao_classificada','Não classificada']];
   const filters={area:'',assunto:'',hotpoint:'',dificuldade:''};
   let active=false,filteredSession=null,openDropdown='';
-  // Títulos conferidos nos oito cadernos PDF originais.
+  // Títulos conferidos nos cadernos PDF originais.
   const hpTitles={
+  "protozoarios-cavitarios-entamoebas": [
+    "Morfologia e fisiologia de Entamoeba histolytica",
+    "Ciclo biológico, habitats, encistamento e desencistamento",
+    "Transmissão, fontes de infecção e epidemiologia",
+    "Patogenia, virulência e localizações intestinais e extraintestinais",
+    "Diagnóstico, tratamento e controle"
+  ],
   "antibioticos-i-beta-lactamicos": [
     "Parede celular: estrutura, função e alvos",
     "Mecanismo de ação dos β-lactâmicos",
