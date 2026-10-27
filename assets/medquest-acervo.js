@@ -57,23 +57,23 @@ for(const id of ["mq-filter-area","mq-pdf-area","mq-q-area","mq-json-area"]){
 let list=[],kind="resumo",otherMode=false;
 function status(id,message,failed=false){const node=$(id);node.textContent=message;node.style.color=failed?"#f08a8a":"#65d2a1"}
 async function fetchList(){
- const r=await db.from("materiais_medquest").select("id,tipo,disciplina_id,tema_id,titulo,descricao,arquivo_path,criado_em").order("criado_em",{ascending:false});
+ const r=await db.from("materiais_medquest").select("id,tipo,disciplina_id,tema_id,tema_nome,titulo,descricao,arquivo_path,criado_em").order("criado_em",{ascending:false});
  if(r.error)throw r.error;
  list=r.data||[];render();
 }
 function render(){
  const q=$("mq-filter-text").value.trim().toLowerCase(),a=$("mq-filter-area").value,container=$("mq-list");container.replaceChildren();
- const filtered=list.filter(x=>x.tipo===kind&&(!a||x.disciplina_id===a)&&(!q||[x.titulo,x.tema_id,x.descricao||""].join(" ").toLowerCase().includes(q)));
+ const filtered=list.filter(x=>x.tipo===kind&&(!a||x.disciplina_id===a)&&(!q||[x.titulo,x.tema_id,x.tema_nome||"",x.descricao||""].join(" ").toLowerCase().includes(q)));
  $("mq-count").textContent=filtered.length+" materiais encontrados";$("mq-empty").hidden=filtered.length!==0;
  for(const item of filtered){
   const card=document.createElement("article");card.className="mq-library-card";
-  const k=document.createElement("small");k.textContent=(areas[item.disciplina_id]||(item.disciplina_id==="geral"?"Geral / interdisciplinar":item.disciplina_id))+" · "+item.tema_id;
+  const k=document.createElement("small");k.textContent=(areas[item.disciplina_id]||(item.disciplina_id==="geral"?"Geral / interdisciplinar":item.disciplina_id))+" · "+(item.tema_nome||item.tema_id);
   const h=document.createElement("h3");h.textContent=item.titulo;
   const p=document.createElement("p");p.textContent=item.descricao||"Material acadêmico em PDF";
   const controls=document.createElement("div");controls.className="mq-actions";
   const open=document.createElement("button");open.textContent="Ler PDF";open.onclick=()=>openPDF(item);controls.append(open);
   const download=document.createElement("button");download.textContent="Baixar PDF";download.className="outline";download.onclick=()=>downloadPDF(item,controls);controls.append(download);
-  if(admin()){const del=document.createElement("button");del.className="outline";del.textContent="Excluir";del.onclick=()=>removePDF(item);controls.append(del)}
+  if(admin()){const edit=document.createElement("button");edit.className="outline";edit.textContent="Editar identificação";edit.onclick=()=>window.MedQuestMaterialEditor.open({id:item.id,onSaved:fetchList});controls.append(edit);const del=document.createElement("button");del.className="outline";del.textContent="Excluir";del.onclick=()=>removePDF(item);controls.append(del)}
   card.append(k,h,p,controls);container.append(card);
  }
 }
