@@ -104,7 +104,7 @@
      const additional=officialPdfs.filter(p=>(!chosen||p.disciplina_id===chosen)&&!accounted.has(p.id));
      let cards=summaries.map(d=>{
        const pdf=pdfFor(d);
-       const action=pdf?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+pdf.id+'\')">Ler resumo <span aria-hidden="true">↗</span></button>':
+       const action=pdf?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+pdf.id+'\')">Ler resumo <span aria-hidden="true">↗</span></button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+pdf.id+'\')">↓ Baixar PDF</button>':
          isEditor()?'<button onclick="studyOfficialAttach(\''+d.id+'\')">Publicar PDF original</button>':
          '<span class="study-pdf-await">PDF original aguardando publicação</span>';
        return '<article class="study-pdf-card"><div class="study-pdf-symbol" aria-hidden="true">▤</div>'+
@@ -116,40 +116,41 @@
      cards+=additional.map(p=>'<article class="study-pdf-card"><div class="study-pdf-symbol" aria-hidden="true">▤</div>'+
        '<div class="study-pdf-meta"><h3>'+E(p.titulo)+'</h3><p>'+E(area(p.disciplina_id))+' · '+E(p.tema_id)+'</p>'+
        '<small class="study-pdf-ready">PDF original disponível</small></div><div class="study-pdf-buttons">'+
-       '<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">Ler resumo ↗</button></div></article>').join('');
+       '<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">Ler resumo ↗</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button></div></article>').join('');
      $('study-list').innerHTML=cards||'<p class="study-empty">Nenhum resumo cadastrado para esta área.</p>';
    };
    studyOfficialFilter();
  }
- function pdfViewer(doc,url){
-   document.getElementById('study-pdf-dialog')?.remove();
-   const dialog=document.createElement('div');dialog.id='study-pdf-dialog';
-   dialog.className='study-pdf-dialog';dialog.setAttribute('role','dialog');
-   dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-label','PDF original: '+doc.titulo);
-   const top=document.createElement('header');top.className='study-pdf-dialog-head';
-   const heading=document.createElement('div');heading.className='study-pdf-dialog-title';
-   const h=document.createElement('strong');h.textContent=doc.titulo;
-   const meta=document.createElement('small');meta.textContent=area(doc.disciplina_id)+' · PDF original';
-   heading.append(h,meta);
-   const controls=document.createElement('div');controls.className='study-pdf-dialog-actions';
-   const link=document.createElement('a');link.href=url;link.target='_blank';
-   link.rel='noopener noreferrer';link.textContent='Abrir em nova aba';
-   const exit=document.createElement('button');exit.type='button';exit.textContent='Fechar ×';
-   exit.onclick=()=>{dialog.remove();document.removeEventListener('keydown',escape)};
-   const timerButton=document.createElement('button');timerButton.type='button';
-   timerButton.textContent='◷ Iniciar cronômetro';
-   timerButton.onclick=()=>window.MedQuestStudyTime?.openStart({
-     atividade:'pdf',titulo:doc.titulo,area_id:doc.disciplina_id,assunto:doc.tema_id
-   });
-   controls.append(timerButton,link,exit);top.append(heading,controls);
-   window.MedQuestStudyTime?.setContext({atividade:'pdf',titulo:doc.titulo,area_id:doc.disciplina_id,assunto:doc.tema_id});
-   const frame=document.createElement('iframe');frame.className='study-pdf-iframe';
-   frame.title='PDF original - '+doc.titulo;
-   frame.src=url+'#toolbar=1&navpanes=0&view=FitH';
-   dialog.append(top,frame);document.body.append(dialog);exit.focus();
-   function escape(e){if(e.key==='Escape')exit.click()}
-   document.addEventListener('keydown',escape);
+ async function pdfViewer(doc,url){
+   const {openPdfReader}=await import('./pdf-reader.mjs?v=safari-pages-1');
+   await openPdfReader({doc,url,area:area(doc.disciplina_id)});
  }
+ function originalPdfName(doc){
+   const original=String(doc.descricao||'').match(/^PDF original\s*[—–-]\s*(.+\.pdf)$/i)?.[1];
+   return (original||doc.titulo+'.pdf').replace(/[\u0000-\u001f/\\]/g,'_');
+ }
+ window.studyOfficialDownload=id=>{
+   const doc=officialPdfs.find(x=>x.id===id);
+   if(!doc||!usuarioAtual)return feedback('Faça login para baixar este material.',true);
+   // Reserve the browsing context inside the tap; Safari blocks popups after await.
+   const target=window.open('about:blank','_blank');
+   if(target){target.opener=null;target.document.title='Baixar PDF — MedQuest';target.document.body.textContent='Preparando o PDF original…';}
+   (async()=>{
+     try{
+       feedback('Preparando o PDF original…');
+       const result=await db.storage.from('materiais_medquest').createSignedUrl(doc.arquivo_path,300,{download:originalPdfName(doc)});
+       if(result.error)throw result.error;
+       if(!result.data?.signedUrl)throw Error('Arquivo indisponível.');
+       if(target&&!target.closed){target.location.replace(result.data.signedUrl);feedback('PDF original enviado para download.');}
+       else{
+         const box=$('study-pdf-feedback');if(!box)return;
+         box.replaceChildren();const link=document.createElement('a');link.href=result.data.signedUrl;
+         link.target='_blank';link.rel='noopener noreferrer';link.download=originalPdfName(doc);
+         link.textContent='Toque aqui para baixar o PDF original';box.append(link);
+       }
+     }catch(e){if(target&&!target.closed)target.close();feedback('Erro ao baixar documento: '+e.message,true);}
+   })();
+ };
  window.studyOfficialOpen=id=>{
    const doc=officialTexts.find(x=>x.id===id);if(!doc)return;
    const pdf=pdfFor(doc);
@@ -163,7 +164,7 @@
      const result=await db.storage.from('materiais_medquest').createSignedUrl(doc.arquivo_path,7200);
      if(result.error)throw result.error;
      if(!result.data?.signedUrl)throw Error('Arquivo indisponível.');
-     feedback('');pdfViewer(doc,result.data.signedUrl);
+     feedback('');await pdfViewer(doc,result.data.signedUrl);
      activity({tipo:'resumo',area_id:doc.disciplina_id});
    }catch(e){feedback('Erro ao abrir documento: '+e.message,true)}
  };
