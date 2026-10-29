@@ -185,6 +185,7 @@ function update(){
  const start=$('mq-time-play');start.textContent=running?'Pausar':paused?'Continuar':'Iniciar';
  start.onclick=running?pause:paused?resume:()=>dialog('start',context);
  $('mq-time-end').disabled=!state;
+ $('mq-time-end').hidden=!state;
  const top=$('mq-top-timer');if(top)top.textContent=state?'◷ '+fmt(elapsed()):'◷ Cronômetro';
  const quiz=document.querySelector('.mq-question-timer');
  if(quiz)quiz.textContent=state?'◷ '+fmt(elapsed()):'◷ Cronômetro';
@@ -198,7 +199,7 @@ function attach(){
  document.querySelector('.topbar-right')?.prepend(top);
  const dock=document.createElement('aside');dock.id='mq-time-dock';dock.className='mq-time-dock';dock.hidden=true;dock.setAttribute('aria-label','Cronômetro de estudos');
  dock.innerHTML='<button type="button" class="mq-time-dismiss" onclick="MedQuestStudyTime.dismiss()" aria-label="Ocultar cronômetro sem pausar" title="Ocultar sem pausar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><button type="button" id="mq-time-compact-trigger" class="mq-time-compact-trigger" aria-controls="mq-time-dock" aria-expanded="false" aria-label="Abrir controles do cronômetro">00:00</button>'+
- '<div class="mq-time-head" title="Arraste para mover o cronômetro"><div><small id="mq-time-state">Pronto</small><strong id="mq-time-clock">00:00:00</strong><span id="mq-time-label" hidden></span></div><button type="button" onclick="MedQuestStudyTime.toggle()" aria-label="Recolher cronômetro">⌄</button></div>'+
+ '<div class="mq-time-head" title="Arraste para mover o cronômetro"><div><small id="mq-time-state">Pronto</small><strong id="mq-time-clock">00:00:00</strong><span id="mq-time-label" hidden></span></div><button type="button" class="mq-time-collapse" onclick="MedQuestStudyTime.toggle()" aria-label="Recolher cronômetro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>'+
  '<div class="mq-time-controls"><button type="button" id="mq-time-play">Iniciar</button><button type="button" id="mq-time-end" onclick="MedQuestStudyTime.finish()">Encerrar</button><button type="button" onclick="MedQuestStudyTime.manual()">+ Manual</button></div>';
  root.append(dock);
  attachDockDragging(dock);

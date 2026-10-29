@@ -12,7 +12,8 @@ test('dismiss keeps counting, survives updates, reappears on leaving questions a
  const context={console,requestAnimationFrame(){},Date:Clock,crypto:{randomUUID:()=> 'session'},usuarioAtual:{id:'student'},localStorage:{getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},document:{getElementById:get,querySelector:()=>null},window:{addEventListener(){}},MutationObserver:class{observe(){}},setInterval(){}};
  vm.runInNewContext(await readFile(new URL('../assets/tempo-estudo.js',import.meta.url),'utf8'),context);
  const timer=context.window.MedQuestStudyTime;
- timer.start({atividade:'questoes',titulo:'Prática'});timer.dismiss();assert.equal(get('mq-time-dock').hidden,true);
+ timer.refresh();assert.equal(get('mq-time-end').hidden,true);assert.equal(get('mq-time-label').hidden,true);
+ timer.start({atividade:'questoes',titulo:'Prática'});assert.equal(get('mq-time-end').hidden,false);timer.pause();assert.equal(get('mq-time-end').hidden,false);timer.resume();timer.dismiss();assert.equal(get('mq-time-dock').hidden,true);
  now.value+=45000;timer.refresh();assert.equal(timer.seconds()>=45,true);assert.equal(get('mq-time-dock').hidden,true);
  const saved=JSON.parse(values.get('mq_timer_student'));assert.ok(saved.running);assert.equal(saved.segments.length,0);
  get('tela-questao').style.display='none';timer.refresh();assert.equal(get('mq-time-dock').hidden,false);
