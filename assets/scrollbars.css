@@ -1,0 +1,10 @@
+/* Native scrolling, styled to match the MedQuest palette. */
+:root{color-scheme:dark}
+*{scrollbar-width:thin;scrollbar-color:#aa9058 #091421}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-track{background:#091421}
+*::-webkit-scrollbar-thumb{background:#aa9058;border:2px solid #091421;border-radius:10px}
+*::-webkit-scrollbar-thumb:hover{background:#d6b56c}
+*::-webkit-scrollbar-corner{background:#091421}
+*::-webkit-scrollbar-button{display:none;width:0;height:0}
+@media(forced-colors:active){*{scrollbar-color:auto}}

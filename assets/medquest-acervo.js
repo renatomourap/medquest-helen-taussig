@@ -323,5 +323,6 @@ window.esconderApp=function(){oldHide();section.style.display="none"};
 const oldScreen=window.mostrarTela;
 window.mostrarTela=function(name){oldScreen(name);section.style.display="none"};
 window.abrirBiblioteca=show;
+window.MedQuestOpenMaterial=async(id,type)=>{await show(type);const item=list.find(x=>x.id===id);if(item)await openPDF(item)};
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.getElementById("mq-study-dialog")&&!document.getElementById("mq-study-dialog").hidden)return;if(e.key==="Escape")closeReader()});
 })();

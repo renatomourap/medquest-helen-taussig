@@ -79,7 +79,8 @@
      paintOfficial();
      if(window.studyPendingDocument){
        const id=window.studyPendingDocument;window.studyPendingDocument=null;
-       if(officialTexts.some(x=>x.id===id))window.studyOfficialOpen(id);
+       if(officialPdfs.some(x=>x.id===id))window.studyOfficialPdf(id);
+       else if(officialTexts.some(x=>x.id===id))window.studyOfficialOpen(id);
      }
    }catch(e){error(e)}
  }
