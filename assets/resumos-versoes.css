@@ -23,3 +23,7 @@
 #study-summary-search{min-width:120px;flex:1;background:#112233;color:#edf2f6;border:1px solid #344b60;border-radius:8px;padding:11px;font:12px Inter,sans-serif}
 @media(max-width:1000px){.mq-summary-version-label{display:grid;gap:4px}.mq-summary-heading strong{font-size:19px}}
 @media(max-width:650px){.mq-summary-topic>summary{min-height:106px;padding:16px;gap:11px}.mq-summary-heading strong{font-size:18px}.mq-summary-heading small{font-size:11px}.mq-summary-topic-icon{flex-basis:24px}.mq-summary-topic-icon svg{width:24px;height:24px}.mq-summary-versions{margin-left:14px}.mq-summary-version{display:grid;grid-template-columns:18px minmax(0,1fr);gap:5px 9px;padding:8px 10px;min-height:88px}.mq-summary-version-label{display:flex;gap:6px}.mq-summary-version-label h3{font-size:12px}.mq-summary-version-label small{font-size:9px}.mq-summary-version-actions{grid-column:2;justify-content:flex-start;margin:0;gap:5px;flex-wrap:wrap}.study-screen .mq-summary-version-actions button{padding:6px 8px;min-height:32px;font-size:10px}.mq-summary-manage>summary{padding:8px 6px;font-size:10px}.mq-summary-manage>div{right:0;top:auto;bottom:calc(100% + 5px)}#study-summary-search{width:100%}}
+
+.study-pdf-toolbar>.mq-control{width:220px;max-width:100%;flex:0 0 220px}
+.study-pdf-toolbar .mq-control-trigger{min-height:44px}
+@media(max-width:650px){.study-pdf-toolbar>.mq-control{width:100%;flex:1 1 100%}}
