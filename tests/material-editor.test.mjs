@@ -18,6 +18,7 @@ test('summary cards use the human subject label and expose editing only to admin
   const nodes=new Map(),get=id=>{if(!nodes.has(id))nodes.set(id,{value:'',innerHTML:'',style:{}});return nodes.get(id)};
   const context={console,perfilAtual:{admin},BANCO:{disciplinas:[{id:'parasitologia',nome:'Parasitologia'}]},window:{},document:{getElementById:get}};
   context.window=context;
+  vm.runInNewContext(await readFile(new URL('../assets/resumos-versoes.js',import.meta.url),'utf8'),context);
   const instrumented=module.replace(/\}\)\(\);\s*$/, "window.paintFixture=items=>{officialPdfs=items;officialTexts=[];paintOfficial()};})();");
   vm.runInNewContext(instrumented,context);
   context.window.paintFixture([{id:'pdf',titulo:'Protozoários cavitários: Entamoebas',disciplina_id:'parasitologia',tema_id:'protozoarios-cavitarios-entamoebas',tema_nome:'Protozoários cavitários: Entamoebas'}]);

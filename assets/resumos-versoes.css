@@ -1,0 +1,25 @@
+/* Compact, inset children. No connector lines or nested scrolling panels. */
+#study-list.mq-summary-list{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.mq-summary-topic{min-width:0}
+.mq-summary-topic>summary{list-style:none;display:flex;align-items:center;gap:16px;min-height:104px;box-sizing:border-box;padding:18px 22px;border:1px solid #6e5d39;border-radius:12px;background:linear-gradient(110deg,#102332,#081724);cursor:pointer;color:#f4dba9}
+.mq-summary-topic>summary::-webkit-details-marker,.mq-summary-manage>summary::-webkit-details-marker{display:none}
+.mq-summary-topic>summary::marker,.mq-summary-manage>summary::marker{content:''}
+.mq-summary-topic[open]>summary{border-color:var(--ouro,#f5cf72)}
+.mq-summary-topic-icon{color:var(--ouro,#f5cf72);flex:0 0 30px}.mq-summary-topic-icon svg{width:30px;height:30px;display:block}
+.mq-summary-heading{display:grid;gap:7px;min-width:0}.mq-summary-heading strong{font:500 21px/1.25 'Playfair Display',Georgia,serif;overflow-wrap:anywhere}.mq-summary-heading small{font:12px/1.5 Inter,sans-serif;color:#aabccc}
+.mq-summary-chevron{width:20px;height:20px;flex-shrink:0;margin-left:auto;color:var(--ouro,#f5cf72)}.mq-summary-topic[open]>summary .mq-summary-chevron{transform:rotate(180deg)}
+.mq-summary-versions{display:grid;gap:9px;margin:10px 0 0 clamp(16px,4vw,48px)}
+.mq-summary-version{display:flex;align-items:center;gap:10px;box-sizing:border-box;min-height:62px;padding:9px 12px;border:1px solid #2b4256;border-radius:9px;background:#102231;min-width:0}
+.mq-summary-version-icon{color:var(--ouro,#f5cf72);flex:0 0 20px}.mq-summary-version-icon svg{width:20px;height:20px;display:block}
+.mq-summary-version-label{min-width:0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.mq-summary-version-label h3{font:600 14px/1.3 Inter,sans-serif;color:#eff2f5;margin:0}.mq-summary-version-label small{font:10px/1.3 Inter,sans-serif}.mq-version-ready{color:#91d9b4}.mq-version-empty{color:#9dafc0}
+.mq-summary-version-actions{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-shrink:0}
+.study-screen .mq-summary-version-actions button{font:600 11px/1.3 Inter,sans-serif;padding:8px 10px;min-height:34px;display:inline-flex;align-items:center;gap:6px;border-radius:7px;white-space:nowrap}
+.mq-summary-version-actions button svg{height:15px;width:15px}.mq-summary-version-actions button:disabled{opacity:.4;cursor:not-allowed;background:#243342;color:#afbac6;border-color:#455361}
+.mq-summary-manage{position:relative;font:600 11px/1.3 Inter,sans-serif}
+.mq-summary-manage>summary{list-style:none;padding:9px 8px;cursor:pointer;color:#eacb8b;border:1px solid #655b42;border-radius:7px}
+.mq-summary-manage>div{position:absolute;right:0;top:calc(100% + 5px);z-index:20;display:grid;gap:6px;width:174px;padding:9px;background:#0c1b29;border:1px solid #655b42;border-radius:9px;box-shadow:0 12px 25px #0007}
+.study-screen .mq-summary-manage button{width:100%;justify-content:flex-start}
+.mq-summary-topic summary:focus-visible,.mq-summary-version button:focus-visible{outline:2px solid var(--ouro,#f5cf72);outline-offset:3px}
+#study-summary-search{min-width:120px;flex:1;background:#112233;color:#edf2f6;border:1px solid #344b60;border-radius:8px;padding:11px;font:12px Inter,sans-serif}
+@media(max-width:1000px){.mq-summary-version-label{display:grid;gap:4px}.mq-summary-heading strong{font-size:19px}}
+@media(max-width:650px){.mq-summary-topic>summary{min-height:106px;padding:16px;gap:11px}.mq-summary-heading strong{font-size:18px}.mq-summary-heading small{font-size:11px}.mq-summary-topic-icon{flex-basis:24px}.mq-summary-topic-icon svg{width:24px;height:24px}.mq-summary-versions{margin-left:14px}.mq-summary-version{display:grid;grid-template-columns:18px minmax(0,1fr);gap:5px 9px;padding:8px 10px;min-height:88px}.mq-summary-version-label{display:flex;gap:6px}.mq-summary-version-label h3{font-size:12px}.mq-summary-version-label small{font-size:9px}.mq-summary-version-actions{grid-column:2;justify-content:flex-start;margin:0;gap:5px;flex-wrap:wrap}.study-screen .mq-summary-version-actions button{padding:6px 8px;min-height:32px;font-size:10px}.mq-summary-manage>summary{padding:8px 6px;font-size:10px}.mq-summary-manage>div{right:0;top:auto;bottom:calc(100% + 5px)}#study-summary-search{width:100%}}

@@ -49,8 +49,9 @@
  const isEditor=()=>perfilAtual?.admin===true;
  const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
- const pdfFor=d=>officialPdfs.find(p=>p.disciplina_id===d.area_id &&
-   (norm(p.tema_id)===norm(d.assunto) || norm(p.titulo)===norm(d.titulo)));
+ const pdfFor=d=>officialPdfs.filter(p=>p.disciplina_id===d.area_id &&
+   (norm(p.tema_id)===norm(d.assunto) || norm(p.titulo)===norm(d.titulo)))
+   .sort((a,b)=>Number(a.resumo_versao==='simplificado')-Number(b.resumo_versao==='simplificado'))[0];
  const fileTopic=file=>{
    const n=norm(file.name.replace(/\.pdf$/i,''));
    const map={'1':'microbiota-humana','2':'infeccao-hospitalar','3':'biofilmes-bacterianos',
@@ -71,7 +72,7 @@
    try{
      const results=await Promise.all([
        fetch('conteudos_oficiais',t=>t.select('*').order('atualizado_em',{ascending:false})),
-       fetch('materiais_medquest',t=>t.select('id,tipo,titulo,descricao,disciplina_id,tema_id,tema_nome,arquivo_path').eq('tipo','resumo').order('criado_em',{ascending:false}))
+       fetch('materiais_medquest',t=>t.select('id,tipo,titulo,descricao,disciplina_id,tema_id,tema_nome,resumo_versao,resumo_grupo_id,arquivo_path').eq('tipo','resumo').order('criado_em',{ascending:false}))
      ]);
      officialTexts=results[0]||[];
      officialPdfs=results[1]||[];
@@ -87,37 +88,25 @@
    box.textContent=message;box.style.color=fail?'#f5a0a0':'#86dbb8';
  };
  function paintOfficial(){
+   const selectedArea=$('study-official-filter')?.value??filter;
+   const searchValue=$('study-summary-search')?.value||'';
+   let retainedOpen=Array.from(document.querySelectorAll?.('.mq-summary-topic[open]')||[]).map(el=>el.dataset.summaryKey);
    $('study-content').innerHTML=
      '<div class="study-toolbar study-pdf-toolbar"><div><p>Leia o documento original, com capa, imagens, tabelas e diagramação preservadas.</p>'+
      '<small>Arquivos originais disponíveis somente para contas aprovadas.</small></div>'+
      (isEditor()?'<button onclick="studyOfficialBatch()">Publicar PDFs originais</button>'+
        '<input id="study-pdf-upload" type="file" accept=".pdf,application/pdf" multiple hidden>':'')+
-     '<select id="study-official-filter" aria-label="Filtrar por disciplina" onchange="studyOfficialFilter()">'+opts(filter)+'</select></div>'+
+     '<input type="search" id="study-summary-search" value="'+E(searchValue)+'" placeholder="Pesquisar assunto" aria-label="Pesquisar assunto">'+
+     '<select id="study-official-filter" aria-label="Filtrar por disciplina" onchange="studyOfficialFilter()">'+opts(selectedArea)+'</select></div>'+
      '<p id="study-pdf-feedback" role="status" aria-live="polite"></p>'+
-     '<div id="study-list" class="study-pdf-grid"></div><div id="study-editor"></div>';
+     '<div id="study-list" class="mq-summary-list"></div><div id="study-editor"></div>';
    const picker=$('study-pdf-upload');
    if(picker)picker.onchange=ev=>window.studyOfficialBatchFiles(Array.from(ev.target.files||[]));
+   const search=$('study-summary-search');if(search)search.oninput=()=>window.studyOfficialFilter();
    window.studyOfficialFilter=()=>{
      const chosen=$('study-official-filter')?.value||'';
-     const summaries=officialTexts.filter(d=>(d.publicado||isEditor())&&(!chosen||d.area_id===chosen));
-     const accounted=new Set(summaries.map(d=>pdfFor(d)?.id).filter(Boolean));
-     const additional=officialPdfs.filter(p=>(!chosen||p.disciplina_id===chosen)&&!accounted.has(p.id));
-     let cards=summaries.map(d=>{
-       const pdf=pdfFor(d);
-       const action=pdf?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+pdf.id+'\')">Ler resumo <svg class="study-read-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v15M12 5C8 3 4 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-2-1-6-1-10 1Z"/></svg></button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+pdf.id+'\')">↓ Baixar PDF</button>':
-         isEditor()?'<button onclick="studyOfficialAttach(\''+d.id+'\')">Publicar PDF original</button>':
-         '<span class="study-pdf-await">PDF original aguardando publicação</span>';
-       return '<article class="study-pdf-card"><div class="study-pdf-symbol" aria-hidden="true">▤</div>'+
-         '<div class="study-pdf-meta"><h3>'+E(d.titulo)+'</h3><p>'+E(area(d.area_id))+' · '+E(d.assunto)+'</p>'+
-         '<small class="'+(pdf?'study-pdf-ready':'study-pdf-await')+'">'+
-         (pdf?'PDF original disponível':'Arquivo original pendente')+'</small></div>'+
-         '<div class="study-pdf-buttons">'+action+(pdf&&isEditor()?'<button onclick="studyEditPdfMetadata(\''+pdf.id+'\')">Editar identificação</button><button class="mq-material-delete" onclick="studyDeletePdf(\''+pdf.id+'\')">Excluir arquivo</button>':'')+'</div></article>';
-     }).join('');
-     cards+=additional.map(p=>'<article class="study-pdf-card"><div class="study-pdf-symbol" aria-hidden="true">▤</div>'+
-       '<div class="study-pdf-meta"><h3>'+E(p.titulo)+'</h3><p>'+E(area(p.disciplina_id))+' · '+E(p.tema_nome||p.tema_id)+'</p>'+
-       '<small class="study-pdf-ready">PDF original disponível</small></div><div class="study-pdf-buttons">'+
-       '<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">Ler resumo <svg class="study-read-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v15M12 5C8 3 4 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-2-1-6-1-10 1Z"/></svg></button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button>'+ (isEditor()?'<button onclick="studyEditPdfMetadata(\''+p.id+'\')">Editar identificação</button><button class="mq-material-delete" onclick="studyDeletePdf(\''+p.id+'\')">Excluir arquivo</button>':'')+'</div></article>').join('');
-     $('study-list').innerHTML=cards||'<p class="study-empty">Nenhum resumo cadastrado para esta área.</p>';
+     const opened=Array.from(document.querySelectorAll?.('.mq-summary-topic[open]')||[]).map(el=>el.dataset.summaryKey);
+     $('study-list').innerHTML=window.MedQuestSummaryVersions.render({pdfs:officialPdfs,texts:officialTexts,chosen,query:$('study-summary-search')?.value||'',canEdit:isEditor(),areaName:area,onChanged:readOfficial,onFeedback:feedback,openKeys:[...retainedOpen,...opened]});retainedOpen=[];
    };
    studyOfficialFilter();
  }
@@ -172,7 +161,7 @@
  };
  async function publishPdf(file,doc){
    if(!isEditor())throw Error('Apenas administradores podem publicar resumos.');
-   if(pdfFor(doc))return false;
+   const existing=pdfFor(doc);if(existing&&(existing.resumo_versao||'expandido')==='expandido')return false;
    if(!file||file.size<1||file.size>36700160||
      !(file.type==='application/pdf'||file.name.toLowerCase().endsWith('.pdf')))
      throw Error('Arquivo inválido ou maior que 35 MB: '+(file?.name||''));
@@ -180,7 +169,7 @@
    const upload=await db.storage.from('materiais_medquest').upload(path,file,{contentType:'application/pdf',upsert:false});
    if(upload.error)throw upload.error;
    const save=await db.from('materiais_medquest').insert({tipo:'resumo',
-     disciplina_id:doc.area_id,tema_id:doc.assunto,titulo:doc.titulo,
+     disciplina_id:doc.area_id,tema_id:doc.assunto,titulo:doc.titulo,resumo_versao:'expandido',resumo_grupo_id:existing?.resumo_grupo_id||crypto.randomUUID(),
      descricao:'PDF original — '+file.name,arquivo_path:path});
    if(save.error){
      await db.storage.from('materiais_medquest').remove([path]);
