@@ -210,3 +210,6 @@
  #mq-questoes-gerais .mq-q-filter-actions{flex-direction:column;align-items:stretch;gap:12px}
  #mq-questoes-gerais .mq-q-apply{width:100%}
 }
+
+/* Local question search shares the filter panel palette and remains full-width on iPad. */
+.mq-q-search{display:grid;gap:8px;margin:18px 0}.mq-q-search-field{display:flex;align-items:center;gap:10px;background:#0b1928;border:1px solid #334454;border-radius:10px;padding:0 13px;min-width:0}.mq-q-search-field:focus-within{border-color:var(--ouro);box-shadow:0 0 0 2px #d4a74e22}.mq-q-search-field svg{width:18px;height:18px;color:var(--ouro);flex:none}.mq-q-search-field input{box-sizing:border-box;width:100%;min-width:0;border:0;background:transparent;color:#f1f3f6;padding:12px 0;font:inherit;font-size:16px;outline:none}.mq-q-search-field input::placeholder{color:#96a2b3}.mq-q-search small{color:var(--cinza);font-size:.74rem}

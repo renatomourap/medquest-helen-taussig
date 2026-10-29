@@ -18,7 +18,13 @@
   const levels=[['facil','Fácil'],['intermediario','Intermediário'],['dificil','Difícil'],
     ['muito_dificil','Muito difícil'],['nao_classificada','Não classificada']];
   const filters={area:'',assunto:'',hotpoint:'',dificuldade:''};
-  let active=false,filteredSession=null,openDropdown='';
+  let active=false,filteredSession=null,openDropdown='',searchQuery='';
+  const normalizeSearch=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/<[^>]*>/g,' ');
+  const questionMatches=(row,query)=>{
+    const text=normalizeSearch([row.areaName,row.temaName,row.hotpoint,row.hotpointTitle,row.questao.enunciado,...(row.questao.alternativas||[]).map(a=>a.texto)].join(' '));
+    return normalizeSearch(query).trim().split(/\s+/).every(term=>text.includes(term));
+  };
+  window.MedQuestQuestionSearch={matches:questionMatches};
   // Títulos conferidos nos cadernos PDF originais.
   const hpTitles={
   "protozoarios-cavitarios-entamoebas": [
@@ -306,6 +312,7 @@
     return rows;
   }
   function matches(row,skip){
+    if(!questionMatches(row,searchQuery))return false;
     if(skip!=='area'&&filters.area&&row.areaId!==filters.area)return false;
     if(skip!=='assunto'&&filters.assunto&&row.temaId!==filters.assunto)return false;
     if(skip!=='hotpoint'&&filters.hotpoint&&row.hotpointKey!==filters.hotpoint)return false;
@@ -382,12 +389,12 @@
     return fields.filter(f=>filters[f.key]).map(f=>'<button type="button" class="mq-q-chip" data-mq-remove="'+f.key+
       '" aria-label="Remover filtro '+E(f.label)+'">'+E(f.label)+': <strong>'+E(names[f.key])+'</strong> <span aria-hidden="true">×</span></button>').join('');
   }
-  function render(){
+  function render(keepSearch=false){
     const el=$('mq-questoes-gerais');if(!el)return;
     const rows=flatten(),matched=rows.filter(r=>matches(r));
     const topics=new Set(matched.map(r=>r.areaId+'|'+r.temaId)).size;
     const incomplete=rows.filter(r=>r.dificuldade==='nao_classificada').length;
-    const filtersOn=fields.some(f=>!!filters[f.key]);
+    const filtersOn=!!searchQuery.trim()||fields.some(f=>!!filters[f.key]);
     const header='<div class="mq-q-head"><div><span class="mq-q-eyebrow">BANCO DE QUESTÕES · MEDQUEST</span>'+
       '<h1>Encontre exatamente o que estudar</h1>'+
       '<p>Combine os filtros para praticar apenas os assuntos e mecanismos desejados.</p></div>'+
@@ -397,6 +404,7 @@
       '<div class="mq-q-filter-heading"><span><span class="mq-q-filter-heading-mark" aria-hidden="true">☷</span>'+
       ' Refine sua prática</span><span class="mq-q-filter-count">'+matched.length+
       ' de '+rows.length+' questões</span></div>'+
+      '<label class="mq-q-search" for="mq-q-search"><span class="mq-q-filter-label">Pesquisar questões</span><span class="mq-q-search-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/></svg><input id="mq-q-search" type="search" value="'+E(searchQuery)+'" placeholder="Busque por trecho, assunto ou Hot Point" autocomplete="off" aria-describedby="mq-q-search-help"></span><small id="mq-q-search-help">A busca combina com os filtros abaixo.</small></label>'+
       '<div class="mq-q-filters">'+fields.map(f=>fieldMarkup(f,rows)).join('')+'</div>'+
       '<div class="mq-q-filter-foot"><div class="mq-q-chips">'+chips(rows)+
       (!filtersOn?'<span class="mq-q-filter-tip">Selecione um ou mais filtros para personalizar sua lista.</span>':'')+
@@ -404,7 +412,7 @@
       '>↺ Limpar filtros</button></div>'+
       '<div class="mq-q-filter-actions"><span class="mq-q-filter-action-hint">'+
       (filtersOn?matched.length+' '+(matched.length===1?'questão selecionada':'questões selecionadas'):
-        'Escolha pelo menos um filtro para iniciar a resolução.')+'</span>'+
+        'Pesquise ou escolha um filtro para iniciar a resolução.')+'</span>'+
       '<button id="mq-q-apply" type="button" class="mq-q-apply"'+
       (!filtersOn||matched.length===0?' disabled':'')+
       ' aria-label="Filtrar e resolver as questões selecionadas">'+
@@ -432,12 +440,24 @@
         ' '+(dCount===1?'questão':'questões')+'</span></div></div>'+
         '<div class="mq-q-topics">'+visible.join('')+'</div></section>';
     }).filter(Boolean).join('');
-    el.innerHTML=header+bar+'<div class="mq-q-results-head"><h2>Assuntos disponíveis</h2>'+
+    const markup=header+bar+'<div class="mq-q-results-head"><h2>Assuntos disponíveis</h2>'+
       '<span>'+topics+' '+(topics===1?'resultado':'resultados')+'</span></div>'+
-      (groups?'<div class="mq-q-groups">'+groups+'</div>':
+      '<div class="mq-q-catalog-results">'+(groups?'<div class="mq-q-groups">'+groups+'</div>':
         '<div class="mq-q-no-results"><div class="mq-q-no-results-icon" aria-hidden="true">⌕</div>'+
         '<h3>Nenhuma questão corresponde aos filtros</h3><p>Tente outra combinação de área, assunto, Hot Point ou dificuldade.</p>'+
-        '<button type="button" id="mq-q-reset-empty">Limpar filtros</button></div>');
+        '<button type="button" id="mq-q-reset-empty">Limpar filtros</button></div>')+'</div>';
+    if(keepSearch&&el.querySelector('.mq-q-head')){
+      // Keep the live input in place so the iPad/iPhone keyboard stays open while typing.
+      const next=document.createElement('div');next.innerHTML=markup;
+      for(const selector of ['.mq-q-head','.mq-q-filter-heading','.mq-q-filters','.mq-q-filter-foot','.mq-q-filter-actions','.mq-q-results-head','.mq-q-catalog-results'])el.querySelector(selector)?.replaceWith(next.querySelector(selector));
+    }else el.innerHTML=markup;
+    const search=el.querySelector('#mq-q-search');
+    const updateSearch=()=>{
+      const position=search.selectionStart;searchQuery=search.value;openDropdown='';render(true);
+      const next=el.querySelector('#mq-q-search');next?.focus({preventScroll:true});
+      try{next?.setSelectionRange(position,position)}catch(e){}
+    };
+    if(search){search.oninput=e=>{if(!e.isComposing)updateSearch()};search.oncompositionend=updateSearch;}
     el.querySelectorAll('[data-mq-trigger]').forEach(button=>{
       button.addEventListener('click',()=>{
         const key=button.dataset.mqTrigger;
@@ -484,7 +504,7 @@
     el.querySelector('#mq-q-apply')?.addEventListener('click',()=>{
       // Resolve a seleção inteira, mesmo com vários assuntos ou disciplinas.
       const selecionadas=flatten().filter(row=>matches(row));
-      if(!fields.some(field=>filters[field.key]) || !selecionadas.length)return;
+      if((!searchQuery.trim()&&!fields.some(field=>filters[field.key])) || !selecionadas.length)return;
       if(typeof window.iniciarQuestoesFiltradas!=='function'){
         console.error('O leitor de questões filtradas não está disponível.');
         return;
@@ -506,6 +526,7 @@
       const selected=matched.filter(r=>r.areaId===did&&r.temaId===tid).map(r=>r.questao);
       if(!selected.length)return;
       window.__mqFromCatalog=true;
+      if(searchQuery.trim()){window.iniciarQuestoesFiltradas(matched.filter(r=>r.areaId===did&&r.temaId===tid));return;}
       iniciarTema(did,tid);
       const all=BANCO.disciplinas.find(d=>d.id===did)?.temas.find(t=>t.id===tid)?.questoes||[];
       if(selected.length<all.length){
@@ -524,7 +545,7 @@
     if(!openDropdown||e.target.closest?.('[data-mq-filter-wrap]'))return;
     openDropdown='';if(active&&$('mq-questoes-gerais')?.style.display==='block')render();
   });
-  function clearFilters(){for(const field of fields)filters[field.key]='';openDropdown='';render();}
+  function clearFilters(){searchQuery='';for(const field of fields)filters[field.key]='';openDropdown='';render();}
   function applyQuestions(list){
     if(!list.length || typeof estadoAtual==='undefined')return;
     estadoAtual.questoes=list;

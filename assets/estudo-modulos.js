@@ -77,6 +77,12 @@
      officialTexts=results[0]||[];
      officialPdfs=results[1]||[];
      paintOfficial();
+     if(window.studyPendingSummaryId){
+       const id=window.studyPendingSummaryId;window.studyPendingSummaryId=null;
+       const file=officialPdfs.find(x=>x.id===id);
+       const card=Array.from(document.querySelectorAll('.mq-summary-topic')).find(el=>el.dataset.summaryKey===(file?.resumo_grupo_id||file?.id));
+       if(card){card.open=true;card.scrollIntoView({block:'nearest',behavior:'smooth'});}
+     }
      if(window.studyPendingDocument){
        const id=window.studyPendingDocument;window.studyPendingDocument=null;
        if(officialPdfs.some(x=>x.id===id))window.studyOfficialPdf(id);
@@ -286,6 +292,7 @@
   const subtitle=$('study-subtitle');
   if(subtitle)subtitle.textContent='Materiais oficiais de '+area(id);
  };
+ window.studyOpenSummarySubject=id=>{window.studyPendingSummaryId=id;filter='';show('resumo')};
  window.studyOpenNote=id=>{window.studyPendingDocument=id;show('anotacao')};
  window.studyContinue=async()=>{
   if(!last)try{last=await fetch('ultima_atividade',t=>t.select('*').eq('usuario_id',usuarioAtual.id).maybeSingle())}catch(e){error(e)}

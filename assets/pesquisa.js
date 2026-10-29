@@ -3,11 +3,28 @@
  'use strict';
  const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
  const matches=(item,q)=>norm(q).trim().split(/\s+/).every(word=>norm(item.search).includes(word));
- window.MedQuestSearchModel={norm,matches};
+ function summaries(pdfs,areaName,hotpointTitle){
+  const groups=new Map();
+  for(const m of pdfs){
+   if(m.tipo!=='resumo')continue;
+   const key=m.resumo_grupo_id||m.id;
+   if(!groups.has(key))groups.set(key,[]);
+   groups.get(key).push(m);
+  }
+  return [...groups.values()].map(files=>{
+   const m=files.find(f=>f.resumo_versao==='expandido')||files[0];
+   const hp=Array.from({length:5},(_,i)=>{const title=hotpointTitle(m.tema_id,'Hot Point '+(i+1));return title?'Hot Point '+(i+1)+' HP'+(i+1)+' '+title:''}).filter(Boolean).join(' ');
+   const versions=[...new Set(files.map(f=>f.resumo_versao||'expandido'))].join(' e ');
+   return {title:m.titulo,label:'Resumo · '+areaName(m.disciplina_id)+' · '+versions,
+    search:[m.titulo,m.tema_nome,m.tema_id,areaName(m.disciplina_id),versions,hp].join(' '),
+    open:()=>window.studyOpenSummarySubject(m.id)};
+  });
+ }
+ window.MedQuestSearchModel={norm,matches,summaries};
  const trigger=document.querySelector('.topbar-search');
  if(!trigger)return;
  const modal=document.createElement('dialog');modal.className='mq-search-dialog';
- modal.innerHTML='<div class="mq-search-head"><label for="mq-search-input">Pesquisar no MedQuest</label><button type="button" aria-label="Fechar pesquisa">×</button></div><input id="mq-search-input" type="search" placeholder="Assunto, trecho da questão ou material…" autocomplete="off"><p class="mq-search-status" role="status"></p><div class="mq-search-results"></div>';
+ modal.innerHTML='<div class="mq-search-head"><label for="mq-search-input">Pesquisar no MedQuest</label><button type="button" aria-label="Fechar pesquisa">×</button></div><input id="mq-search-input" type="search" placeholder="Tema, assunto, Hot Point ou funcionalidade…" autocomplete="off"><p class="mq-search-status" role="status"></p><div class="mq-search-results"></div>';
  document.body.append(modal);
  const input=modal.querySelector('input'),status=modal.querySelector('[role=status]'),results=modal.querySelector('.mq-search-results');
  let items=[],generation=0,returnFocus;
@@ -18,7 +35,7 @@
  modal.addEventListener('click',e=>{if(e.target===modal){const r=modal.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close()}});
  function paint(){
   results.replaceChildren();const query=input.value.trim();
-  if(!query){status.textContent='Digite para buscar assuntos, questões, PDFs e suas anotações.';return}
+  if(!query){status.textContent='Busque resumos por tema, assunto ou Hot Point, ou encontre uma funcionalidade.';return}
   const found=items.filter(x=>matches(x,query));
   status.textContent=found.length?`${found.length} resultado(s)${found.length>60?' — refine a pesquisa para ver mais':''}`:'Nenhum resultado encontrado.';
   for(const item of found.slice(0,60)){
@@ -33,22 +50,25 @@
  async function open(){
   if(!allowed())return;
   returnFocus=document.activeElement;const request=++generation;items=[];input.value='';results.replaceChildren();status.textContent='Carregando conteúdos…';if(!modal.open)modal.showModal();input.focus();
-  for(const d of BANCO.disciplinas||[])for(const t of d.temas||[]){
-   if(!t.questoes?.length)continue;
-   items.push({title:t.nome,label:'Assunto · '+d.nome,search:t.nome+' '+d.nome,open:()=>iniciarTema(d.id,t.id)});
-   t.questoes.forEach((q,index)=>items.push({title:q.enunciado,label:'Questão · '+d.nome+' · '+t.nome,search:[d.nome,t.nome,q.enunciado,q.hotpoint,...(q.alternativas||[]).map(a=>a.texto)].join(' '),open:async()=>{await iniciarTema(d.id,t.id);renderQuestao(index)}}));
-  }
-  const loaded=await Promise.allSettled([
-   db.from('materiais_medquest').select('id,titulo,tipo,disciplina_id,tema_nome,tema_id,resumo_versao'),
-   db.from('estudo_documentos').select('id,titulo,assunto,area_id').eq('usuario_id',usuarioAtual.id).eq('tipo','anotacao')
-  ]);
-  if(request!==generation||!modal.open||!allowed())return;
+  const sections=[
+   ['Início','Página inicial, dashboard, explorar áreas','nav-inicio'],
+   ['Perfil','Dados da conta, cadastro','nav-perfil'],
+   ['Resumos','Biblioteca, PDFs, resumo expandido, resumo simplificado, ler, baixar','nav-resumo'],
+   ['Questões','Banco de questões, filtros, praticar, resolver, gabarito comentado','nav-questoes'],
+   ['Outros Materiais','Artigos, resumos gerais, AIM','nav-outros'],
+   ['Plano da Semana','Planejamento semanal, tarefas, metas, organização','nav-plano'],
+   ['Progresso','Estatísticas, acertos, desempenho, histórico diário, tempo de estudo','nav-progresso'],
+   ['Cronômetro','Tempo de estudo, iniciar, pausar, registrar estudo manualmente','mq-top-timer']
+  ];
+  for(const [title,keywords,id] of sections)if(document.getElementById(id))items.push({title,label:'Funcionalidade da plataforma',search:title+' '+keywords,open:()=>document.getElementById(id)?.click()});
   let failed=false;
-  loaded.forEach((r,n)=>{if(r.status!=='fulfilled'||r.value.error){failed=true;return}for(const m of r.value.data||[]){
-   const area=BANCO.disciplinas.find(d=>d.id===(m.disciplina_id||m.area_id))?.nome||'Geral';
-   const type=n?'Anotação':m.tipo==='resumo'?'Resumo '+(m.resumo_versao||'expandido'):'Material';
-   items.push({title:m.titulo,label:type+' · '+area,search:[m.titulo,m.tema_nome,m.tema_id,m.assunto,area,type].join(' '),open:()=>{if(n)return studyOpenNote(m.id);if(m.tipo==='resumo'){window.studyPendingDocument=m.id;return abrirEstudo('resumo')}return window.MedQuestOpenMaterial(m.id,m.tipo)}});
-  }});
+  try{
+   const r=await db.from('materiais_medquest').select('id,titulo,tipo,disciplina_id,tema_nome,tema_id,resumo_versao,resumo_grupo_id').eq('tipo','resumo');
+   if(request!==generation||!modal.open||!allowed())return;
+   if(r.error)throw r.error;
+   items.push(...summaries(r.data||[],id=>BANCO.disciplinas.find(d=>d.id===id)?.nome||'Geral',(topic,hp)=>window.MedQuestHotPoints?.titulo(topic,hp)||''));
+  }catch(e){if(request!==generation||!modal.open||!allowed())return;failed=true;}
+
   paint();if(failed)status.textContent+=' Parte dos materiais não pôde ser carregada. Feche e abra a busca para tentar novamente.';
  }
  trigger.onclick=open;
