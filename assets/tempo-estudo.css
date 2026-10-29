@@ -340,5 +340,5 @@ html.mq-ipad-safari .mq-time-dock.mq-time-compact:not(.mq-dock-open){
 .mq-time-collapse svg{width:18px;height:18px}
 .mq-time-controls>button[hidden]{display:none!important}
 .mq-time-dock.mq-dock-open .mq-time-controls{margin-top:7px;gap:5px}
-.mq-time-dock.mq-dock-open .mq-time-controls>button{padding:7px 3px}
+.mq-time-dock.mq-dock-open .mq-time-controls>button{flex:0 0 auto;padding:4px 10px}
 #mq-time-label[hidden]{display:none!important}
