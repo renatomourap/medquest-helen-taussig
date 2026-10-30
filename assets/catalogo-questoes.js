@@ -27,6 +27,20 @@
   window.MedQuestQuestionSearch={matches:questionMatches};
   // Títulos conferidos nos cadernos PDF originais.
   const hpTitles={
+  "bastonetes-gram-positivos": [
+    "Fisiologia e estrutura",
+    "Patogênese e imunidade",
+    "Epidemiologia e transmissão",
+    "Doenças e correlação clínica",
+    "Diagnóstico, tratamento e prevenção"
+  ],
+  "streptococcus-sp-e-enterococcus-sp": [
+    "Fisiologia e estrutura",
+    "Patogênese e imunidade",
+    "Epidemiologia",
+    "Doenças clínicas",
+    "Diagnóstico, tratamento e controle"
+  ],
   "protozoarios-cavitarios-entamoebas": [
     "Morfologia e fisiologia de Entamoeba histolytica",
     "Ciclo biológico, habitats, encistamento e desencistamento",
