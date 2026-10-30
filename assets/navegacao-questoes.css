@@ -1,0 +1,35 @@
+.mq-question-nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 12px;padding:8px 0;color:var(--texto)}
+.mq-question-step{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:1;min-width:270px}
+.mq-question-step strong{font-size:.82rem;font-weight:600;white-space:nowrap}
+.mq-question-nav button,.mq-question-map button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mq-question-step>button,.mq-question-map-trigger{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 12px;min-height:36px;border:1px solid var(--borda,#293b4d);border-radius:8px;background:#0d1b29;color:#dfb95e;font-size:.78rem}
+.mq-question-nav svg,.mq-question-map svg{width:16px;height:16px;flex:none}
+.mq-question-nav button:disabled,.mq-question-map button:disabled{opacity:.45;cursor:default}
+.mq-question-map-trigger{border-color:#b09250;color:var(--ouro,#efc866)}
+.mq-question-preview{display:flex;gap:5px;flex:none}
+.mq-question-number{display:inline-flex;align-items:center;justify-content:center;position:relative;min-width:0;min-height:34px;border:1px solid #304152;border-radius:7px;background:#172332;color:#b7c0cc;padding:4px;font-size:.78rem;font-weight:600}
+.mq-question-preview .mq-question-number{width:34px}
+.mq-question-map .mq-question-number{font-size:.75rem}
+.mq-question-number.is-correct{background:#113b31;color:#87e3b7;border-color:#258766}
+.mq-question-number.is-incorrect{background:#421e28;color:#ffb1b5;border-color:#b74756}
+.mq-question-number.is-current{border:2px solid var(--ouro,#efc866);color:var(--ouro,#efc866)}
+.mq-question-number:hover{border-color:var(--ouro,#efc866)}
+.mq-question-map{position:fixed;z-index:2200;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;padding:12px;background:#0b1724;color:#e8edf4;border:1px solid #53604c;border-radius:10px;box-shadow:0 12px 35px #0007}
+.mq-question-map[hidden]{display:none}
+.mq-question-map header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+.mq-question-map h2{font-size:.86rem;font-weight:600;margin:0}
+#mq-question-map-close{display:flex;align-items:center;justify-content:center;width:32px;height:32px;padding:5px;border:0;background:transparent;color:var(--ouro,#efc866)}
+#mq-question-map-filter .mq-control{display:block;width:100%}
+#mq-question-map-filter .mq-control-trigger{width:100%;font-size:.76rem;min-height:36px;white-space:normal;text-align:left;overflow-wrap:anywhere}
+#mq-question-map-group{width:100%;padding:8px;background:#102131;color:#e8edf4;border:1px solid #435363;border-radius:7px;font:inherit}
+.mq-question-map-status{font-size:.7rem;color:#9eacbd;line-height:1.4;margin:8px 0}
+.mq-question-map-grid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}
+.mq-question-map-legend{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #273747;padding-top:9px;margin-top:10px;font-size:.66rem;color:#b8c2cf}
+.mq-question-map-legend span{display:inline-flex;align-items:center;gap:4px}
+.mq-question-map-legend span:before{content:'';display:block;width:7px;height:7px;border-radius:50%;background:#657285}
+.mq-question-map-legend .is-current:before{background:#efc866}.mq-question-map-legend .is-correct:before{background:#36ad81}.mq-question-map-legend .is-incorrect:before{background:#df6974}
+.mq-question-map footer{margin-top:7px;text-align:right}
+#mq-question-map-pending{display:inline-flex;align-items:center;gap:6px;border:0;padding:8px 0;background:none;color:var(--ouro,#efc866);font-size:.75rem}
+.mq-question-nav button:focus-visible,.mq-question-map button:focus-visible{outline:2px solid var(--ouro,#efc866);outline-offset:2px}
+@media(max-width:760px){.mq-question-nav{gap:8px}.mq-question-step{flex-basis:100%;min-width:0}.mq-question-preview{flex:1}.mq-question-step>button,.mq-question-map-trigger{min-height:40px}.mq-question-preview .mq-question-number{width:36px;min-height:38px}}
+@media(max-width:540px){.mq-question-map-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.mq-question-map-grid .mq-question-number{min-height:40px}.mq-question-map{padding:12px}.mq-question-step{gap:7px}.mq-question-step>button{padding:8px}.mq-question-preview{gap:4px}.mq-question-preview .mq-question-number{width:32px}.mq-question-map-trigger{padding:8px 10px}}

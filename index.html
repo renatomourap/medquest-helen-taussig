@@ -2251,6 +2251,7 @@
 <link rel="stylesheet" href="assets/resumos-versoes.css?v=summary-filter-2">
 <link rel="stylesheet" href="assets/scrollbars.css?v=1">
 <link rel="stylesheet" href="assets/pesquisa.css?v=compact-3">
+<link rel="stylesheet" href="assets/navegacao-questoes.css?v=1">
 </head>
 <body>
 
@@ -2801,7 +2802,7 @@
     </div>
   </div>
 
-  <div class="miniaturas" id="miniaturas"></div>
+  <div class="mq-question-nav" id="miniaturas" aria-label="Navegação entre questões"></div>
 
   <div style="margin-top:18px;">
     <div class="questao-box">
@@ -7500,25 +7501,11 @@ function navegarQuestao(delta) {
 }
 
 function renderMiniaturas() {
-  const cont = document.getElementById('miniaturas');
-  cont.innerHTML = '';
-  estadoAtual.questoes.forEach((_, i) => {
-    const m = document.createElement('div');
-    m.className = 'mini'; m.textContent = i + 1; m.id = `mini-${i}`;
-    m.onclick = () => renderQuestao(i);
-    cont.appendChild(m);
-  });
+  window.MedQuestQuestionNav?.reset();
 }
 
 function atualizarMiniaturas() {
-  estadoAtual.questoes.forEach((_, i) => {
-    const m = document.getElementById(`mini-${i}`);
-    if (!m) return;
-    m.className = 'mini';
-    const resp = estadoAtual.respostas[i];
-    if (i === estadoAtual.questaoIndex) m.classList.add('atual');
-    if (resp) m.classList.add(resp.acertou ? 'acertou' : 'errou');
-  });
+  window.MedQuestQuestionNav?.refresh();
 }
 
 function encerrarSessao() {
@@ -7692,5 +7679,6 @@ iniciarAuth();
 <script src="assets/frase-diaria.js?v=1"></script>
 <script src="assets/material-editor.js?v=summary-versions-1"></script>
 <script src="assets/pesquisa.js?v=compact-3"></script>
+<script src="assets/navegacao-questoes.js?v=1"></script>
 </body>
 </html>
