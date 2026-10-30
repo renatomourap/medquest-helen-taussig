@@ -2250,7 +2250,7 @@
 <link rel="stylesheet" href="assets/material-editor.css?v=delete-file-1">
 <link rel="stylesheet" href="assets/resumos-versoes.css?v=summary-filter-2">
 <link rel="stylesheet" href="assets/scrollbars.css?v=1">
-<link rel="stylesheet" href="assets/pesquisa.css?v=1">
+<link rel="stylesheet" href="assets/pesquisa.css?v=compact-3">
 </head>
 <body>
 
@@ -2548,11 +2548,11 @@
         <button class="hamburger" id="hamburger" onclick="abrirSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <button type="button" class="topbar-search" aria-label="Pesquisar na plataforma" aria-haspopup="dialog">
+        <div class="topbar-search" role="search" aria-label="Pesquisar na plataforma">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <span>Pesquisar resumos e funcionalidades...</span>
+          <input id="mq-search-input" type="search" placeholder="Pesquisar" aria-label="Pesquisar resumos e funcionalidades" aria-controls="mq-search-panel" aria-expanded="false" autocomplete="off">
           <kbd>Ctrl K</kbd>
-        </button>
+        </div>
       </div>
       <div class="topbar-right">
         <button class="btn-admin" id="btn-admin" style="display:none;" onclick="mostrarAdmin()">
@@ -7691,6 +7691,6 @@ iniciarAuth();
 <script src="assets/notificacoes.js?v=1"></script>
 <script src="assets/frase-diaria.js?v=1"></script>
 <script src="assets/material-editor.js?v=summary-versions-1"></script>
-<script src="assets/pesquisa.js?v=scope-2"></script>
+<script src="assets/pesquisa.js?v=compact-3"></script>
 </body>
 </html>

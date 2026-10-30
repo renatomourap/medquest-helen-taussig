@@ -23,19 +23,26 @@
  window.MedQuestSearchModel={norm,matches,summaries};
  const trigger=document.querySelector('.topbar-search');
  if(!trigger)return;
- const modal=document.createElement('dialog');modal.className='mq-search-dialog';
- modal.innerHTML='<div class="mq-search-head"><label for="mq-search-input">Pesquisar no MedQuest</label><button type="button" aria-label="Fechar pesquisa">×</button></div><input id="mq-search-input" type="search" placeholder="Tema, assunto, Hot Point ou funcionalidade…" autocomplete="off"><p class="mq-search-status" role="status"></p><div class="mq-search-results"></div>';
- document.body.append(modal);
- const input=modal.querySelector('input'),status=modal.querySelector('[role=status]'),results=modal.querySelector('.mq-search-results');
- let items=[],generation=0,returnFocus;
+ const input=trigger.querySelector('input');
+ const panel=document.createElement('div');panel.id='mq-search-panel';panel.className='mq-search-panel';panel.hidden=true;panel.setAttribute('role','region');panel.setAttribute('aria-label','Resultados da pesquisa');
+ panel.innerHTML='<p class="mq-search-status" role="status"></p><div class="mq-search-results"></div>';
+ document.body.append(panel);
+ const status=panel.querySelector('[role=status]'),results=panel.querySelector('.mq-search-results');
+ let items=[],generation=0;
  const allowed=()=>typeof usuarioAtual!=='undefined'&&usuarioAtual&&perfilAtual?.aprovado;
- function close(){generation++;items=[];results.replaceChildren();modal.close();returnFocus?.focus()}
- modal.querySelector('button').onclick=close;
- modal.addEventListener('cancel',e=>{e.preventDefault();close()});
- modal.addEventListener('click',e=>{if(e.target===modal){const r=modal.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close()}});
+ function position(){
+  if(panel.hidden)return;
+  const rect=trigger.getBoundingClientRect(),width=Math.min(rect.width,window.innerWidth-24),top=rect.bottom+6;
+  panel.style.width=width+'px';panel.style.left=Math.max(12,Math.min(rect.left,window.innerWidth-width-12))+'px';
+  panel.style.top=top+'px';panel.style.maxHeight=Math.max(80,Math.min(360,window.innerHeight-top-12))+'px';
+ }
+ function close(){generation++;items=[];results.replaceChildren();panel.hidden=true;input.setAttribute('aria-expanded','false')}
+ document.addEventListener('pointerdown',e=>{if(!trigger.contains(e.target)&&!panel.contains(e.target))close()});
+ document.addEventListener('focusin',e=>{if(!trigger.contains(e.target)&&!panel.contains(e.target))close()});
+ window.addEventListener('resize',position);window.addEventListener('scroll',position,true);
  function paint(){
   results.replaceChildren();const query=input.value.trim();
-  if(!query){status.textContent='Busque resumos por tema, assunto ou Hot Point, ou encontre uma funcionalidade.';return}
+  if(!query){status.textContent='Tema, assunto, Hot Point ou funcionalidade.';return}
   const found=items.filter(x=>matches(x,query));
   status.textContent=found.length?`${found.length} resultado(s)${found.length>60?' — refine a pesquisa para ver mais':''}`:'Nenhum resultado encontrado.';
   for(const item of found.slice(0,60)){
@@ -44,12 +51,13 @@
    b.onclick=async()=>{if(!allowed()){close();return}close();try{await item.open()}catch(e){alert('Não foi possível abrir o resultado. Tente novamente.')}};results.append(b);
   }
  }
- input.oninput=paint;
+ input.onfocus=()=>open();
+ input.oninput=()=>{if(!allowed()){close();return}if(panel.hidden)open();else paint()};
  input.onkeydown=e=>{if(e.key==='ArrowDown'){e.preventDefault();results.querySelector('button')?.focus()}else if(e.key==='Enter'){e.preventDefault();results.querySelector('button')?.click()}};
  results.onkeydown=e=>{const buttons=[...results.querySelectorAll('button')],i=buttons.indexOf(document.activeElement);if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const next=i+(e.key==='ArrowDown'?1:-1);if(next<0)input.focus();else buttons[Math.min(next,buttons.length-1)]?.focus()}};
  async function open(){
-  if(!allowed())return;
-  returnFocus=document.activeElement;const request=++generation;items=[];input.value='';results.replaceChildren();status.textContent='Carregando conteúdos…';if(!modal.open)modal.showModal();input.focus();
+  if(!allowed()||!panel.hidden)return;
+  const request=++generation;items=[];results.replaceChildren();status.textContent='Carregando conteúdos…';panel.hidden=false;input.setAttribute('aria-expanded','true');position();
   const sections=[
    ['Início','Página inicial, dashboard, explorar áreas','nav-inicio'],
    ['Perfil','Dados da conta, cadastro','nav-perfil'],
@@ -64,13 +72,15 @@
   let failed=false;
   try{
    const r=await db.from('materiais_medquest').select('id,titulo,tipo,disciplina_id,tema_nome,tema_id,resumo_versao,resumo_grupo_id').eq('tipo','resumo');
-   if(request!==generation||!modal.open||!allowed())return;
+   if(request!==generation||panel.hidden||!allowed())return;
    if(r.error)throw r.error;
    items.push(...summaries(r.data||[],id=>BANCO.disciplinas.find(d=>d.id===id)?.nome||'Geral',(topic,hp)=>window.MedQuestHotPoints?.titulo(topic,hp)||''));
-  }catch(e){if(request!==generation||!modal.open||!allowed())return;failed=true;}
+  }catch(e){if(request!==generation||panel.hidden||!allowed())return;failed=true;}
 
   paint();if(failed)status.textContent+=' Parte dos materiais não pôde ser carregada. Feche e abra a busca para tentar novamente.';
  }
- trigger.onclick=open;
- document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'&&allowed()){e.preventDefault();open()}});
+ trigger.onclick=()=>{input.focus();open()};
+ panel.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();input.focus();close()}});
+ input.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close()}});
+ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'&&allowed()){e.preventDefault();input.focus();open()}});
 })();
