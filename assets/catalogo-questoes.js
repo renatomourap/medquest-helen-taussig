@@ -27,6 +27,20 @@
   window.MedQuestQuestionSearch={matches:questionMatches};
   // Títulos conferidos nos cadernos PDF originais.
   const hpTitles={
+  "bastonetes-gram-negativos": [
+    "Fisiologia e estrutura",
+    "Patogênese e imunidade",
+    "Epidemiologia",
+    "Doenças clínicas",
+    "Diagnóstico, tratamento, prevenção e controle"
+  ],
+  "neisseria-sp": [
+    "Fisiologia e estrutura",
+    "Patogênese e imunidade",
+    "Epidemiologia",
+    "Doenças clínicas",
+    "Diagnóstico, tratamento, prevenção e controle"
+  ],
   "bastonetes-gram-positivos": [
     "Fisiologia e estrutura",
     "Patogênese e imunidade",
