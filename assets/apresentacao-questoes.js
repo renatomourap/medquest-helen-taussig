@@ -39,7 +39,7 @@
       const alt=heading.exec(line);
       if(objectiveLabel.test(line)){add('objective',line);}
       else if(alt){const body=line.slice(alt[0].length).replace(/^(?:(?:incorreta|correta|inadequada)\b\s*[:.–—-]?\s*)+/i,'');add('alternative',body,alt[1].toUpperCase());}
-      else if(/^(?:Questão\s*\d|Resposta\b|Fonte\s*:|Base\s*:|HP\s*\d)/i.test(line)){add('plain',line);}
+      else if(/^(?:Questão\s*\d|Resposta\b|Gabarito\s*:|Origem\s*:|Fonte\s*:|Base\s*:|HP\s*\d)/i.test(line)){add('plain',line);}
       else if(current){current.text.push(line);}
       else add('plain',line);
     }
@@ -56,7 +56,7 @@
       const text=escape(section.text.join(' '));
       if(section.type==='objective')return '<p><strong class="mq-learning-objective">'+text+'</strong></p>';
       if(section.type==='alternative')return '<div class="mq-comment-alternative">'+badge(section.letter)+'<p>'+text+'</p></div>';
-      return '<p>'+text.replace(/(Resposta(?: correta)?\s*:\s*)([A-D])\b/i,(_,label,letter)=>label+badge(letter.toUpperCase()))+'</p>';
+      return '<p>'+text.replace(/((?:Resposta(?: correta)?|Gabarito)\s*:\s*)([A-D])\b/i,(_,label,letter)=>label+badge(letter.toUpperCase()))+'</p>';
     }).join('');
   }
   window.MedQuestQuestionPresentation={split,statement,commentary,commentSections};
