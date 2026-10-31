@@ -28,9 +28,9 @@
   }
   function statement(value){const p=split(value);return (p.text?'<p>'+escape(p.text).replace(/\n\s*\n/g,'</p><p>')+'</p>':'')+(p.command?'<p class="mq-question-command">'+escape(p.command)+'</p>':'');}
   function commentSections(value,objective){
-    const lines=String(value||'').replace(/\r/g,'').replace(/[^\S\n]*\bObjetivo de aprendizagem\b\s*[:.–—-]?\s*/gi,'\nObjetivo de aprendizagem: ').replace(/[^\S\n]*\bObjetivo\s*[:.]\s*/gi,'\nObjetivo: ').replace(/\s+(?=[A-D]\)\s*(?:in)?correta\b)/gi,'\n').replace(/\s*·\s*(?=Objetivo(?: de aprendizagem)?\s*:)/gi,'\n').split('\n');
+    const lines=String(value||'').replace(/\r/g,'').replace(/[^\S\n]*\bObjetivo de aprendizagem\b\s*[:.·–—-]?\s*/gi,'\nObjetivo de aprendizagem: ').replace(/[^\S\n]*\bObjetivo\s*[:.]\s*/gi,'\nObjetivo: ').replace(/\s+(?=[A-D]\)\s*(?:in)?correta\b)/gi,'\n').replace(/\s*·\s*(?=Objetivo(?: de aprendizagem)?\s*:)/gi,'\n').split('\n');
     const sections=[];let current=null;
-    const heading=/^\s*(?:[•×✓✔–—-]\s*)?([A-D])\s*(?:[).:·–—-]\s*|\s+(?=(?:incorreta|correta|inadequada)\b))/i;
+    const heading=/^\s*(?:[•×✓✔–—-]\s*)?([A-D])\s*(?:[):·–—-]\s*|\.\s*(?=(?:incorreta|correta|inadequada|distrator)\b)|\s+(?=(?:incorreta|correta|inadequada|distrator)\b))/i;
     const objectiveLabel=/^\s*Objetivo(?: de aprendizagem)?\s*[:.]/i;
     function add(type,text,letter){current={type,text:[text],letter};sections.push(current);}
     for(const raw of lines){
@@ -38,26 +38,47 @@
       if(!line){if(current?.type!=='alternative')current=null;continue;}
       const alt=heading.exec(line);
       if(objectiveLabel.test(line)){add('objective',line);}
-      else if(alt){const body=line.slice(alt[0].length).replace(/^(?:(?:incorreta|correta|inadequada)\b\s*[:.–—-]?\s*)+/i,'');add('alternative',body,alt[1].toUpperCase());}
-      else if(/^(?:Questão\s*\d|Resposta\b|Gabarito\s*:|Origem\s*:|Referências?\b|Fonte\s*:|Base\s*:|HP\s*\d)/i.test(line)){add('plain',line);}
+      else if(alt){const body=line.slice(alt[0].length).replace(/^(?:(?:incorreta|correta|inadequada|distrator)\b\s*[:.–—-]?\s*)+/i,'');add('alternative',body,alt[1].toUpperCase());}
+      else if(/^(?:Questão\s*\d|Resposta(?: correta)?\s*:|Gabarito\s*:|Origem\s*:|Referências?\b|Fonte\s*:|Base\s*:|HP\s*\d)/i.test(line)){add('plain',line);}
       else if(current){current.text.push(line);}
       else add('plain',line);
     }
     if(objective&&!sections.some(s=>s.type==='objective'))sections.unshift({type:'objective',text:['Objetivo de aprendizagem: '+objective]});
     return sections;
   }
-  function commentary(html,objective,correct){
-    // Normalize legacy HTML and plain PDF imports into the same readable sections.
+  function feedbackModel(sections,correct){
+    const unique=items=>[...new Set(items.map(s=>s.trim()).filter(Boolean))];
+    const objectives=[],general=[],summaries=[],alternatives={A:[],B:[],C:[],D:[]};
+    const metadata=/^(?:Questão\s*\d|HP\s*\d|Hot Point\s*\d|Fonte\b|Base\s*:|Origem\b|Referências?\b|Nível\b|(?:MUITO\s+)?DIF[ÍI]CIL\b|INTERMEDI[ÁA]RI[AO]\b|F[ÁA]CIL\b)/i;
+    for(const section of sections){
+      let text=section.text.join(' ').trim();
+      if(section.type==='objective'){
+        // An imported paragraph may have the answer summary attached to the objective.
+        const parts=text.split(/\s+Resposta(?: correta)?\s*:\s*[A-D]\s*[|:–—-]?\s*/i);
+        objectives.push(parts[0].replace(/^Objetivo(?: de aprendizagem)?\s*[:.]?\s*/i,''));
+        if(parts[1])summaries.push(parts[1]);
+      }else if(section.type==='alternative')alternatives[section.letter]?.push(text);
+      else{
+        const answer=/^(?:Resposta(?: correta)?|Gabarito)\s*:\s*[A-D]\b\s*[|:–—-]?\s*([\s\S]*)$/i.exec(text);
+        if(answer){if(answer[1]&&!metadata.test(answer[1]))summaries.push(answer[1]);}
+        else if(!metadata.test(text))general.push(text);
+      }
+    }
+    const body=unique(alternatives[correct]||[]);
+    // Older questions have one general explanation and comments only for the wrong options.
+    const correctText=unique([...general,...(body.length?body:summaries)]);
+    const ordered=[correct,...['A','B','C','D'].filter(letter=>letter!==correct)];
+    return {objective:unique(objectives).join(' '),alternatives:ordered.map(letter=>({letter,correct:letter===correct,text:letter===correct?correctText.join(' '):unique(alternatives[letter]||[]).join(' ')}))};
+  }
+  function commentary(html,objective,correct,context={}){
     const decode=document.createElement('div');
     decode.innerHTML=String(html||'').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<\/(?:p|div|li)>/gi,'\n');
-    const sections=commentSections(decode.textContent,objective);
-    const badge=letter=>'<span class="mq-answer-badge '+(letter===correct?'mq-answer-correct':'mq-answer-incorrect')+'">'+letter+') '+(letter===correct?'CORRETA':'INCORRETA')+'</span>';
-    return sections.map(section=>{
-      const text=escape(section.text.join(' '));
-      if(section.type==='objective')return '<p><strong class="mq-learning-objective">'+text+'</strong></p>';
-      if(section.type==='alternative')return '<div class="mq-comment-alternative">'+badge(section.letter)+'<p>'+text+'</p></div>';
-      return '<p>'+text.replace(/((?:Resposta(?: correta)?|Gabarito)\s*:\s*)([A-D])\b/i,(_,label,letter)=>label+badge(letter.toUpperCase()))+'</p>';
-    }).join('');
+    const model=feedbackModel(commentSections(decode.textContent,objective),correct);
+    const number=String(context.number||1).padStart(2,'0');
+    const hotpoint=String(context.hotpoint||'').replace(/^HP\s*/i,'Hot Point ');
+    const header='<p class="mq-feedback-meta">Questão '+escape(number)+(hotpoint?' · '+escape(hotpoint):'')+'</p>';
+    const learning='<p><strong class="mq-learning-objective">'+(model.objective?'Objetivo de aprendizagem: '+escape(model.objective):'Objetivo de aprendizagem não informado neste material.')+'</strong></p>';
+    return header+learning+model.alternatives.map(item=>'<div class="mq-comment-alternative"><span class="mq-answer-badge '+(item.correct?'mq-answer-correct':'mq-answer-incorrect')+'">'+item.letter+') '+(item.correct?'CORRETA':'INCORRETA')+'</span><p>'+escape(item.text||'Justificativa não informada neste material.')+'</p></div>').join('');
   }
-  window.MedQuestQuestionPresentation={split,statement,commentary,commentSections};
+  window.MedQuestQuestionPresentation={split,statement,commentary,commentSections,feedbackModel};
 })();

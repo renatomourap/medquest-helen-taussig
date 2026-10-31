@@ -41,3 +41,13 @@ test('uppercase learning objective heading on its own line includes the complete
 test('objective after a difficulty label gets its own bold section',()=>{
  const sections=model.commentSections('DIFÍCIL Objetivo: Diferenciar Neisseria mucosa.\n\nReferência da questão: Resumo Expandido, p. 18.\nA) INCORRETA\nExplicação.');assert.equal(sections[0].type,'plain');assert.equal(sections[0].text[0],'DIFÍCIL');assert.equal(sections[1].type,'objective');
 });
+test('approved feedback order is objective, correct explanation, then wrong alternatives with no duplicated answer',()=>{
+ const sections=model.commentSections('Questão 001 · Resposta: D\nFonte: Resumo Expandido, p. 3\nObjetivo: Interpretar o cultivo.\nResposta: D | Resumo repetido.\nA) INCORRETA\nExplicação A.\nB) INCORRETA\nExplicação B.\nC) INCORRETA\nExplicação C.\nD) CORRETA\nExplicação D.');
+ const result=model.feedbackModel(sections,'D');assert.equal(result.objective,'Interpretar o cultivo.');assert.equal(result.alternatives.map(a=>a.letter).join(''),'DABC');assert.equal(result.alternatives[0].text,'Explicação D.');assert(!JSON.stringify(result).includes('Resumo Expandido'));assert(!JSON.stringify(result).includes('Resumo repetido'));
+});
+test('general explanation supplies correct feedback in legacy comments without a correct-item section',()=>{
+ const result=model.feedbackModel(model.commentSections('Resposta: B\n\nExplicação real do mecanismo.\n\nObjetivo: Explicar o mecanismo.\nA) Incorreta: A.\nC) Incorreta: C.\nD) Incorreta: D.'),'B');assert.equal(result.alternatives[0].text,'Explicação real do mecanismo.');assert.equal(result.alternatives.length,4);
+});
+test('species abbreviations and prose beginning with Resposta remain in their original alternative',()=>{
+ const result=model.feedbackModel(model.commentSections('A) CORRETA\nB. cereus é móvel.\nB DISTRATOR\nC. diphtheriae não forma esporos.\nC) INCORRETA\nResposta prévia não demonstra deficiência.\nD) INCORRETA\nOutro mecanismo.'),'A');assert.equal(result.alternatives[0].text,'B. cereus é móvel.');assert.equal(result.alternatives[1].text,'C. diphtheriae não forma esporos.');assert.equal(result.alternatives[2].text,'Resposta prévia não demonstra deficiência.');
+});

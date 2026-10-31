@@ -2252,8 +2252,8 @@
 <link rel="stylesheet" href="assets/scrollbars.css?v=1">
 <link rel="stylesheet" href="assets/pesquisa.css?v=compact-3">
 <link rel="stylesheet" href="assets/navegacao-questoes.css?v=pages-2">
-<link rel="stylesheet" href="assets/apresentacao-questoes.css?v=3">
-<script src="assets/apresentacao-questoes.js?v=3"></script>
+<link rel="stylesheet" href="assets/apresentacao-questoes.css?v=4">
+<script src="assets/apresentacao-questoes.js?v=4"></script>
 </head>
 <body>
 
@@ -7482,7 +7482,7 @@ function renderQuestao(index) {
   });
   const gabBox = document.getElementById('gabarito-box');
   const gabTxt = document.getElementById('gabarito-texto');
-  if (resp && !aguardando) { gabTxt.innerHTML = MedQuestQuestionPresentation.commentary(q.comentario, MedQuestQuestionPresentation.split(q.enunciado).objective, q.correta); gabBox.classList.add('visivel'); }
+  if (resp && !aguardando) { gabTxt.innerHTML = MedQuestQuestionPresentation.commentary(q.comentario, MedQuestQuestionPresentation.split(q.enunciado).objective, q.correta, {number: index + 1, hotpoint: q.hotpoint}); gabBox.classList.add('visivel'); }
   else { gabBox.classList.remove('visivel'); gabTxt.innerHTML = ''; }
   document.getElementById('btn-anterior').disabled = (index === 0);
   document.getElementById('btn-proximo').disabled = (index === total - 1);
