@@ -6,6 +6,19 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLo
 const admin=()=>typeof perfilAtual!=='undefined'&&perfilAtual?.admin===true;
 const types=[['expandido','Resumo expandido'],['simplificado','Resumo simplificado']];
 const icon=kind=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(kind==='simplificado'?'<path d="m13 2-9 12h7l-1 8 10-13h-7Z"/>':'<path d="M12 5v15M12 5C8 3 4 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-2-1-6-1-10 1Z"/>')+'</svg>';
+// Fixed cohort: only the twelve subjects submitted in the latest batch.
+// Never select by upload date or list position: future uploads must not change scope.
+const materialTopics={
+ microbiologia:[/\bstreptococcus\b.*\benterococcus\b/,/\bbastonetes-gram-positivos\b/,/\bbastonetes-gram-negativos\b/,/\bneisseria\b/,/\benterobacteriaceae\b/,/\bmicobacterias\b/,/\bmycoplasma\b.*\bchlamydia\b/,/\btreponema\b.*\bleptospira\b/],
+ farmacologia:[/\bantimicobacterianos\b/],
+ parasitologia:[/\bentamoebas?\b/,/\bgiardia\b.*\btrichomonas\b/,/\btoxoplasma\b/]
+};
+const hasMaterialSections=g=>(materialTopics[g.area]||[]).some(pattern=>[g.topicId,g.topic,g.title].some(value=>pattern.test(norm(value))));
+function legacySummary(g,canEdit){
+ const files=Object.values(g.files);
+ const actions=files.map(p=>'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">'+icon('expandido')+'Ler resumo</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button>'+(canEdit?'<button onclick="studyEditPdfMetadata(\''+p.id+'\')">Editar identificação</button><button onclick="studyDeletePdf(\''+p.id+'\')">Excluir arquivo</button>':'')).join('');
+ return '<article class="study-row mq-summary-legacy" data-summary-key="'+escape(g.key)+'"><div><b>'+escape(g.title)+'</b><p>'+escape(g.topic)+'</p></div><div class="mq-summary-version-actions">'+(actions||(canEdit?'<button onclick="studyOfficialAttach(\''+g.officialId+'\')">Publicar PDF</button>':'<span>PDF ainda não disponível</span>'))+'</div></article>';
+}
 function model(pdfs,texts,canEdit=false){
  const groups=new Map(),accounted=new Set();
  for(const p of pdfs){
@@ -32,7 +45,7 @@ function render({pdfs,texts,chosen='',query='',canEdit=false,areaName=id=>id,onC
  groups=model(pdfs,texts,canEdit);refresh=onChanged;feedback=onFeedback;
  const forcedOpen=pendingOpen;pendingOpen=null;
  const visible=groups.filter(g=>(!chosen||g.area===chosen)&&(!query||norm(g.title+' '+g.topic).includes(norm(query))));
- return visible.map(g=>'<details class="mq-summary-topic" data-summary-key="'+escape(g.key)+'"'+(openKeys.includes(g.key)||forcedOpen===g.key?' open':'')+'><summary><span class="mq-summary-topic-icon">'+icon('expandido')+'</span><span class="mq-summary-heading"><strong>'+escape(g.title)+'</strong><small>'+escape(areaName(g.area))+' · '+escape(g.topic)+'</small></span><svg class="mq-summary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="mq-summary-versions"><h3 class="mq-material-section-title">Resumos</h3>'+types.map(([kind,label])=>{
+ return visible.map(g=>!hasMaterialSections(g)?legacySummary(g,canEdit):'<details class="mq-summary-topic" data-summary-key="'+escape(g.key)+'"'+(openKeys.includes(g.key)||forcedOpen===g.key?' open':'')+'><summary><span class="mq-summary-topic-icon">'+icon('expandido')+'</span><span class="mq-summary-heading"><strong>'+escape(g.title)+'</strong><small>'+escape(areaName(g.area))+' · '+escape(g.topic)+'</small></span><svg class="mq-summary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="mq-summary-versions"><h3 class="mq-material-section-title">Resumos</h3>'+types.map(([kind,label])=>{
   const p=g.files[kind];
   const actions=p?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">'+icon('expandido')+'Ler resumo</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button>':'<button disabled>Ler resumo</button><button disabled>Baixar PDF</button>';
   const manage=!canEdit?'':p?'<details class="mq-summary-manage"><summary>Gerenciar</summary><div><button onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Substituir PDF</button><button onclick="studyEditPdfMetadata(\''+p.id+'\')">Editar identificação</button><button class="mq-material-delete" onclick="studyDeletePdf(\''+p.id+'\')">Excluir arquivo</button></div></details>':'<button class="mq-summary-publish" onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Publicar PDF</button>';
@@ -71,5 +84,5 @@ function pick(key,kind){
  };
  picker.click();
 }
-window.MedQuestSummaryVersions={model,render,pick,upload};
+window.MedQuestSummaryVersions={model,render,pick,upload,hasMaterialSections};
 })();

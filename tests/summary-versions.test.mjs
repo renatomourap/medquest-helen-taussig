@@ -21,3 +21,19 @@ test('publishing simplified PDF sends the original file object and preserves the
 test('replacement updates only the selected file and removes the old bytes only after the new path is confirmed',async()=>{const {api,events}=fixture();await api.upload(api.model([base,simple],[text])[0],'simplificado',{size:10,type:'application/pdf',name:'New.pdf'},simple);assert.equal(events.find(e=>e.action==='eq'&&e.key==='id').value,'simple');assert.deepEqual(events.at(-1).paths,['private/simple.pdf']);assert.equal(events.some(e=>e.paths?.includes('private/original.pdf')),false)});
 for(const mode of ['saveError','conflict'])test('failed replacement preserves both existing originals: '+mode,async()=>{const {api,events}=fixture({[mode]:true});await assert.rejects(api.upload(api.model([base,simple],[text])[0],'simplificado',{size:10,type:'application/pdf',name:'New.pdf'},simple));const removed=events.find(e=>e.action==='remove').paths;assert.equal(removed.length,1);assert.match(removed[0],/new-file.pdf/);assert.equal(removed.includes(simple.arquivo_path),false)});
 test('students and invalid files cannot initiate an upload',async()=>{const f=fixture({admin:false});await assert.rejects(f.api.upload({},'simplificado',{size:10,type:'application/pdf'}));assert.equal(f.events.length,0);const a=fixture();await assert.rejects(a.api.upload({},'simplificado',{size:10,type:'text/plain',name:'bad.txt'}));assert.equal(a.events.length,0)});
+
+test('only the fixed twelve subjects receive summary versions and lecture slots',()=>{
+ const {api}=fixture();
+ const cohort={microbiologia:['Streptococcus e Enterococcus','Bastonetes Gram-positivos','Bastonetes Gram-negativos','Neisseria sp.','Enterobacteriaceae','Micobactérias','Mycoplasma e Chlamydia','Treponema e Leptospira'],farmacologia:['Antimicobacterianos'],parasitologia:['Protozoários cavitários: Entamoebas','Giardia e Trichomonas','Toxoplasma gondii e Toxoplasmose']};
+ let count=0;
+ for(const [area,titles] of Object.entries(cohort))for(const title of titles){
+  const html=api.render({pdfs:[{...base,titulo:title,tema_id:title,tema_nome:title,disciplina_id:area}],texts:[]});
+  assert.match(html,/Materiais da aula/,title);assert.match(html,/Capítulos de referência/);count++;
+ }
+ assert.equal(count,12);
+ for(const [area,title] of [['microbiologia','Biofilmes Bacterianos'],['microbiologia','Microbiota Humana'],['microbiologia','Staphylococcus sp.'],['farmacologia','Antibióticos I — Beta-lactâmicos'],['imunologia','Distúrbios de Hipersensibilidade'],['parasitologia','Introdução à Parasitologia'],['parasitologia','Artrópodes, Vetores e Parasitas'],['microbiologia','Novo assunto']]){
+  const html=api.render({pdfs:[{...base,titulo:title,tema_id:title,tema_nome:title,disciplina_id:area}],texts:[],canEdit:true});
+  assert.doesNotMatch(html,/mq-summary-topic|Materiais da aula|Resumo simplificado/,title);
+  assert.match(html,/studyOfficialPdf\('expanded'\)/);assert.match(html,/studyOfficialDownload\('expanded'\)/);assert.match(html,/studyEditPdfMetadata/);
+ }
+});
