@@ -51,3 +51,19 @@ test('general explanation supplies correct feedback in legacy comments without a
 test('species abbreviations and prose beginning with Resposta remain in their original alternative',()=>{
  const result=model.feedbackModel(model.commentSections('A) CORRETA\nB. cereus é móvel.\nB DISTRATOR\nC. diphtheriae não forma esporos.\nC) INCORRETA\nResposta prévia não demonstra deficiência.\nD) INCORRETA\nOutro mecanismo.'),'A');assert.equal(result.alternatives[0].text,'B. cereus é móvel.');assert.equal(result.alternatives[1].text,'C. diphtheriae não forma esporos.');assert.equal(result.alternatives[2].text,'Resposta prévia não demonstra deficiência.');
 });
+test('clinical introduction beginning with Dois is never hidden before a later Um deles sentence',()=>{
+ const objective='Correlacionar pleomorfismo, cápsula e tipagem antigênica com a interpretação microbiológica.';
+ const clinical='Dois isolados de pacientes com infecção respiratória mostram cocobacilos pleomórficos e exigem meios enriquecidos. Um deles foi obtido de secreção brônquica de adulto com DPOC; o outro, do sangue de criança não vacinada com meningite.';
+ const p=model.split('Objetivo de aprendizagem. '+objective+' '+clinical+' Pergunta. Qual interpretação explica a diferença?');
+ assert.equal(p.objective,objective);assert.equal(p.text,clinical);assert.equal(p.command,'Qual interpretação explica a diferença?');
+});
+test('clinical sentences before a later Paciente or Uma are preserved regardless of their opening words',()=>{
+ for(const intro of ['Após uma confraternização, dois adultos adoeceram. Ambos tiveram exposição costeira.','Em investigação de equipamento respiratório, foi isolado um bacilo. O crescimento concentra-se na interface com o ar.','Dois pacientes ingeriram frutos do mar. O primeiro desenvolveu diarreia.']){
+  const clinical=intro+' Uma avaliação foi realizada.';const p=model.split('Objetivo: Relacionar os mecanismos. '+clinical+' Pergunta: Qual interpretação explica o quadro?');assert.equal(p.objective,'Relacionar os mecanismos.');assert.equal(p.text,clinical);
+ }
+});
+test('exact source objective handles multiple sentences, abbreviations and wrapped whitespace without consuming the case',()=>{
+ const objective='Interpretar H. influenzae. Correlacionar os fatores X e V.';const clinical='Dois isolados foram investigados. Um deles exige ambos os fatores.';
+ const p=model.split('Objetivo de aprendizagem: Interpretar H. influenzae. Correlacionar os fatores X e V. '+clinical+' Pergunta: Qual interpretação é adequada?',objective);assert.equal(p.objective,objective);assert.equal(p.text,clinical);
+ const fallback=model.split('Objetivo: Explicar o mecanismo. Dois isolados foram investigados. Um deles foi cultivado. Pergunta: Qual agente?', 'Objetivo diferente que não está no texto.');assert.equal(fallback.objective,'Explicar o mecanismo.');assert.match(fallback.text,/^Dois isolados/);
+});

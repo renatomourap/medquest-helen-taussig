@@ -2253,7 +2253,7 @@
 <link rel="stylesheet" href="assets/pesquisa.css?v=compact-3">
 <link rel="stylesheet" href="assets/navegacao-questoes.css?v=pages-2">
 <link rel="stylesheet" href="assets/apresentacao-questoes.css?v=4">
-<script src="assets/apresentacao-questoes.js?v=4"></script>
+<script src="assets/apresentacao-questoes.js?v=preserve-statements-5"></script>
 </head>
 <body>
 
@@ -7446,7 +7446,8 @@ function renderQuestao(index) {
   document.getElementById('q-numero').textContent =
     `Questão ${index + 1} • ${q.hotpoint}` +
     (q.__mqHotpointTitulo ? ` — ${q.__mqHotpointTitulo}` : '');
-  document.getElementById('q-enunciado').innerHTML = MedQuestQuestionPresentation.statement(q.enunciado);
+  const questionPresentation = MedQuestQuestionPresentation.question(q);
+  document.getElementById('q-enunciado').innerHTML = questionPresentation.html;
   const altContainer = document.getElementById('alternativas');
   altContainer.innerHTML = '';
   const resp = estadoAtual.respostas[index];
@@ -7482,7 +7483,7 @@ function renderQuestao(index) {
   });
   const gabBox = document.getElementById('gabarito-box');
   const gabTxt = document.getElementById('gabarito-texto');
-  if (resp && !aguardando) { gabTxt.innerHTML = MedQuestQuestionPresentation.commentary(q.comentario, MedQuestQuestionPresentation.split(q.enunciado).objective, q.correta, {number: index + 1, hotpoint: q.hotpoint}); gabBox.classList.add('visivel'); }
+  if (resp && !aguardando) { gabTxt.innerHTML = MedQuestQuestionPresentation.commentary(q.comentario, questionPresentation.objective, q.correta, {number: index + 1, hotpoint: q.hotpoint}); gabBox.classList.add('visivel'); }
   else { gabBox.classList.remove('visivel'); gabTxt.innerHTML = ''; }
   document.getElementById('btn-anterior').disabled = (index === 0);
   document.getElementById('btn-proximo').disabled = (index === total - 1);

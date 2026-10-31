@@ -1,14 +1,24 @@
 // Presentation only: never changes question objects, IDs or saved answers.
 (function(){
   const escape=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function split(value){
+  function split(value,knownObjective=''){
     let text=String(value||'').replace(/\r/g,'').trim(),objective='',command='';
     const label=/^Objetivo(?: de aprendizagem)?\s*[:.\-–]?\s*/i;
     if(label.test(text)){
       const rest=text.replace(label,'');
-      let boundary=rest.search(/\n\s*\n|\n\s*(?:Enunciado(?: clínico)?|Caso clínico)\s*:/i);
-      if(boundary<0){const m=/\.\s+(?=(?:Uma? |Paciente |Durante |Na avaliação |Em um|Em uma))/i.exec(rest);if(m)boundary=m.index+1;}
-      if(boundary<0){const m=/\.\s+(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÇ])/.exec(rest);if(m)boundary=m.index+1;}
+      // Exact source metadata wins; never search for a later clinical opening.
+      const escaped=String(knownObjective||'').trim().split(/\s+/).map(word=>word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('\\s+');
+      const sourceMatch=escaped?new RegExp('^'+escaped+'(?=\\s|$)','i').exec(rest):null;
+      let boundary=sourceMatch?sourceMatch[0].length:-1;
+      if(boundary<0){
+        // Explicit paragraph or clinical label delimiters preserve multiline objectives.
+        boundary=rest.search(/\n\s*\n|\n\s*(?:Enunciado(?: clínico)?|Caso clínico)\s*:/i);
+      }
+      if(boundary<0){
+        // Conservative fallback: the FIRST sentence, not a sentence selected by its first word.
+        const first=/\.\s+(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÇ])/.exec(rest);
+        if(first)boundary=first.index+1;
+      }
       if(boundary>=0){objective=rest.slice(0,boundary).trim();text=rest.slice(boundary).trim();}
     }else{
       // Some source PDFs use an unlabelled objective in a separate first paragraph.
@@ -26,7 +36,7 @@
     if(!command){const boundaries=[...text.matchAll(/[.!]\s+(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÇ])/g)];const last=boundaries.at(-1);if(last){command=text.slice(last.index+1).trim();text=text.slice(0,last.index+1).trim();}}
     return {text,objective,command};
   }
-  function statement(value){const p=split(value);return (p.text?'<p>'+escape(p.text).replace(/\n\s*\n/g,'</p><p>')+'</p>':'')+(p.command?'<p class="mq-question-command">'+escape(p.command)+'</p>':'');}
+  function statement(value,knownObjective=''){const p=split(value,knownObjective);return (p.text?'<p>'+escape(p.text).replace(/\n\s*\n/g,'</p><p>')+'</p>':'')+(p.command?'<p class="mq-question-command">'+escape(p.command)+'</p>':'');}
   function commentSections(value,objective){
     const lines=String(value||'').replace(/\r/g,'').replace(/[^\S\n]*\bObjetivo de aprendizagem\b\s*[:.·–—-]?\s*/gi,'\nObjetivo de aprendizagem: ').replace(/[^\S\n]*\bObjetivo\s*[:.]\s*/gi,'\nObjetivo: ').replace(/\s+(?=[A-D]\)\s*(?:in)?correta\b)/gi,'\n').replace(/\s*·\s*(?=Objetivo(?: de aprendizagem)?\s*:)/gi,'\n').split('\n');
     const sections=[];let current=null;
@@ -80,5 +90,12 @@
     const learning='<p><strong class="mq-learning-objective">'+(model.objective?'Objetivo de aprendizagem: '+escape(model.objective):'Objetivo de aprendizagem não informado neste material.')+'</strong></p>';
     return header+learning+model.alternatives.map(item=>'<div class="mq-comment-alternative"><span class="mq-answer-badge '+(item.correct?'mq-answer-correct':'mq-answer-incorrect')+'">'+item.letter+') '+(item.correct?'CORRETA':'INCORRETA')+'</span><p>'+escape(item.text||'Justificativa não informada neste material.')+'</p></div>').join('');
   }
-  window.MedQuestQuestionPresentation={split,statement,commentary,commentSections,feedbackModel};
+  function question(q){
+    const decode=document.createElement('div');
+    decode.innerHTML=String(q.comentario||'').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<\/(?:p|div|li)>/gi,'\n');
+    const sourceObjective=feedbackModel(commentSections(decode.textContent),q.correta).objective;
+    const parts=split(q.enunciado,sourceObjective);
+    return {...parts,html:statement(q.enunciado,sourceObjective)};
+  }
+  window.MedQuestQuestionPresentation={split,statement,commentary,commentSections,feedbackModel,question};
 })();
