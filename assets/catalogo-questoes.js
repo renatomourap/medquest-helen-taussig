@@ -27,6 +27,7 @@
   window.MedQuestQuestionSearch={matches:questionMatches};
   // Títulos conferidos nos cadernos PDF originais.
   const hpTitles={
+  "toxoplasma-gondii-e-toxoplasmose": ["Ciclo de vida e transmissão", "Patogênese e resposta imune", "Manifestações clínicas", "Diagnóstico", "Tratamento, conduta e prevenção"],
 
   "micobacterias": [
     "Fisiologia e estrutura",
@@ -166,9 +167,35 @@
     "Classificação de helmintos"
   ]
 };
+  const hpSubjects={
+  "antimicobacterianos": "Antimicobacterianos",
+  "micobacterias": "Micobactérias",
+  "mycoplasma-sp-e-chlamydia-sp": "Mycoplasma sp. e Chlamydia sp.",
+  "enterobacteriaceae": "Enterobacteriaceae",
+  "treponema-sp-e-leptospira-sp": "Treponema sp. e Leptospira sp.",
+  "giardia-e-trichomonas": "Giardia e Trichomonas",
+  "protozoarios-cavitarios-entamoebas": "Protozoários cavitários: Entamoebas",
+  "bastonetes-gram-positivos": "Bastonetes Gram-positivos",
+  "bastonetes-gram-negativos": "Bastonetes Gram-negativos",
+  "streptococcus-sp-e-enterococcus-sp": "Streptococcus sp. e Enterococcus sp.",
+  "neisseria-sp": "Neisseria sp.",
+  "staphylococcus-sp": "Staphylococcus sp.",
+  "biofilmes-bacterianos": "Biofilmes Bacterianos",
+  "hipersensibilidade": "Distúrbios de Hipersensibilidade",
+  "imunodeficiencias-primarias": "Imunodeficiências Primárias",
+  "antibioticos-i-beta-lactamicos": "Antibióticos I — Beta-lactâmicos",
+  "antibioticos-ii-sintese-proteica": "Antibióticos II — Síntese Proteica",
+  "antibioticos-iii-sulfonamidas-e-quinolonas": "Antibióticos III — Sulfonamidas e Quinolonas",
+  "artropodes-vetores-e-parasitas": "Artrópodes, Vetores e Parasitas",
+  "introducao-a-parasitologia": "Introdução à Parasitologia",
+  "microbiota-humana": "Microbiota Humana",
+  "infeccao-hospitalar": "Infecção Hospitalar",
+  "toxoplasma-gondii-e-toxoplasmose": "Toxoplasma gondii e toxoplasmose"
+};
   const hpTitle=(topic,hp)=>{
     const i=Number(String(hp).match(/\d+/)?.[0]||0)-1;
-    return hpTitles[topic]?.[i]||'';
+    const title=hpTitles[topic]?.[i]||'';
+    return title&&hpSubjects[topic]?title+' — '+hpSubjects[topic]:title;
   };
   window.MedQuestHotPoints={titulo:hpTitle};
   const normalizeHP=q=>{

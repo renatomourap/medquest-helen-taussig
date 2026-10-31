@@ -40,3 +40,10 @@ test('question search matches named Hot Points and ignores accents without mutat
  const row={areaName:'Imunologia',temaName:'Deficiências',hotpoint:'Hot Point 1',hotpointTitle:'Investigação de imunodeficiências',questao:{id:7,enunciado:'Caso clínico',alternativas:[{texto:'Linfócitos B'}]}};
  const before=JSON.stringify(row);assert.equal(matches(row,'investigacao linfocitos'),true);assert.equal(matches(row,'parasita'),false);assert.equal(JSON.stringify(row),before);
 });
+test('Hot Point filter titles include the organism or subject and distinguish repeated headings',()=>{
+ const f=catalogFixture(),title=f.ctx.MedQuestHotPoints.titulo;
+ assert.equal(title('staphylococcus-sp','Hot Point 1'),'Fisiologia e estrutura — Staphylococcus sp.');
+ assert.equal(title('micobacterias','Hot Point 1'),'Fisiologia e estrutura — Micobactérias');
+ assert.notEqual(title('staphylococcus-sp','Hot Point 1'),title('micobacterias','Hot Point 1'));
+ for(let n=1;n<=5;n++)assert.match(title('toxoplasma-gondii-e-toxoplasmose','Hot Point '+n),/Toxoplasma gondii e toxoplasmose/);
+});
