@@ -7,3 +7,6 @@
 .mq-answer-badge { display: table; margin: .8em 0 .35em; padding: .16em .45em; border-radius: .3em; font-size: 1em; line-height: 1.35; font-weight: 700; color: #102024; vertical-align: baseline; }
 .mq-answer-correct { background: #59d29d; }
 .mq-answer-incorrect { background: #f78488; }
+
+#gabarito-texto p { margin: 0 0 .75em; }
+.mq-comment-alternative { margin-top: 1.2em; }

@@ -8,6 +8,7 @@
       const rest=text.replace(label,'');
       let boundary=rest.search(/\n\s*\n|\n\s*(?:Enunciado(?: clínico)?|Caso clínico)\s*:/i);
       if(boundary<0){const m=/\.\s+(?=(?:Uma? |Paciente |Durante |Na avaliação |Em um|Em uma))/i.exec(rest);if(m)boundary=m.index+1;}
+      if(boundary<0){const m=/\.\s+(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÇ])/.exec(rest);if(m)boundary=m.index+1;}
       if(boundary>=0){objective=rest.slice(0,boundary).trim();text=rest.slice(boundary).trim();}
     }else{
       // Some source PDFs use an unlabelled objective in a separate first paragraph.
@@ -20,26 +21,43 @@
     else{
       const paragraphs=text.split(/\n\s*\n/);
       if(paragraphs.length>1&&/\?\s*$/.test(paragraphs.at(-1))){command=paragraphs.pop().trim();text=paragraphs.join('\n\n').trim();}
-      else{const m=/(?:^|[.!]\s+)((?:Qual|Quais|Que mecanismo|Como|Considerando|Com base|Diante)[^?]*\?)\s*$/i.exec(text);if(m&&m.index>0){command=m[1].trim();text=text.slice(0,m.index+(/^[.!]/.test(m[0])?1:0)).trim();}}
+      else{const m=/(?:^|[.!]\s+)((?:Qual|Quais|Que [^?]*|Em qual|Como|Considerando|Com base|Diante)[^?]*\?)\s*$/i.exec(text);if(m&&m.index>0){command=m[1].trim();text=text.slice(0,m.index+(/^[.!]/.test(m[0])?1:0)).trim();}}
     }
+    if(!command){const boundaries=[...text.matchAll(/[.!]\s+(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÇ])/g)];const last=boundaries.at(-1);if(last){command=text.slice(last.index+1).trim();text=text.slice(0,last.index+1).trim();}}
     return {text,objective,command};
   }
   function statement(value){const p=split(value);return (p.text?'<p>'+escape(p.text).replace(/\n\s*\n/g,'</p><p>')+'</p>':'')+(p.command?'<p class="mq-question-command">'+escape(p.command)+'</p>':'');}
-  function commentary(html,objective){
-    const box=document.createElement('div');box.innerHTML=String(html||'');
-    const walker=document.createTreeWalker(box,4),nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-    let foundObjective=false;
-    for(const node of nodes){
-      const text=node.nodeValue;
-      if(/^\s*Objetivo(?: de aprendizagem)?\s*[:.]/i.test(text)){
-        foundObjective=true;const strong=document.createElement('strong');strong.className='mq-learning-objective';strong.textContent=text.trim();node.replaceWith(strong);continue;
-      }
-      const regex=/(^|\n|•\s*)([A-D])\s*(?:\)|[.:])?\s+(INCORRETA|CORRETA)\b\s*:?/gi;let m,last=0;const fragment=document.createDocumentFragment();
-      while((m=regex.exec(text))){fragment.append(document.createTextNode(text.slice(last,m.index)+m[1]));const badge=document.createElement('span');badge.className='mq-answer-badge '+(m[3].toUpperCase()==='CORRETA'?'mq-answer-correct':'mq-answer-incorrect');badge.textContent=m[2].toUpperCase()+') '+m[3].toUpperCase();fragment.append(badge);last=regex.lastIndex;}
-      if(last){fragment.append(document.createTextNode(text.slice(last)));node.replaceWith(fragment);}
+  function commentSections(value,objective){
+    const lines=String(value||'').replace(/\r/g,'').replace(/\s+(?=[A-D]\)\s*(?:in)?correta\b)/gi,'\n').replace(/\s*·\s*(?=Objetivo(?: de aprendizagem)?\s*:)/gi,'\n').split('\n');
+    const sections=[];let current=null;
+    const heading=/^\s*(?:[•×✓✔–—-]\s*)?([A-D])\s*(?:[).:·–—-]\s*|\s+(?=(?:incorreta|correta|inadequada)\b))/i;
+    const objectiveLabel=/^\s*Objetivo(?: de aprendizagem)?\s*[:.]/i;
+    function add(type,text,letter){current={type,text:[text],letter};sections.push(current);}
+    for(const raw of lines){
+      const line=raw.trim();
+      if(!line){if(current?.type==='plain')current=null;continue;}
+      const alt=heading.exec(line);
+      if(objectiveLabel.test(line)){add('objective',line);}
+      else if(alt){const body=line.slice(alt[0].length).replace(/^(?:(?:incorreta|correta|inadequada)\b\s*[:.–—-]?\s*)+/i,'');add('alternative',body,alt[1].toUpperCase());}
+      else if(/^(?:Questão\s*\d|Resposta\b|Fonte\s*:|Base\s*:|HP\s*\d)/i.test(line)){add('plain',line);}
+      else if(current){current.text.push(line);}
+      else add('plain',line);
     }
-    if(objective&&!foundObjective){const p=document.createElement('p'),strong=document.createElement('strong');strong.className='mq-learning-objective';strong.textContent='Objetivo de aprendizagem: '+objective;p.append(strong);box.prepend(p);}
-    return box.innerHTML;
+    if(objective&&!sections.some(s=>s.type==='objective'))sections.unshift({type:'objective',text:['Objetivo de aprendizagem: '+objective]});
+    return sections;
   }
-  window.MedQuestQuestionPresentation={split,statement,commentary};
+  function commentary(html,objective,correct){
+    // Normalize legacy HTML and plain PDF imports into the same readable sections.
+    const decode=document.createElement('div');
+    decode.innerHTML=String(html||'').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<\/(?:p|div|li)>/gi,'\n');
+    const sections=commentSections(decode.textContent,objective);
+    const badge=letter=>'<span class="mq-answer-badge '+(letter===correct?'mq-answer-correct':'mq-answer-incorrect')+'">'+letter+') '+(letter===correct?'CORRETA':'INCORRETA')+'</span>';
+    return sections.map(section=>{
+      const text=escape(section.text.join(' '));
+      if(section.type==='objective')return '<p><strong class="mq-learning-objective">'+text+'</strong></p>';
+      if(section.type==='alternative')return '<div class="mq-comment-alternative">'+badge(section.letter)+'<p>'+text+'</p></div>';
+      return '<p>'+text.replace(/(Resposta(?: correta)?\s*:\s*)([A-D])\b/i,(_,label,letter)=>label+badge(letter.toUpperCase()))+'</p>';
+    }).join('');
+  }
+  window.MedQuestQuestionPresentation={split,statement,commentary,commentSections};
 })();
