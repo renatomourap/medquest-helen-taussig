@@ -22,7 +22,7 @@ test('replacement updates only the selected file and removes the old bytes only 
 for(const mode of ['saveError','conflict'])test('failed replacement preserves both existing originals: '+mode,async()=>{const {api,events}=fixture({[mode]:true});await assert.rejects(api.upload(api.model([base,simple],[text])[0],'simplificado',{size:10,type:'application/pdf',name:'New.pdf'},simple));const removed=events.find(e=>e.action==='remove').paths;assert.equal(removed.length,1);assert.match(removed[0],/new-file.pdf/);assert.equal(removed.includes(simple.arquivo_path),false)});
 test('students and invalid files cannot initiate an upload',async()=>{const f=fixture({admin:false});await assert.rejects(f.api.upload({},'simplificado',{size:10,type:'application/pdf'}));assert.equal(f.events.length,0);const a=fixture();await assert.rejects(a.api.upload({},'simplificado',{size:10,type:'text/plain',name:'bad.txt'}));assert.equal(a.events.length,0)});
 
-test('only the fixed twelve subjects receive summary versions and lecture slots',()=>{
+test('all subjects retain summary versions; only the fixed twelve receive lecture slots',()=>{
  const {api}=fixture();
  const cohort={microbiologia:['Streptococcus e Enterococcus','Bastonetes Gram-positivos','Bastonetes Gram-negativos','Neisseria sp.','Enterobacteriaceae','Micobactérias','Mycoplasma e Chlamydia','Treponema e Leptospira'],farmacologia:['Antimicobacterianos'],parasitologia:['Protozoários cavitários: Entamoebas','Giardia e Trichomonas','Toxoplasma gondii e Toxoplasmose']};
  let count=0;
@@ -33,7 +33,9 @@ test('only the fixed twelve subjects receive summary versions and lecture slots'
  assert.equal(count,12);
  for(const [area,title] of [['microbiologia','Biofilmes Bacterianos'],['microbiologia','Microbiota Humana'],['microbiologia','Staphylococcus sp.'],['farmacologia','Antibióticos I — Beta-lactâmicos'],['imunologia','Distúrbios de Hipersensibilidade'],['parasitologia','Introdução à Parasitologia'],['parasitologia','Artrópodes, Vetores e Parasitas'],['microbiologia','Novo assunto']]){
   const html=api.render({pdfs:[{...base,titulo:title,tema_id:title,tema_nome:title,disciplina_id:area}],texts:[],canEdit:true});
-  assert.doesNotMatch(html,/mq-summary-topic|Materiais da aula|Resumo simplificado/,title);
+  assert.doesNotMatch(html,/Materiais da aula|Slides da aula|Capítulos de referência/,title);
+  assert.match(html,/mq-summary-topic/,title);assert.match(html,/Resumo expandido/,title);assert.match(html,/Resumo simplificado/,title);
+  assert.equal((html.match(/class="mq-summary-version"/g)||[]).length,2);
   assert.match(html,/studyOfficialPdf\('expanded'\)/);assert.match(html,/studyOfficialDownload\('expanded'\)/);assert.match(html,/studyEditPdfMetadata/);
  }
 });

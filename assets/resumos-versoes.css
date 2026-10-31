@@ -39,6 +39,3 @@
 /* 12px titles override the generic 20px study heading (40% smaller).
    Grid gap keeps each heading close to its children and preserves sibling spacing. */
 .mq-summary-topic[open]{padding-bottom:20px}
-.mq-summary-legacy{margin-bottom:0}
-.mq-summary-legacy .mq-summary-version-actions{flex-wrap:wrap;flex-shrink:1}
-@media(max-width:650px){.mq-summary-legacy .mq-summary-version-actions{margin-left:0;justify-content:flex-start}}

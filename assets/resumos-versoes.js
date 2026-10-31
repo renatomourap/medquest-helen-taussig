@@ -14,11 +14,6 @@ const materialTopics={
  parasitologia:[/\bentamoebas?\b/,/\bgiardia\b.*\btrichomonas\b/,/\btoxoplasma\b/]
 };
 const hasMaterialSections=g=>(materialTopics[g.area]||[]).some(pattern=>[g.topicId,g.topic,g.title].some(value=>pattern.test(norm(value))));
-function legacySummary(g,canEdit){
- const files=Object.values(g.files);
- const actions=files.map(p=>'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">'+icon('expandido')+'Ler resumo</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button>'+(canEdit?'<button onclick="studyEditPdfMetadata(\''+p.id+'\')">Editar identificação</button><button onclick="studyDeletePdf(\''+p.id+'\')">Excluir arquivo</button>':'')).join('');
- return '<article class="study-row mq-summary-legacy" data-summary-key="'+escape(g.key)+'"><div><b>'+escape(g.title)+'</b><p>'+escape(g.topic)+'</p></div><div class="mq-summary-version-actions">'+(actions||(canEdit?'<button onclick="studyOfficialAttach(\''+g.officialId+'\')">Publicar PDF</button>':'<span>PDF ainda não disponível</span>'))+'</div></article>';
-}
 function model(pdfs,texts,canEdit=false){
  const groups=new Map(),accounted=new Set();
  for(const p of pdfs){
@@ -45,12 +40,12 @@ function render({pdfs,texts,chosen='',query='',canEdit=false,areaName=id=>id,onC
  groups=model(pdfs,texts,canEdit);refresh=onChanged;feedback=onFeedback;
  const forcedOpen=pendingOpen;pendingOpen=null;
  const visible=groups.filter(g=>(!chosen||g.area===chosen)&&(!query||norm(g.title+' '+g.topic).includes(norm(query))));
- return visible.map(g=>!hasMaterialSections(g)?legacySummary(g,canEdit):'<details class="mq-summary-topic" data-summary-key="'+escape(g.key)+'"'+(openKeys.includes(g.key)||forcedOpen===g.key?' open':'')+'><summary><span class="mq-summary-topic-icon">'+icon('expandido')+'</span><span class="mq-summary-heading"><strong>'+escape(g.title)+'</strong><small>'+escape(areaName(g.area))+' · '+escape(g.topic)+'</small></span><svg class="mq-summary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="mq-summary-versions"><h3 class="mq-material-section-title">Resumos</h3>'+types.map(([kind,label])=>{
+ return visible.map(g=>'<details class="mq-summary-topic" data-summary-key="'+escape(g.key)+'"'+(openKeys.includes(g.key)||forcedOpen===g.key?' open':'')+'><summary><span class="mq-summary-topic-icon">'+icon('expandido')+'</span><span class="mq-summary-heading"><strong>'+escape(g.title)+'</strong><small>'+escape(areaName(g.area))+' · '+escape(g.topic)+'</small></span><svg class="mq-summary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="mq-summary-versions"><h3 class="mq-material-section-title">Resumos</h3>'+types.map(([kind,label])=>{
   const p=g.files[kind];
   const actions=p?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">'+icon('expandido')+'Ler resumo</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button>':'<button disabled>Ler resumo</button><button disabled>Baixar PDF</button>';
   const manage=!canEdit?'':p?'<details class="mq-summary-manage"><summary>Gerenciar</summary><div><button onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Substituir PDF</button><button onclick="studyEditPdfMetadata(\''+p.id+'\')">Editar identificação</button><button class="mq-material-delete" onclick="studyDeletePdf(\''+p.id+'\')">Excluir arquivo</button></div></details>':'<button class="mq-summary-publish" onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Publicar PDF</button>';
   return '<section class="mq-summary-version" aria-label="'+escape(label)+'"><span class="mq-summary-version-icon">'+icon(kind)+'</span><div class="mq-summary-version-label"><h3>'+label+'</h3><small class="'+(p?'mq-version-ready':'mq-version-empty')+'">'+(p?'PDF original disponível':'Ainda não disponível')+'</small></div><div class="mq-summary-version-actions">'+actions+manage+'</div></section>';
- }).join('')+lectureMaterials()+'</div></details>').join('')||'<p class="study-empty">Nenhum resumo disponível com esses filtros.</p>';
+ }).join('')+(hasMaterialSections(g)?lectureMaterials():'')+'</div></details>').join('')||'<p class="study-empty">Nenhum resumo disponível com esses filtros.</p>';
 }
 async function upload(group,kind,file,existing){
  if(!admin())throw Error('Somente administradores podem publicar PDFs.');
