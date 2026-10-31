@@ -27,6 +27,50 @@
   window.MedQuestQuestionSearch={matches:questionMatches};
   // Títulos conferidos nos cadernos PDF originais.
   const hpTitles={
+
+  "micobacterias": [
+    "Fisiologia e estrutura",
+    "Patogênese e imunidade",
+    "Epidemiologia",
+    "Doenças clínicas",
+    "Diagnóstico, tratamento, prevenção e controle"
+  ],
+  "mycoplasma-sp-e-chlamydia-sp": [
+    "Fisiologia e estrutura",
+    "Patogênese e imunidade",
+    "Epidemiologia",
+    "Doenças clínicas",
+    "Diagnóstico, tratamento, prevenção e controle"
+  ],
+  "enterobacteriaceae": [
+    "Fisiologia e estrutura",
+    "Patogênese e imunidade",
+    "Epidemiologia",
+    "Doenças clínicas",
+    "Diagnóstico, tratamento, prevenção e controle"
+  ],
+  "treponema-sp-e-leptospira-sp": [
+    "Fisiologia e estrutura",
+    "Patogênese e imunidade",
+    "Epidemiologia",
+    "Doenças clínicas",
+    "Diagnóstico, tratamento, prevenção e controle"
+  ],
+  "antimicobacterianos": [
+    "Características físico-químicas e mecanismos de ação",
+    "Resistência micobacteriana e testes de sensibilidade",
+    "Tratamento da tuberculose e da hanseníase",
+    "Reações adversas e toxicidade antimicobacteriana",
+    "Interações medicamentosas e implicações clínicas"
+  ],
+  "giardia-e-trichomonas": [
+    "Morfologia e organização celular",
+    "Fases evolutivas e ciclos",
+    "Clínica e epidemiologia",
+    "Mecanismos fisiopatológicos",
+    "Diagnóstico, controle e profilaxia"
+  ]
+,
   "bastonetes-gram-negativos": [
     "Fisiologia e estrutura",
     "Patogênese e imunidade",
