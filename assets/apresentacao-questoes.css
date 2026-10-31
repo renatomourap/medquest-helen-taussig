@@ -1,0 +1,9 @@
+.questao-enunciado { text-align: justify; text-justify: inter-word; overflow-wrap: break-word; }
+.questao-enunciado p { margin: 0; white-space: normal; }
+.questao-enunciado p + p { margin-top: 1.65em; }
+.questao-enunciado .mq-question-command { font-weight: 700; }
+.mq-learning-objective { font-weight: 700; font-style: normal; }
+#gabarito-texto em:has(.mq-learning-objective) { font-style: normal; }
+.mq-answer-badge { display: table; margin: .8em 0 .35em; padding: .16em .45em; border-radius: .3em; font-size: 1em; line-height: 1.35; font-weight: 700; color: #102024; vertical-align: baseline; }
+.mq-answer-correct { background: #59d29d; }
+.mq-answer-incorrect { background: #f78488; }
