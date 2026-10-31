@@ -29,3 +29,15 @@ test('legacy middle dots, cross marks and inline headings all receive alternativ
 test('legacy objectives before different clinical openings and implicit commands stay complete',()=>{
  const p=model.split('Objetivo de aprendizagem. Relacionar transmissão de H. influenzae com doença. No mesmo ambulatório, uma criança tem febre. A equipe quer definir a conduta.');assert.equal(p.objective,'Relacionar transmissão de H. influenzae com doença.');assert.equal(p.command,'A equipe quer definir a conduta.');assert.equal(p.text,'No mesmo ambulatório, uma criança tem febre.');
 });
+test('approved layout recognizes uppercase unpunctuated learning objective on the same metadata line',()=>{
+ const value='HP 02 · INTERMEDIÁRIA · fonte: pp. 8 OBJETIVO DE APRENDIZAGEM Distinguir acilação de pbps a partir do mecanismo e de suas implicações farmacológicas.';
+ const sections=model.commentSections(value);
+ assert.equal(sections.length,2);assert.equal(sections[0].type,'plain');assert.equal(sections[0].text[0],'HP 02 · INTERMEDIÁRIA · fonte: pp. 8');assert.equal(sections[1].type,'objective');assert.equal(sections[1].text[0],'Objetivo de aprendizagem: Distinguir acilação de pbps a partir do mecanismo e de suas implicações farmacológicas.');
+});
+test('uppercase learning objective heading on its own line includes the complete wrapped objective only',()=>{
+ const sections=model.commentSections('HP 02 · DIFÍCIL · fonte: p. 8\nOBJETIVO DE APRENDIZAGEM\nDistinguir acilação de pbps a partir do mecanismo\ne de suas implicações farmacológicas.\nA) Correta: Explicação.\nB) Incorreta: Outra explicação.');
+ const objective=sections.filter(s=>s.type==='objective');assert.equal(objective.length,1);assert.equal(objective[0].text.join(' '),'Objetivo de aprendizagem: Distinguir acilação de pbps a partir do mecanismo e de suas implicações farmacológicas.');assert.equal(sections.filter(s=>s.type==='alternative').length,2);
+});
+test('objective after a difficulty label gets its own bold section',()=>{
+ const sections=model.commentSections('DIFÍCIL Objetivo: Diferenciar Neisseria mucosa.\n\nReferência da questão: Resumo Expandido, p. 18.\nA) INCORRETA\nExplicação.');assert.equal(sections[0].type,'plain');assert.equal(sections[0].text[0],'DIFÍCIL');assert.equal(sections[1].type,'objective');
+});

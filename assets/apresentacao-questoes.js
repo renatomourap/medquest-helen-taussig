@@ -28,18 +28,18 @@
   }
   function statement(value){const p=split(value);return (p.text?'<p>'+escape(p.text).replace(/\n\s*\n/g,'</p><p>')+'</p>':'')+(p.command?'<p class="mq-question-command">'+escape(p.command)+'</p>':'');}
   function commentSections(value,objective){
-    const lines=String(value||'').replace(/\r/g,'').replace(/\s+(?=[A-D]\)\s*(?:in)?correta\b)/gi,'\n').replace(/\s*·\s*(?=Objetivo(?: de aprendizagem)?\s*:)/gi,'\n').split('\n');
+    const lines=String(value||'').replace(/\r/g,'').replace(/[^\S\n]*\bObjetivo de aprendizagem\b\s*[:.–—-]?\s*/gi,'\nObjetivo de aprendizagem: ').replace(/[^\S\n]*\bObjetivo\s*[:.]\s*/gi,'\nObjetivo: ').replace(/\s+(?=[A-D]\)\s*(?:in)?correta\b)/gi,'\n').replace(/\s*·\s*(?=Objetivo(?: de aprendizagem)?\s*:)/gi,'\n').split('\n');
     const sections=[];let current=null;
     const heading=/^\s*(?:[•×✓✔–—-]\s*)?([A-D])\s*(?:[).:·–—-]\s*|\s+(?=(?:incorreta|correta|inadequada)\b))/i;
     const objectiveLabel=/^\s*Objetivo(?: de aprendizagem)?\s*[:.]/i;
     function add(type,text,letter){current={type,text:[text],letter};sections.push(current);}
     for(const raw of lines){
       const line=raw.trim();
-      if(!line){if(current?.type==='plain')current=null;continue;}
+      if(!line){if(current?.type!=='alternative')current=null;continue;}
       const alt=heading.exec(line);
       if(objectiveLabel.test(line)){add('objective',line);}
       else if(alt){const body=line.slice(alt[0].length).replace(/^(?:(?:incorreta|correta|inadequada)\b\s*[:.–—-]?\s*)+/i,'');add('alternative',body,alt[1].toUpperCase());}
-      else if(/^(?:Questão\s*\d|Resposta\b|Gabarito\s*:|Origem\s*:|Fonte\s*:|Base\s*:|HP\s*\d)/i.test(line)){add('plain',line);}
+      else if(/^(?:Questão\s*\d|Resposta\b|Gabarito\s*:|Origem\s*:|Referências?\b|Fonte\s*:|Base\s*:|HP\s*\d)/i.test(line)){add('plain',line);}
       else if(current){current.text.push(line);}
       else add('plain',line);
     }
