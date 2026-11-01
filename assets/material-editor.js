@@ -57,7 +57,7 @@ async function remove({id,officialId=null,onSaved}={}){
    const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
    officialId=linked.data?.find(d=>norm(d.assunto)===norm(item.tema_id)||norm(d.titulo)===norm(item.titulo))?.id||null;
   }
-  const confirmed=await window.MedQuestStudyUI.confirm({title:'Excluir arquivo?',message:'Excluir permanentemente “'+item.titulo+'” e seu cartão da biblioteca? Esta ação não pode ser desfeita. As questões e o histórico de estudos serão preservados.',confirm:'Excluir arquivo',danger:true});
+  const confirmed=await window.MedQuestStudyUI.confirm({title:'Excluir arquivo?',message:'Excluir permanentemente “'+item.titulo+'” e seu cartão da biblioteca? Esta ação não pode ser desfeita. Se este arquivo estiver vinculado a outros assuntos, também deixará de aparecer neles. As questões e o histórico de estudos serão preservados.',confirm:'Excluir arquivo',danger:true});
   if(!confirmed||!admin())return;
   const removed=await db.storage.from('materiais_medquest').remove([item.arquivo_path]);
   if(removed.error)throw removed.error;

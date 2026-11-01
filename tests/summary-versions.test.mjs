@@ -64,3 +64,11 @@ test('Treponema and Leptospira has no slide slot; summaries and reference chapte
  const {api}=fixture();const pdfs=[{...base,disciplina_id:'microbiologia',tema_id:'treponema-sp-e-leptospira-sp',titulo:'Treponema sp. e Leptospira sp.',tema_nome:'Treponema sp. e Leptospira sp.'}];
  for(const canEdit of [false,true]){const html=api.render({pdfs,texts:[],canEdit});assert.doesNotMatch(html,/Slides da aula/);for(const label of ['Resumo expandido','Resumo simplificado','Capítulos de referência','Materiais da aula'])assert.ok(html.includes(label));assert.match(html,/studyOfficialPdf\('expanded'\)/);}
 });
+
+test('one reference PDF is shared across subjects without changing file identity or duplicating cards',()=>{
+ const {api}=fixture();const first={...base,id:'first-summary',resumo_grupo_id:'first'},second={...base,id:'second-summary',resumo_grupo_id:'second',tema_id:'giardia-e-trichomonas',titulo:'Giardia e Trichomonas',tema_nome:'Giardia e Trichomonas'};
+ const chapter={...base,id:'shared-rey',tipo:'capitulo',titulo:'Rey — Capítulos 11 e 12',resumo_grupo_id:'first'},links=[{material_id:'shared-rey',disciplina_id:'parasitologia',tema_id:second.tema_id,tema_nome:second.tema_nome,resumo_grupo_id:'second'}];
+ const pdfs=[first,second,chapter],before=JSON.stringify(pdfs),model=api.model(pdfs,[],false,[...links,...links]);assert.equal(model.length,2);for(const g of model){assert.equal(g.materials.length,1);assert.equal(g.materials[0].id,'shared-rey');assert.equal(g.materials[0].arquivo_path,chapter.arquivo_path);}
+ const html=api.render({pdfs,texts:[],topicLinks:links});assert.equal((html.match(/studyOfficialPdf\('shared-rey'\)/g)||[]).length,2);assert.equal((html.match(/studyOfficialDownload\('shared-rey'\)/g)||[]).length,2);assert.equal(JSON.stringify(pdfs),before);
+ const missing=api.model([first,second],[],false,links);assert.ok(missing.every(g=>!g.materials));
+});

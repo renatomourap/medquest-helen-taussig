@@ -45,7 +45,7 @@
 
  // O resumo completo e fiel é o PDF ORIGINAL, não a transcrição textual.
  // Metadados antigos da tabela conteudos_oficiais servem apenas para classificar assuntos.
- let officialTexts=[],officialPdfs=[],officialEditing=null;
+ let officialTexts=[],officialPdfs=[],officialTopicLinks=[],officialEditing=null;
  const isEditor=()=>perfilAtual?.admin===true;
  const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
@@ -72,10 +72,12 @@
    try{
      const results=await Promise.all([
        fetch('conteudos_oficiais',t=>t.select('*').order('atualizado_em',{ascending:false})),
-       fetch('materiais_medquest',t=>t.select('id,tipo,titulo,descricao,disciplina_id,tema_id,tema_nome,resumo_versao,resumo_grupo_id,arquivo_path').in('tipo',['resumo','slide','capitulo']).order('criado_em',{ascending:false}))
+       fetch('materiais_medquest',t=>t.select('id,tipo,titulo,descricao,disciplina_id,tema_id,tema_nome,resumo_versao,resumo_grupo_id,arquivo_path').in('tipo',['resumo','slide','capitulo']).order('criado_em',{ascending:false})),
+       fetch('material_temas_medquest',t=>t.select('material_id,disciplina_id,tema_id,tema_nome,resumo_grupo_id'))
      ]);
      officialTexts=results[0]||[];
      officialPdfs=results[1]||[];
+     officialTopicLinks=results[2]||[];
      paintOfficial();
      if(window.studyPendingSummaryId){
        const id=window.studyPendingSummaryId;window.studyPendingSummaryId=null;
@@ -113,7 +115,7 @@
    window.studyOfficialFilter=()=>{
      const chosen=$('study-official-filter')?.value||'';
      const opened=Array.from(document.querySelectorAll?.('.mq-summary-topic[open]')||[]).map(el=>el.dataset.summaryKey);
-     $('study-list').innerHTML=window.MedQuestSummaryVersions.render({pdfs:officialPdfs,texts:officialTexts,chosen,query:$('study-summary-search')?.value||'',canEdit:isEditor(),areaName:area,onChanged:readOfficial,onFeedback:feedback,openKeys:[...retainedOpen,...opened]});retainedOpen=[];
+     $('study-list').innerHTML=window.MedQuestSummaryVersions.render({pdfs:officialPdfs,texts:officialTexts,topicLinks:officialTopicLinks,chosen,query:$('study-summary-search')?.value||'',canEdit:isEditor(),areaName:area,onChanged:readOfficial,onFeedback:feedback,openKeys:[...retainedOpen,...opened]});retainedOpen=[];
    };
    window.MedQuestStudyUI?.enhance($('study-summary-toolbar'));
    studyOfficialFilter();

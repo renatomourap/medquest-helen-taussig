@@ -14,7 +14,7 @@ const materialTopics={
  parasitologia:[/\bentamoebas?\b/,/\bgiardia\b.*\btrichomonas\b/,/\btoxoplasma\b/]
 };
 const hasMaterialSections=g=>(materialTopics[g.area]||[]).some(pattern=>[g.topicId,g.topic,g.title].some(value=>pattern.test(norm(value))));
-function model(pdfs,texts,canEdit=false){
+function model(pdfs,texts,canEdit=false,topicLinks=[]){
  const groups=new Map(),accounted=new Set();
  for(const p of pdfs.filter(p=>!p.tipo||p.tipo==='resumo')){
   const key=p.resumo_grupo_id||p.id;
@@ -28,10 +28,12 @@ function model(pdfs,texts,canEdit=false){
   Object.assign(g,{area:p.disciplina_id,title:p.titulo,topicId:p.tema_id,topic:p.tema_nome||links[0]?.assunto||p.tema_id,officialId:links[0]?.id||null});
  }
  for(const d of texts)if(!accounted.has(d.id)&&(d.publicado||canEdit))groups.set('official:'+d.id,{key:'official:'+d.id,groupId:d.id,area:d.area_id,title:d.titulo,topicId:d.assunto,topic:d.assunto,officialId:d.id,files:{}});
- for(const p of pdfs.filter(p=>['slide','capitulo'].includes(p.tipo))){
+ const extra=pdfs.filter(p=>['slide','capitulo'].includes(p.tipo));
+ for(const link of topicLinks){const p=extra.find(p=>p.id===link.material_id);if(p)extra.push({...p,disciplina_id:link.disciplina_id,tema_id:link.tema_id,tema_nome:link.tema_nome,resumo_grupo_id:link.resumo_grupo_id})}
+ for(const p of extra){
   let g=[...groups.values()].find(g=>g.area===p.disciplina_id&&norm(g.topicId)===norm(p.tema_id));
   if(!g){const key=p.resumo_grupo_id||p.id;g={key,area:p.disciplina_id,title:p.tema_nome||p.tema_id,topicId:p.tema_id,topic:p.tema_nome||p.tema_id,files:{}};groups.set(key,g)}
-  (g.materials||(g.materials=[])).push(p);
+  g.materials||=[];if(!g.materials.some(file=>file.id===p.id))g.materials.push(p);
  }
  return [...groups.values()].sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
 }
@@ -48,8 +50,8 @@ function lectureMaterials(g,canEdit){
 }
 let groups=[],refresh=()=>{},feedback=()=>{},pendingOpen=null;
 const pending=new Set();
-function render({pdfs,texts,chosen='',query='',canEdit=false,areaName=id=>id,onChanged=()=>{},onFeedback=()=>{},openKeys=[]}){
- groups=model(pdfs,texts,canEdit);refresh=onChanged;feedback=onFeedback;
+function render({pdfs,texts,topicLinks=[],chosen='',query='',canEdit=false,areaName=id=>id,onChanged=()=>{},onFeedback=()=>{},openKeys=[]}){
+ groups=model(pdfs,texts,canEdit,topicLinks);refresh=onChanged;feedback=onFeedback;
  const forcedOpen=pendingOpen;pendingOpen=null;
  const visible=groups.filter(g=>(!chosen||g.area===chosen)&&(!query||norm(g.title+' '+g.topic).includes(norm(query))));
  return visible.map(g=>'<details class="mq-summary-topic" data-summary-key="'+escape(g.key)+'"'+(openKeys.includes(g.key)||forcedOpen===g.key?' open':'')+'><summary><span class="mq-summary-topic-icon">'+icon('expandido')+'</span><span class="mq-summary-heading"><strong>'+escape(g.title)+'</strong><small>'+escape(areaName(g.area))+' · '+escape(g.topic)+'</small></span><svg class="mq-summary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="mq-summary-versions">'+(compactTopic(g)?'':'<h3 class="mq-material-section-title">Resumos</h3>')+types.map(([kind,label])=>{
