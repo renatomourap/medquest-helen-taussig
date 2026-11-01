@@ -22,13 +22,13 @@ test('replacement updates only the selected file and removes the old bytes only 
 for(const mode of ['saveError','conflict'])test('failed replacement preserves both existing originals: '+mode,async()=>{const {api,events}=fixture({[mode]:true});await assert.rejects(api.upload(api.model([base,simple],[text])[0],'simplificado',{size:10,type:'application/pdf',name:'New.pdf'},simple));const removed=events.find(e=>e.action==='remove').paths;assert.equal(removed.length,1);assert.match(removed[0],/new-file.pdf/);assert.equal(removed.includes(simple.arquivo_path),false)});
 test('students and invalid files cannot initiate an upload',async()=>{const f=fixture({admin:false});await assert.rejects(f.api.upload({},'simplificado',{size:10,type:'application/pdf'}));assert.equal(f.events.length,0);const a=fixture();await assert.rejects(a.api.upload({},'simplificado',{size:10,type:'text/plain',name:'bad.txt'}));assert.equal(a.events.length,0)});
 
-test('all subjects retain summary versions; only the fixed twelve receive lecture slots',()=>{
+test('all subjects retain summary versions and empty lecture categories stay hidden',()=>{
  const {api}=fixture();
  const cohort={microbiologia:['Streptococcus e Enterococcus','Bastonetes Gram-positivos','Bastonetes Gram-negativos','Neisseria sp.','Enterobacteriaceae','Micobactérias','Mycoplasma e Chlamydia','Treponema e Leptospira'],farmacologia:['Antimicobacterianos'],parasitologia:['Protozoários cavitários: Entamoebas','Giardia e Trichomonas','Toxoplasma gondii e Toxoplasmose']};
  let count=0;
  for(const [area,titles] of Object.entries(cohort))for(const title of titles){
   const html=api.render({pdfs:[{...base,titulo:title,tema_id:title,tema_nome:title,disciplina_id:area}],texts:[]});
-  if(title==='Micobactérias')assert.doesNotMatch(html,/Materiais da aula|Slides da aula/);else assert.match(html,/Materiais da aula/,title);assert.match(html,/Capítulos de referência/);count++;
+  assert.doesNotMatch(html,/Materiais da aula|Slides da aula|Capítulos de referência|mq-material-section-title/);assert.match(html,/Resumo expandido/);assert.match(html,/Resumo simplificado/);count++;
  }
  assert.equal(count,12);
  for(const [area,title] of [['microbiologia','Biofilmes Bacterianos'],['microbiologia','Microbiota Humana'],['microbiologia','Staphylococcus sp.'],['farmacologia','Antibióticos I — Beta-lactâmicos'],['imunologia','Distúrbios de Hipersensibilidade'],['parasitologia','Introdução à Parasitologia'],['parasitologia','Artrópodes, Vetores e Parasitas'],['microbiologia','Novo assunto']]){
@@ -56,13 +56,13 @@ test('lecture publication accepts multiple chapters without replacing a summary 
 
  test('Micobacteria hides only redundant headings and slide slot; other subjects keep current layout',()=>{
  const {api}=fixture();const pdfs=[{...base,disciplina_id:'microbiologia',tema_id:'micobacterias',titulo:'Micobactérias',tema_nome:'Micobactérias'}, {...simple,disciplina_id:'microbiologia',tema_id:'micobacterias',titulo:'Micobactérias',tema_nome:'Micobactérias'}];
- for(const canEdit of [false,true]){const html=api.render({pdfs,texts:[],canEdit});assert.doesNotMatch(html,/Slides da aula|Materiais da aula|class="mq-material-section-title"/);assert.match(html,/Resumo expandido/);assert.match(html,/Resumo simplificado/);assert.match(html,/Capítulos de referência/);assert.match(html,/studyOfficialPdf\('expanded'\)/);}
- const other=api.render({pdfs:[base,simple],texts:[]});assert.match(other,/Materiais da aula/);assert.match(other,/Slides da aula/);assert.match(other,/>Resumos<\/h3>/);
+ for(const canEdit of [false,true]){const html=api.render({pdfs,texts:[],canEdit});assert.doesNotMatch(html,/Slides da aula|Materiais da aula|class="mq-material-section-title"/);assert.match(html,/Resumo expandido/);assert.match(html,/Resumo simplificado/);assert.doesNotMatch(html,/Capítulos de referência/);assert.match(html,/studyOfficialPdf\('expanded'\)/);}
+ const other=api.render({pdfs:[base,simple],texts:[]});assert.doesNotMatch(other,/Materiais da aula|Slides da aula|>Resumos<\/h3>/);
  });
 
 test('Treponema and Leptospira has no slide slot; summaries and reference chapters remain',()=>{
  const {api}=fixture();const pdfs=[{...base,disciplina_id:'microbiologia',tema_id:'treponema-sp-e-leptospira-sp',titulo:'Treponema sp. e Leptospira sp.',tema_nome:'Treponema sp. e Leptospira sp.'}];
- for(const canEdit of [false,true]){const html=api.render({pdfs,texts:[],canEdit});assert.doesNotMatch(html,/Slides da aula/);for(const label of ['Resumo expandido','Resumo simplificado','Capítulos de referência','Materiais da aula'])assert.ok(html.includes(label));assert.match(html,/studyOfficialPdf\('expanded'\)/);}
+ for(const canEdit of [false,true]){const html=api.render({pdfs,texts:[],canEdit});assert.doesNotMatch(html,/Slides da aula/);for(const label of ['Resumo expandido','Resumo simplificado'])assert.ok(html.includes(label));assert.match(html,/studyOfficialPdf\('expanded'\)/);}
 });
 
 test('one reference PDF is shared across subjects without changing file identity or duplicating cards',()=>{
@@ -71,4 +71,12 @@ test('one reference PDF is shared across subjects without changing file identity
  const pdfs=[first,second,chapter],before=JSON.stringify(pdfs),model=api.model(pdfs,[],false,[...links,...links]);assert.equal(model.length,2);for(const g of model){assert.equal(g.materials.length,1);assert.equal(g.materials[0].id,'shared-rey');assert.equal(g.materials[0].arquivo_path,chapter.arquivo_path);}
  const html=api.render({pdfs,texts:[],topicLinks:links});assert.equal((html.match(/studyOfficialPdf\('shared-rey'\)/g)||[]).length,2);assert.equal((html.match(/studyOfficialDownload\('shared-rey'\)/g)||[]).length,2);assert.equal(JSON.stringify(pdfs),before);
  const missing=api.model([first,second],[],false,links);assert.ok(missing.every(g=>!g.materials));
+});
+
+test('all topics show only populated lecture categories, without redundant section headings; admin can add missing files',()=>{
+ const {api}=fixture();for(const canEdit of [false,true])for(const kinds of [[],['slide'],['capitulo'],['slide','capitulo']]){
+ const pdfs=[base,simple,...kinds.map(kind=>({...base,id:kind,tipo:kind,titulo:'Arquivo '+kind}))];const html=api.render({pdfs,texts:[],canEdit});assert.doesNotMatch(html,/Materiais da aula|>Resumos<\/h3>|Em breve|mq-material-section-title/);
+ for(const [kind,label] of [['slide','Slides da aula'],['capitulo','Capítulos de referência']]){assert.equal(html.includes(label),kinds.includes(kind));if(kinds.includes(kind)){assert.ok(html.includes("studyOfficialPdf('"+kind+"')"));assert.ok(html.includes("studyOfficialDownload('"+kind+"')"));}else if(canEdit){assert.ok(html.includes(kind==='slide'?'Adicionar slide':'Adicionar capítulo'));}}
+ assert.match(html,/Resumo expandido/);assert.match(html,/Resumo simplificado/);
+ }
 });

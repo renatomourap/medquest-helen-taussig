@@ -37,16 +37,15 @@ function model(pdfs,texts,canEdit=false,topicLinks=[]){
  }
  return [...groups.values()].sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
 }
-const compactTopic=g=>g.area==='microbiologia'&&norm(g.topicId)==='micobacterias';
-const noSlideTopic=g=>g.area==='microbiologia'&&['micobacterias','treponema-sp-e-leptospira-sp'].includes(norm(g.topicId));
 function lectureMaterials(g,canEdit){
  const slides='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M12 16v5m-4 0h8M7 8h10M7 11h6"/></svg>';
- return (compactTopic(g)?'':'<h3 class="mq-material-section-title">Materiais da aula</h3>')+[['slide','Slides da aula',slides],['capitulo','Capítulos de referência',icon('expandido')]].filter(([kind])=>!noSlideTopic(g)||kind!=='slide').map(([kind,label,symbol])=>{
+ return [['slide','Slides da aula',slides],['capitulo','Capítulos de referência',icon('expandido')]].map(([kind,label,symbol])=>{
   const files=(g.materials||[]).filter(p=>p.tipo===kind).sort((a,b)=>a.titulo.localeCompare(b.titulo,'pt-BR'));
+  if(!files.length)return '';
   const add=canEdit?'<button class="mq-summary-publish" onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Adicionar PDF</button>':'';
   const rows=files.map(p=>'<section class="mq-summary-version mq-lecture-file"><div class="mq-summary-version-label"><h3>'+escape(p.titulo)+'</h3><small class="mq-version-ready">PDF original disponível</small></div><div class="mq-summary-version-actions"><button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">'+icon('expandido')+'Ler material</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button>'+(canEdit?'<details class="mq-summary-manage"><summary>Gerenciar</summary><div><button onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\',\''+p.id+'\')">Substituir PDF</button><button onclick="studyEditPdfMetadata(\''+p.id+'\')">Editar identificação</button><button class="mq-material-delete" onclick="studyDeletePdf(\''+p.id+'\')">Excluir arquivo</button></div></details>':'')+'</div></section>').join('');
-  return '<div class="mq-lecture-placeholder"><span class="mq-summary-version-icon">'+symbol+'</span><strong>'+label+'</strong>'+(files.length?'':'<span class="mq-coming-soon">Em breve</span>')+add+'</div>'+rows;
- }).join('');
+  return '<div class="mq-lecture-placeholder"><span class="mq-summary-version-icon">'+symbol+'</span><strong>'+label+'</strong>'+add+'</div>'+rows;
+ }).join('')+(canEdit&&hasMaterialSections(g)?'<div class="mq-summary-version-actions">'+[['slide','Adicionar slide'],['capitulo','Adicionar capítulo']].filter(([kind])=>!(g.materials||[]).some(p=>p.tipo===kind)).map(([kind,label])=>'<button class="mq-summary-publish" onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">'+label+'</button>').join('')+'</div>':'');
 }
 let groups=[],refresh=()=>{},feedback=()=>{},pendingOpen=null;
 const pending=new Set();
@@ -54,7 +53,7 @@ function render({pdfs,texts,topicLinks=[],chosen='',query='',canEdit=false,areaN
  groups=model(pdfs,texts,canEdit,topicLinks);refresh=onChanged;feedback=onFeedback;
  const forcedOpen=pendingOpen;pendingOpen=null;
  const visible=groups.filter(g=>(!chosen||g.area===chosen)&&(!query||norm(g.title+' '+g.topic).includes(norm(query))));
- return visible.map(g=>'<details class="mq-summary-topic" data-summary-key="'+escape(g.key)+'"'+(openKeys.includes(g.key)||forcedOpen===g.key?' open':'')+'><summary><span class="mq-summary-topic-icon">'+icon('expandido')+'</span><span class="mq-summary-heading"><strong>'+escape(g.title)+'</strong><small>'+escape(areaName(g.area))+' · '+escape(g.topic)+'</small></span><svg class="mq-summary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="mq-summary-versions">'+(compactTopic(g)?'':'<h3 class="mq-material-section-title">Resumos</h3>')+types.map(([kind,label])=>{
+ return visible.map(g=>'<details class="mq-summary-topic" data-summary-key="'+escape(g.key)+'"'+(openKeys.includes(g.key)||forcedOpen===g.key?' open':'')+'><summary><span class="mq-summary-topic-icon">'+icon('expandido')+'</span><span class="mq-summary-heading"><strong>'+escape(g.title)+'</strong><small>'+escape(areaName(g.area))+' · '+escape(g.topic)+'</small></span><svg class="mq-summary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="mq-summary-versions">'+types.map(([kind,label])=>{
   const p=g.files[kind];
   const actions=p?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">'+icon('expandido')+'Ler resumo</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button>':'<button disabled>Ler resumo</button><button disabled>Baixar PDF</button>';
   const manage=!canEdit?'':p?'<details class="mq-summary-manage"><summary>Gerenciar</summary><div><button onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Substituir PDF</button><button onclick="studyEditPdfMetadata(\''+p.id+'\')">Editar identificação</button><button class="mq-material-delete" onclick="studyDeletePdf(\''+p.id+'\')">Excluir arquivo</button></div></details>':'<button class="mq-summary-publish" onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Publicar PDF</button>';
