@@ -334,11 +334,14 @@ html.mq-ipad-safari .mq-time-dock.mq-time-compact:not(.mq-dock-open){
 .mq-time-dock.mq-time-compact:has(.mq-time-dismiss:not([hidden])){width:124px;padding-right:30px;box-sizing:border-box}
 
 /* Expanded controls fit their content; retain the existing clock typography. */
-.mq-time-dock.mq-dock-open{box-sizing:border-box;width:min(232px,calc(100vw - 24px));padding:6px 8px}
-.mq-time-dock.mq-dock-open .mq-time-head{position:static;padding-right:62px;gap:6px}
-.mq-time-dock.mq-dock-open .mq-time-head>button{position:absolute;right:36px;top:2px;display:grid;place-items:center;box-sizing:border-box;width:32px;height:32px;min-width:32px;min-height:32px;padding:7px;border-radius:8px;color:var(--ouro,#f5cf72)}
+.mq-time-dock.mq-dock-open{box-sizing:border-box;width:max-content;max-width:calc(100vw - 24px);padding:6px 8px}
+.mq-time-dock.mq-dock-open .mq-time-head{position:static;padding-right:32px;gap:6px}
+.mq-time-dock.mq-dock-open:has(.mq-time-dismiss:not([hidden])) .mq-time-head{padding-right:32px}
+.mq-time-dock.mq-dock-open .mq-time-head small{white-space:nowrap}
+.mq-time-dock.mq-dock-open .mq-time-head span{max-width:170px}
+.mq-time-dock.mq-dock-open .mq-time-head>button{position:absolute;right:2px;top:auto;bottom:2px;display:grid;place-items:center;box-sizing:border-box;width:32px;height:32px;min-width:32px;min-height:32px;padding:7px;border-radius:8px;color:var(--ouro,#f5cf72)}
 .mq-time-collapse svg{width:18px;height:18px}
 .mq-time-controls>button[hidden]{display:none!important}
-.mq-time-dock.mq-dock-open .mq-time-controls{margin-top:7px;gap:5px}
+.mq-time-dock.mq-dock-open .mq-time-controls{margin-top:7px;gap:5px;padding-right:32px;flex-wrap:wrap}
 .mq-time-dock.mq-dock-open .mq-time-controls>button{flex:0 0 auto;padding:4px 10px}
 #mq-time-label[hidden]{display:none!important}
