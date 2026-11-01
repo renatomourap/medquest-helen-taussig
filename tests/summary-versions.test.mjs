@@ -59,3 +59,8 @@ test('lecture publication accepts multiple chapters without replacing a summary 
  for(const canEdit of [false,true]){const html=api.render({pdfs,texts:[],canEdit});assert.doesNotMatch(html,/Slides da aula|Materiais da aula|class="mq-material-section-title"/);assert.match(html,/Resumo expandido/);assert.match(html,/Resumo simplificado/);assert.match(html,/Capítulos de referência/);assert.match(html,/studyOfficialPdf\('expanded'\)/);}
  const other=api.render({pdfs:[base,simple],texts:[]});assert.match(other,/Materiais da aula/);assert.match(other,/Slides da aula/);assert.match(other,/>Resumos<\/h3>/);
  });
+
+test('Treponema and Leptospira has no slide slot; summaries and reference chapters remain',()=>{
+ const {api}=fixture();const pdfs=[{...base,disciplina_id:'microbiologia',tema_id:'treponema-sp-e-leptospira-sp',titulo:'Treponema sp. e Leptospira sp.',tema_nome:'Treponema sp. e Leptospira sp.'}];
+ for(const canEdit of [false,true]){const html=api.render({pdfs,texts:[],canEdit});assert.doesNotMatch(html,/Slides da aula/);for(const label of ['Resumo expandido','Resumo simplificado','Capítulos de referência','Materiais da aula'])assert.ok(html.includes(label));assert.match(html,/studyOfficialPdf\('expanded'\)/);}
+});

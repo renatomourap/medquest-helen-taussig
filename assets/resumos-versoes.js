@@ -36,9 +36,10 @@ function model(pdfs,texts,canEdit=false){
  return [...groups.values()].sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
 }
 const compactTopic=g=>g.area==='microbiologia'&&norm(g.topicId)==='micobacterias';
+const noSlideTopic=g=>g.area==='microbiologia'&&['micobacterias','treponema-sp-e-leptospira-sp'].includes(norm(g.topicId));
 function lectureMaterials(g,canEdit){
  const slides='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M12 16v5m-4 0h8M7 8h10M7 11h6"/></svg>';
- return (compactTopic(g)?'':'<h3 class="mq-material-section-title">Materiais da aula</h3>')+[['slide','Slides da aula',slides],['capitulo','Capítulos de referência',icon('expandido')]].filter(([kind])=>!compactTopic(g)||kind!=='slide').map(([kind,label,symbol])=>{
+ return (compactTopic(g)?'':'<h3 class="mq-material-section-title">Materiais da aula</h3>')+[['slide','Slides da aula',slides],['capitulo','Capítulos de referência',icon('expandido')]].filter(([kind])=>!noSlideTopic(g)||kind!=='slide').map(([kind,label,symbol])=>{
   const files=(g.materials||[]).filter(p=>p.tipo===kind).sort((a,b)=>a.titulo.localeCompare(b.titulo,'pt-BR'));
   const add=canEdit?'<button class="mq-summary-publish" onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Adicionar PDF</button>':'';
   const rows=files.map(p=>'<section class="mq-summary-version mq-lecture-file"><div class="mq-summary-version-label"><h3>'+escape(p.titulo)+'</h3><small class="mq-version-ready">PDF original disponível</small></div><div class="mq-summary-version-actions"><button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">'+icon('expandido')+'Ler material</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button>'+(canEdit?'<details class="mq-summary-manage"><summary>Gerenciar</summary><div><button onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\',\''+p.id+'\')">Substituir PDF</button><button onclick="studyEditPdfMetadata(\''+p.id+'\')">Editar identificação</button><button class="mq-material-delete" onclick="studyDeletePdf(\''+p.id+'\')">Excluir arquivo</button></div></details>':'')+'</div></section>').join('');
