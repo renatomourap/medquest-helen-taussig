@@ -28,7 +28,7 @@ test('all subjects retain summary versions; only the fixed twelve receive lectur
  let count=0;
  for(const [area,titles] of Object.entries(cohort))for(const title of titles){
   const html=api.render({pdfs:[{...base,titulo:title,tema_id:title,tema_nome:title,disciplina_id:area}],texts:[]});
-  assert.match(html,/Materiais da aula/,title);assert.match(html,/Capítulos de referência/);count++;
+  if(title==='Micobactérias')assert.doesNotMatch(html,/Materiais da aula|Slides da aula/);else assert.match(html,/Materiais da aula/,title);assert.match(html,/Capítulos de referência/);count++;
  }
  assert.equal(count,12);
  for(const [area,title] of [['microbiologia','Biofilmes Bacterianos'],['microbiologia','Microbiota Humana'],['microbiologia','Staphylococcus sp.'],['farmacologia','Antibióticos I — Beta-lactâmicos'],['imunologia','Distúrbios de Hipersensibilidade'],['parasitologia','Introdução à Parasitologia'],['parasitologia','Artrópodes, Vetores e Parasitas'],['microbiologia','Novo assunto']]){
@@ -53,3 +53,9 @@ test('lecture publication accepts multiple chapters without replacing a summary 
  await api.upload(g,'capitulo',file);const saved=events.find(e=>e.action==='insert').data;assert.equal(saved.tipo,'capitulo');assert.equal(saved.titulo,'Capítulo 19');assert.equal(saved.resumo_grupo_id,'group');assert.equal(events.some(e=>e.action==='update'||e.action==='remove'),false);
  const student=fixture({admin:false});await assert.rejects(student.api.upload(g,'slide',file));assert.equal(student.events.length,0);
 });
+
+ test('Micobacteria hides only redundant headings and slide slot; other subjects keep current layout',()=>{
+ const {api}=fixture();const pdfs=[{...base,disciplina_id:'microbiologia',tema_id:'micobacterias',titulo:'Micobactérias',tema_nome:'Micobactérias'}, {...simple,disciplina_id:'microbiologia',tema_id:'micobacterias',titulo:'Micobactérias',tema_nome:'Micobactérias'}];
+ for(const canEdit of [false,true]){const html=api.render({pdfs,texts:[],canEdit});assert.doesNotMatch(html,/Slides da aula|Materiais da aula|class="mq-material-section-title"/);assert.match(html,/Resumo expandido/);assert.match(html,/Resumo simplificado/);assert.match(html,/Capítulos de referência/);assert.match(html,/studyOfficialPdf\('expanded'\)/);}
+ const other=api.render({pdfs:[base,simple],texts:[]});assert.match(other,/Materiais da aula/);assert.match(other,/Slides da aula/);assert.match(other,/>Resumos<\/h3>/);
+ });
