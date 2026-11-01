@@ -49,7 +49,7 @@
  const isEditor=()=>perfilAtual?.admin===true;
  const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
- const pdfFor=d=>officialPdfs.filter(p=>p.disciplina_id===d.area_id &&
+ const pdfFor=d=>officialPdfs.filter(p=>p.tipo==='resumo'&&p.disciplina_id===d.area_id &&
    (norm(p.tema_id)===norm(d.assunto) || norm(p.titulo)===norm(d.titulo)))
    .sort((a,b)=>Number(a.resumo_versao==='simplificado')-Number(b.resumo_versao==='simplificado'))[0];
  const fileTopic=file=>{
@@ -72,7 +72,7 @@
    try{
      const results=await Promise.all([
        fetch('conteudos_oficiais',t=>t.select('*').order('atualizado_em',{ascending:false})),
-       fetch('materiais_medquest',t=>t.select('id,tipo,titulo,descricao,disciplina_id,tema_id,tema_nome,resumo_versao,resumo_grupo_id,arquivo_path').eq('tipo','resumo').order('criado_em',{ascending:false}))
+       fetch('materiais_medquest',t=>t.select('id,tipo,titulo,descricao,disciplina_id,tema_id,tema_nome,resumo_versao,resumo_grupo_id,arquivo_path').in('tipo',['resumo','slide','capitulo']).order('criado_em',{ascending:false}))
      ]);
      officialTexts=results[0]||[];
      officialPdfs=results[1]||[];

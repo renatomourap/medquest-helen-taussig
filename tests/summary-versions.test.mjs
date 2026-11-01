@@ -39,3 +39,17 @@ test('all subjects retain summary versions; only the fixed twelve receive lectur
   assert.match(html,/studyOfficialPdf\('expanded'\)/);assert.match(html,/studyOfficialDownload\('expanded'\)/);assert.match(html,/studyEditPdfMetadata/);
  }
 });
+
+test('lecture files keep both summaries and multiple references under one subject, with independent original file actions',()=>{
+ const {api}=fixture();const pdfs=[base,simple,{...base,id:'slide',tipo:'slide',titulo:'Slides da aula'},{...base,id:'murray',tipo:'capitulo',titulo:'Murray — Capítulo 19'},{...base,id:'levinson',tipo:'capitulo',titulo:'Levinson — Capítulo 15'}];
+ const original=JSON.stringify(pdfs),model=api.model(pdfs,[text]);assert.equal(model.length,1);assert.equal(model[0].files.expandido.id,'expanded');assert.equal(model[0].files.simplificado.id,'simple');assert.equal(model[0].materials.length,3);
+ const html=api.render({pdfs,texts:[text],canEdit:false});assert.equal((html.match(/class="mq-summary-topic"/g)||[]).length,1);
+ for(const id of ['expanded','simple','slide','murray','levinson']){assert.ok(html.includes("studyOfficialPdf('"+id+"')"));assert.ok(html.includes("studyOfficialDownload('"+id+"')"));}
+ assert.doesNotMatch(html,/Em breve|Gerenciar|Adicionar PDF/);assert.equal(JSON.stringify(pdfs),original);
+ const admin=api.render({pdfs,texts:[text],canEdit:true});assert.match(admin,/Adicionar PDF/);for(const id of ['slide','murray','levinson'])assert.ok(admin.includes("studyDeletePdf('"+id+"')"));
+});
+test('lecture publication accepts multiple chapters without replacing a summary version; student cannot publish',async()=>{
+ const {api,events}=fixture();const g=api.model([base,simple],[text])[0],file={size:100,type:'application/pdf',name:'Capítulo 19.pdf'};
+ await api.upload(g,'capitulo',file);const saved=events.find(e=>e.action==='insert').data;assert.equal(saved.tipo,'capitulo');assert.equal(saved.titulo,'Capítulo 19');assert.equal(saved.resumo_grupo_id,'group');assert.equal(events.some(e=>e.action==='update'||e.action==='remove'),false);
+ const student=fixture({admin:false});await assert.rejects(student.api.upload(g,'slide',file));assert.equal(student.events.length,0);
+});

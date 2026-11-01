@@ -16,7 +16,7 @@ const materialTopics={
 const hasMaterialSections=g=>(materialTopics[g.area]||[]).some(pattern=>[g.topicId,g.topic,g.title].some(value=>pattern.test(norm(value))));
 function model(pdfs,texts,canEdit=false){
  const groups=new Map(),accounted=new Set();
- for(const p of pdfs){
+ for(const p of pdfs.filter(p=>!p.tipo||p.tipo==='resumo')){
   const key=p.resumo_grupo_id||p.id;
   if(!groups.has(key))groups.set(key,{key,files:{}});
   groups.get(key).files[p.resumo_versao||'expandido']=p;
@@ -28,11 +28,21 @@ function model(pdfs,texts,canEdit=false){
   Object.assign(g,{area:p.disciplina_id,title:p.titulo,topicId:p.tema_id,topic:p.tema_nome||links[0]?.assunto||p.tema_id,officialId:links[0]?.id||null});
  }
  for(const d of texts)if(!accounted.has(d.id)&&(d.publicado||canEdit))groups.set('official:'+d.id,{key:'official:'+d.id,groupId:d.id,area:d.area_id,title:d.titulo,topicId:d.assunto,topic:d.assunto,officialId:d.id,files:{}});
+ for(const p of pdfs.filter(p=>['slide','capitulo'].includes(p.tipo))){
+  let g=[...groups.values()].find(g=>g.area===p.disciplina_id&&norm(g.topicId)===norm(p.tema_id));
+  if(!g){const key=p.resumo_grupo_id||p.id;g={key,area:p.disciplina_id,title:p.tema_nome||p.tema_id,topicId:p.tema_id,topic:p.tema_nome||p.tema_id,files:{}};groups.set(key,g)}
+  (g.materials||(g.materials=[])).push(p);
+ }
  return [...groups.values()].sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
 }
-function lectureMaterials(){
+function lectureMaterials(g,canEdit){
  const slides='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M12 16v5m-4 0h8M7 8h10M7 11h6"/></svg>';
- return '<h3 class="mq-material-section-title">Materiais da aula</h3><section class="mq-lecture-placeholder" aria-label="Slides da aula — Em breve"><span class="mq-summary-version-icon">'+slides+'</span><strong>Slides da aula</strong><span class="mq-coming-soon">Em breve</span></section><section class="mq-lecture-placeholder" aria-label="Capítulos de referência — Em breve"><span class="mq-summary-version-icon">'+icon('expandido')+'</span><strong>Capítulos de referência</strong><span class="mq-coming-soon">Em breve</span></section>';
+ return '<h3 class="mq-material-section-title">Materiais da aula</h3>'+[['slide','Slides da aula',slides],['capitulo','Capítulos de referência',icon('expandido')]].map(([kind,label,symbol])=>{
+  const files=(g.materials||[]).filter(p=>p.tipo===kind).sort((a,b)=>a.titulo.localeCompare(b.titulo,'pt-BR'));
+  const add=canEdit?'<button class="mq-summary-publish" onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Adicionar PDF</button>':'';
+  const rows=files.map(p=>'<section class="mq-summary-version mq-lecture-file"><div class="mq-summary-version-label"><h3>'+escape(p.titulo)+'</h3><small class="mq-version-ready">PDF original disponível</small></div><div class="mq-summary-version-actions"><button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">'+icon('expandido')+'Ler material</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button>'+(canEdit?'<details class="mq-summary-manage"><summary>Gerenciar</summary><div><button onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\',\''+p.id+'\')">Substituir PDF</button><button onclick="studyEditPdfMetadata(\''+p.id+'\')">Editar identificação</button><button class="mq-material-delete" onclick="studyDeletePdf(\''+p.id+'\')">Excluir arquivo</button></div></details>':'')+'</div></section>').join('');
+  return '<div class="mq-lecture-placeholder"><span class="mq-summary-version-icon">'+symbol+'</span><strong>'+label+'</strong>'+(files.length?'':'<span class="mq-coming-soon">Em breve</span>')+add+'</div>'+rows;
+ }).join('');
 }
 let groups=[],refresh=()=>{},feedback=()=>{},pendingOpen=null;
 const pending=new Set();
@@ -45,11 +55,11 @@ function render({pdfs,texts,chosen='',query='',canEdit=false,areaName=id=>id,onC
   const actions=p?'<button class="study-pdf-read" onclick="studyOfficialPdf(\''+p.id+'\')">'+icon('expandido')+'Ler resumo</button><button class="study-pdf-download" onclick="studyOfficialDownload(\''+p.id+'\')">↓ Baixar PDF</button>':'<button disabled>Ler resumo</button><button disabled>Baixar PDF</button>';
   const manage=!canEdit?'':p?'<details class="mq-summary-manage"><summary>Gerenciar</summary><div><button onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Substituir PDF</button><button onclick="studyEditPdfMetadata(\''+p.id+'\')">Editar identificação</button><button class="mq-material-delete" onclick="studyDeletePdf(\''+p.id+'\')">Excluir arquivo</button></div></details>':'<button class="mq-summary-publish" onclick="MedQuestSummaryVersions.pick(\''+g.key+'\',\''+kind+'\')">Publicar PDF</button>';
   return '<section class="mq-summary-version" aria-label="'+escape(label)+'"><span class="mq-summary-version-icon">'+icon(kind)+'</span><div class="mq-summary-version-label"><h3>'+label+'</h3><small class="'+(p?'mq-version-ready':'mq-version-empty')+'">'+(p?'PDF original disponível':'Ainda não disponível')+'</small></div><div class="mq-summary-version-actions">'+actions+manage+'</div></section>';
- }).join('')+(hasMaterialSections(g)?lectureMaterials():'')+'</div></details>').join('')||'<p class="study-empty">Nenhum resumo disponível com esses filtros.</p>';
+ }).join('')+(hasMaterialSections(g)||(g.materials||[]).length?lectureMaterials(g,canEdit):'')+'</div></details>').join('')||'<p class="study-empty">Nenhum resumo disponível com esses filtros.</p>';
 }
 async function upload(group,kind,file,existing){
  if(!admin())throw Error('Somente administradores podem publicar PDFs.');
- if(!types.some(t=>t[0]===kind))throw Error('Versão inválida.');
+ if(!types.some(t=>t[0]===kind)&&!['slide','capitulo'].includes(kind))throw Error('Versão inválida.');
  if(!file||file.size<1||file.size>36700160||!(file.type==='application/pdf'||/\.pdf$/i.test(file.name)))throw Error('Selecione um PDF válido de até 35 MB.');
  const path=group.area+'/'+norm(group.topicId)+'/'+kind+'/'+crypto.randomUUID()+'.pdf';
  let uploaded=false,committed=false;
@@ -57,13 +67,13 @@ async function upload(group,kind,file,existing){
   const stored=await db.storage.from('materiais_medquest').upload(path,file,{contentType:'application/pdf',upsert:false});if(stored.error)throw stored.error;uploaded=true;
   const details={descricao:'PDF original — '+file.name,arquivo_path:path};
   const saved=existing?await db.from('materiais_medquest').update(details).eq('id',existing.id).eq('arquivo_path',existing.arquivo_path).select('id'):
-   await db.from('materiais_medquest').insert({...details,tipo:'resumo',titulo:group.title,disciplina_id:group.area,tema_id:group.topicId,tema_nome:group.topic,resumo_versao:kind,resumo_grupo_id:group.groupId||group.key}).select('id');
+   await db.from('materiais_medquest').insert({...details,tipo:['slide','capitulo'].includes(kind)?kind:'resumo',titulo:['slide','capitulo'].includes(kind)?file.name.replace(/\.pdf$/i,''):group.title,disciplina_id:group.area,tema_id:group.topicId,tema_nome:group.topic,resumo_versao:['slide','capitulo'].includes(kind)?'expandido':kind,resumo_grupo_id:group.groupId||group.key}).select('id');
   if(saved.error)throw saved.error;if(!saved.data?.length)throw Error('O banco não confirmou a publicação. Atualize a biblioteca.');committed=true;
   if(existing){const removed=await db.storage.from('materiais_medquest').remove([existing.arquivo_path]);if(removed.error)return 'Nova versão publicada. O arquivo anterior não pôde ser removido do armazenamento.';}
   return existing?'PDF substituído.':'PDF publicado.';
  }catch(error){if(uploaded&&!committed)await db.storage.from('materiais_medquest').remove([path]);throw error;}
 }
-function pick(key,kind){
+function pick(key,kind,id=null){
  if(!admin()||pending.has(key+'|'+kind))return;
  const group=groups.find(g=>g.key===key);if(!group)return;
  const picker=document.createElement('input');picker.type='file';picker.accept='.pdf,application/pdf';picker.hidden=true;document.body.append(picker);
@@ -72,8 +82,8 @@ function pick(key,kind){
   const file=picker.files?.[0];picker.remove();if(!file)return;
   const action=key+'|'+kind;if(pending.has(action))return;pending.add(action);
   try{
-   const existing=group.files[kind];
-   if(existing&&!await window.MedQuestStudyUI.confirm({title:'Substituir PDF?',message:'Substituir somente o '+types.find(t=>t[0]===kind)[1].toLowerCase()+' de “'+group.title+'” pelo arquivo “'+file.name+'”? A outra versão será preservada.',confirm:'Substituir PDF'}))return;
+   const existing=id?(group.materials||[]).find(p=>p.id===id):group.files[kind];
+   if(existing&&!await window.MedQuestStudyUI.confirm({title:'Substituir PDF?',message:'Substituir somente o '+(types.find(t=>t[0]===kind)?.[1]||'material').toLowerCase()+' de “'+group.title+'” pelo arquivo “'+file.name+'”? Os demais arquivos serão preservados.',confirm:'Substituir PDF'}))return;
    feedback('Publicando '+file.name+'…');const message=await upload(group,kind,file,existing);pendingOpen=group.groupId||key;await refresh();feedback(message);window.MedQuestStudyUI.toast(message);
   }catch(error){feedback('Não foi possível publicar: '+error.message,true)}finally{pending.delete(action)}
  };
