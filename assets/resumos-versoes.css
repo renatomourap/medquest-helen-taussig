@@ -50,3 +50,10 @@
 .mq-summary-versions>*{grid-column:1;min-width:0}
 .mq-summary-versions>.mq-summary-version-actions{grid-column:1;margin:0;justify-content:flex-start;flex-wrap:wrap}
 .mq-summary-versions>.mq-summary-version-actions:empty{display:none}
+
+/* File rows belong to a single category box, retaining existing typography/actions. */
+.mq-lecture-group{min-width:0;border:1px solid #2b4256;border-radius:9px;background:#0d1d2a}
+.mq-lecture-group>.mq-lecture-placeholder{border:0;background:transparent;border-radius:0}
+.mq-lecture-files{display:grid;grid-template-columns:minmax(0,1fr);padding:0 12px 6px}
+.mq-lecture-files>.mq-lecture-file{grid-column:1;margin:0;min-width:0;border:0;border-top:1px solid #2b4256;border-radius:0;background:transparent;padding:10px 0}
+@media(max-width:650px){.mq-lecture-files{padding:0 10px 4px}.mq-lecture-files>.mq-lecture-file{padding:9px 0}}
