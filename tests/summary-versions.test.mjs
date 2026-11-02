@@ -80,3 +80,8 @@ test('all topics show only populated lecture categories, without redundant secti
  assert.match(html,/Resumo expandido/);assert.match(html,/Resumo simplificado/);
  }
 });
+
+test('slides and references stay inside their own category container with all original actions',()=>{
+ const {api}=fixture();const pdfs=[base,simple,{...base,id:'giardia-slide',tipo:'slide',titulo:'Giardia'},{...base,id:'trichomonas-slide',tipo:'slide',titulo:'Trichomonas'},{...base,id:'rey30',tipo:'capitulo',titulo:'Rey — Capítulo 30'},{...base,id:'rey11',tipo:'capitulo',titulo:'Rey — Capítulos 11 e 12'}];
+ for(const canEdit of [false,true]){const html=api.render({pdfs,texts:[],canEdit});assert.ok(!html.includes("PDF original disponível"));assert.equal((html.match(/class="mq-lecture-group"/g)||[]).length,2);const slides=html.indexOf('aria-label="Slides da aula"'),chapters=html.indexOf('aria-label="Capítulos de referência"');for(const id of ['giardia-slide','trichomonas-slide']){const pos=html.indexOf("studyOfficialPdf('"+id+"')");assert.ok(pos>slides&&pos<chapters);}for(const id of ['rey30','rey11'])assert.ok(html.indexOf("studyOfficialPdf('"+id+"')")>chapters);for(const p of pdfs)assert.ok(html.includes("studyOfficialDownload('"+p.id+"')"));assert.equal((html.match(/class="mq-summary-topic"/g)||[]).length,1);}
+});
