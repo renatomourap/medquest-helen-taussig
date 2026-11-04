@@ -1,0 +1,24 @@
+/* Allow the app's flex column and its inner screens to shrink to the viewport. */
+.app-layout{width:100%;min-width:0}
+.main-area,.main-content{min-width:0}
+.main-content{max-width:100%}
+.topbar-left{display:flex;align-items:center;gap:12px;min-width:0}
+#tela-temas{width:100%;min-width:0}
+.temas-lista,.tema-info{min-width:0}
+.tema-item{min-width:0;max-width:100%;gap:12px}
+.tema-info{flex:1}
+.tema-info h3,.tema-info>span{white-space:normal;overflow-wrap:anywhere}
+.tema-item>.seta{flex-shrink:0}
+
+/* Two compact rows keep every header action available on phones. */
+@media(max-width:600px){
+ .topbar{display:grid;grid-template-columns:minmax(0,1fr);height:auto;min-height:58px;gap:8px;padding:10px 12px;padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+ .topbar-left{width:100%;min-width:0}
+ .topbar-left>.hamburger{flex:none}
+ .topbar-left>.topbar-search{display:flex;flex:1;min-width:0;width:100%;max-width:none}
+ .topbar-right{width:100%;min-width:0;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+ .topbar-right>.btn-admin{white-space:nowrap}
+ .topbar-right>.topbar-user{flex:none}
+ #tela-temas{padding:24px 14px}
+ .tela-titulo,.tela-subtitulo{overflow-wrap:anywhere}
+}
