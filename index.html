@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="assets/tempo-estudo.css?v=timer-fit-content-4">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MedQuest — Helen Taussig</title>
+<title>MedQuest</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2276,7 +2276,6 @@
     <img class="lp-logo-heart" src="assets/heart.png" alt="">
     <div>
       <div class="lp-logo-name">MedQuest</div>
-      <div class="lp-logo-sub">HELLEN TAUSSIG</div>
       <div class="lp-logo-sub2">BANCO DE QUESTÕES MÉDICAS</div>
     </div>
   </div>
@@ -2419,7 +2418,6 @@
     <div class="lp-modal-logo">
       <img src="assets/heart.png" alt="">
       <h2>MedQuest</h2>
-      <p>HELLEN TAUSSIG</p>
     </div>
 
     <div id="msg-erro" class="msg-erro"></div>
@@ -2494,7 +2492,7 @@
   <nav class="sidebar" id="sidebar">
     <button type="button" class="sidebar-logo" onclick="irParaDashboard()" title="Início">
       <img src="assets/heart.png" alt="">
-      <div class="logo-txt"><b>MedQuest</b><small>HELLEN TAUSSIG</small></div>
+      <div class="logo-txt"><b>MedQuest</b></div>
     </button>
 
     <div class="sidebar-nav">
@@ -3634,7 +3632,7 @@ function textoCobranca(u) {
   const nome = (u.nome || '').trim().split(/\s+/)[0];
   const ola = nome ? `Olá, ${nome}!` : 'Olá!';
   const assino = (perfilAtual && perfilAtual.nome ? perfilAtual.nome : '').trim();
-  const rodape = `${assino ? assino + '\n' : ''}MedQuest — Hellen Taussig`;
+  const rodape = `${assino ? assino + '\n' : ''}MedQuest`;
   const data = u.pagamento_validade
     ? new Date(u.pagamento_validade).toLocaleDateString('pt-BR') : null;
   const monta = (assunto, miolo) => ({ assunto, corpo: `${ola}\n\n${miolo}\n\nQualquer dúvida, estou à disposição.\n\n${rodape}` });
