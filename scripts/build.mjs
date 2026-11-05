@@ -3,6 +3,16 @@ import path from 'node:path';
 const root = process.cwd(), out = path.join(root, 'dist');
 await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
+const maintenance = JSON.parse(await readFile(path.join(root, 'maintenance.json'), 'utf8'));
+if (maintenance.enabled) {
+  await copyFile(path.join(root, 'maintenance.html'), path.join(out, 'index.html'));
+  await copyFile(path.join(root, 'sw.js'), path.join(out, 'sw.js'));
+  await mkdir(path.join(out, 'assets'), { recursive: true });
+  await copyFile(path.join(root, 'assets', 'heart.png'), path.join(out, 'assets', 'heart.png'));
+  console.log('MedQuest maintenance screen built; application and login assets are not published.');
+  process.exit(0);
+}
+
 for (const name of ['index.html', 'manifest.webmanifest', 'sw.js']) await copyFile(path.join(root, name), path.join(out, name));
 await cp(path.join(root, 'assets'), path.join(out, 'assets'), {
   recursive: true, filter: src => !src.startsWith(path.join(root, 'assets', 'vendor'))
